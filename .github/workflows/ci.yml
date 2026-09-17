@@ -30,7 +30,7 @@ jobs:
       - run: go run ./cmd/sfctl experiment run --scenario scenarios/leo-resilient.json --output reports/ci.json --html reports/ci.html
       - run: python3 -m py_compile tools/*.py ntn/*.py lab/linux-networking/*.py lab/containerlab/phase1-frr-otg/*.py lab/containerlab/protocol-matrix/*.py lab/orbit-closed-loop/*.py lab/batfish/*.py lab/p4/*.py
       - run: for manifest in ntn/experiments/*.json; do python3 ntn/experiment.py --manifest "$manifest" --validate-only; done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: starfabric-report
