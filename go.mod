@@ -10,7 +10,7 @@ require (
 	github.com/openconfig/gribi v1.9.1
 	github.com/openconfig/gribigo v0.1.3
 	github.com/quic-go/quic-go v0.62.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.70.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
 	go.opentelemetry.io/otel v1.46.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.46.0
 	go.opentelemetry.io/otel/sdk v1.46.0
