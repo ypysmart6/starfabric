@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package starfabric.v1;
+
+option go_package = "github.com/starfabric/starfabric/gen/starfabric/v1;starfabricv1";
+
+import "google/protobuf/timestamp.proto";
+
+message Node {
+  string id = 1;
+  string kind = 2;
+  string loopback = 3;
+  map<string, string> labels = 4;
+  bool enabled = 5;
+}
+
+message Link {
+  string id = 1;
+  string source = 2;
+  string target = 3;
+  bool admin_up = 4;
+  bool operational_up = 5;
+  int64 latency_us = 6;
+  int64 capacity_bps = 7;
+  int64 loss_ppm = 8;
+  int64 reliability_ppm = 9;
+  google.protobuf.Timestamp telemetry_at = 10;
+  google.protobuf.Timestamp valid_until = 11;
+  google.protobuf.Timestamp availability_end = 12;
+  repeated string risk_groups = 13;
+  string link_type = 14;
+  string acquisition_state = 15;
+  double range_km = 16;
+  double doppler_hz = 17;
+}
+
+message TopologySnapshot {
+  uint64 version = 1;
+  google.protobuf.Timestamp generated_at = 2;
+  google.protobuf.Timestamp valid_from = 3;
+  google.protobuf.Timestamp valid_until = 4;
+  repeated Node nodes = 5;
+  repeated Link links = 6;
+}
+
+enum EventType {
+  EVENT_TYPE_UNSPECIFIED = 0;
+  EVENT_TYPE_LINK_UP = 1;
+  EVENT_TYPE_LINK_DOWN = 2;
+  EVENT_TYPE_LINK_UPDATE = 3;
+  EVENT_TYPE_NODE_UP = 4;
+  EVENT_TYPE_NODE_DOWN = 5;
+}
+
+message TopologyEvent {
+  string event_id = 1;
+  string subject = 2;
+  uint64 sequence = 3;
+  EventType type = 4;
+  google.protobuf.Timestamp observed_at = 5;
+  google.protobuf.Timestamp effective_at = 6;
+  Link link = 7;
+  Node node = 8;
+}

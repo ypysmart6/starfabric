@@ -1,0 +1,15 @@
+zebra=yes
+bgpd=yes
+ospfd=no
+ospf6d=no
+isisd=yes
+ldpd=no
+bfdd=yes
+staticd=yes
+vtysh_enable=yes
+zebra_options="  -A 127.0.0.1 -s 90000000"
+mgmtd_options="  -A 127.0.0.1"
+bgpd_options="   -A 127.0.0.1"
+isisd_options="  -A 127.0.0.1"
+staticd_options="-A 127.0.0.1"
+bfdd_options="   -A 127.0.0.1"

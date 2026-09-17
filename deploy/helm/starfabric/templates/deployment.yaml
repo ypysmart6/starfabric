@@ -1,0 +1,146 @@
+{{- if and (not .Values.ha.enabled) (ne (int .Values.replicaCount) 1) }}{{ fail "replicaCount must be 1 unless ha.enabled=true" }}{{- end }}
+{{- if and .Values.ha.enabled (lt (int .Values.replicaCount) 2) }}{{ fail "HA requires replicaCount >= 2" }}{{- end }}
+{{- if and .Values.ha.enabled (not (has "ReadWriteMany" .Values.persistence.accessModes)) }}{{ fail "HA requires a ReadWriteMany persistent volume for durable state handoff" }}{{- end }}
+{{- if and .Values.tls.enabled (not .Values.tls.existingSecret) }}{{ fail "tls.existingSecret is required when TLS/mTLS is enabled" }}{{- end }}
+{{- if and (eq .Values.adapter.kind "frr") (or (not .Values.adapter.frrAgentEndpoint) (not .Values.adapter.frrAgentSecret)) }}{{ fail "FRR pods require adapter.frrAgentEndpoint and adapter.frrAgentSecret" }}{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "starfabric.fullname" . }}
+  labels:
+    {{- include "starfabric.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    {{- if .Values.ha.enabled }}
+    type: RollingUpdate
+    rollingUpdate: {maxUnavailable: 1, maxSurge: 1}
+    {{- else }}
+    type: Recreate
+    {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "starfabric.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/scenario: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        app.kubernetes.io/name: {{ include "starfabric.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ include "starfabric.fullname" . }}
+      terminationGracePeriodSeconds: 30
+      {{- if .Values.ha.enabled }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: {{ include "starfabric.name" . }}
+                    app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: controller
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --scenario=/config/scenario.json
+            - --state-dir=/data
+            - --listen=:8080
+            - --health-listen=:8081
+            - --log-file=/data/controller.log
+            - --adapter={{ .Values.adapter.kind }}
+            - --reconcile-interval={{ .Values.reconcileInterval }}
+            - --plan-ttl={{ .Values.controllerTuning.planTTL }}
+            - --operation-timeout={{ .Values.controllerTuning.operationTimeout }}
+            - --http-write-timeout={{ .Values.controllerTuning.httpWriteTimeout }}
+            {{- if eq .Values.adapter.kind "frr" }}
+            - --frr-agent-endpoint={{ .Values.adapter.frrAgentEndpoint }}
+            - --frr-agent-token-file=/frr-agent/token
+            {{- if .Values.adapter.frrAgentInsecure }}
+            - --frr-agent-insecure
+            {{- end }}
+            {{- end }}
+            {{- if .Values.observability.otlpEndpoint }}
+            - --otlp-endpoint={{ .Values.observability.otlpEndpoint }}
+            {{- if .Values.observability.otlpInsecure }}
+            - --otlp-insecure
+            {{- end }}
+            {{- end }}
+            {{- if .Values.ha.enabled }}
+            - --leader-election
+            - --leader-lease-name={{ .Values.ha.leaseName }}
+            - --leader-lease-duration={{ .Values.ha.leaseDuration }}
+            - --leader-retry-period={{ .Values.ha.retryPeriod }}
+            {{- end }}
+            {{- if .Values.auth.existingSecret }}
+            - --token-file=/secrets/token
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - --tls-cert=/tls/tls.crt
+            - --tls-key=/tls/tls.key
+            - --tls-client-ca=/tls/ca.crt
+            {{- end }}
+          ports:
+            - {name: http, containerPort: 8080, protocol: TCP}
+            - {name: health, containerPort: 8081, protocol: TCP}
+          readinessProbe:
+            httpGet: {path: /readyz, port: health}
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /healthz, port: health}
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - {name: scenario, mountPath: /config, readOnly: true}
+            - {name: data, mountPath: /data}
+            {{- if eq .Values.adapter.kind "frr" }}
+            - {name: frr-agent, mountPath: /frr-agent, readOnly: true}
+            {{- end }}
+            {{- if .Values.auth.existingSecret }}
+            - {name: auth, mountPath: /secrets, readOnly: true}
+            {{- end }}
+            {{- if .Values.tls.enabled }}
+            - {name: tls, mountPath: /tls, readOnly: true}
+            {{- end }}
+      volumes:
+        {{- if eq .Values.adapter.kind "frr" }}
+        - name: frr-agent
+          secret: {secretName: {{ .Values.adapter.frrAgentSecret }}}
+        {{- end }}
+        - name: scenario
+          configMap: {name: {{ include "starfabric.fullname" . }}-scenario}
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim: {claimName: {{ include "starfabric.fullname" . }}}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if .Values.auth.existingSecret }}
+        - name: auth
+          secret:
+            secretName: {{ .Values.auth.existingSecret }}
+            items:
+              - {key: {{ .Values.auth.tokenKey }}, path: token}
+        {{- end }}
+        {{- if .Values.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ .Values.tls.existingSecret }}
+            items:
+              - {key: {{ .Values.tls.certKey }}, path: tls.crt}
+              - {key: {{ .Values.tls.privateKeyKey }}, path: tls.key}
+              - {key: {{ .Values.tls.clientCAKey }}, path: ca.crt}
+        {{- end }}

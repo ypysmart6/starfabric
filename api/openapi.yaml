@@ -1,0 +1,429 @@
+openapi: 3.1.0
+info:
+  title: StarFabric Control API
+  version: 1.1.0
+  description: Versioned topology, deterministic predictive planning, reconciliation, and digital-twin fault injection.
+servers:
+  - url: http://127.0.0.1:8080
+security:
+  - bearerAuth: []
+paths:
+  /healthz:
+    get:
+      security: []
+      responses:
+        "200": {description: Healthy}
+  /readyz:
+    get:
+      security: []
+      responses:
+        "200": {description: Leader is ready}
+        "503": {$ref: "#/components/responses/Error"}
+  /metrics:
+    get:
+      responses:
+        "200":
+          description: Prometheus text exposition
+          content:
+            text/plain: {schema: {type: string}}
+  /api/v1/topology:
+    get:
+      responses:
+        "200":
+          description: Current topology snapshot
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/TopologySnapshot"}}
+  /api/v1/topology/events:
+    post:
+      parameters:
+        - in: query
+          name: reconcile
+          schema: {type: boolean, default: false}
+      requestBody:
+        required: true
+        content:
+          application/json: {schema: {$ref: "#/components/schemas/TopologyEvent"}}
+      responses:
+        "202":
+          description: Event accepted
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/ApplyEventResponse"}}
+        "409": {$ref: "#/components/responses/Error"}
+        "422": {$ref: "#/components/responses/Error"}
+  /api/v1/topology/events/batch:
+    post:
+      description: Atomically apply one physical sampling instant as one topology version. Request size is limited to 8 MiB; replay and sequence checks apply to every event.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [events]
+              properties:
+                events:
+                  type: array
+                  minItems: 1
+                  maxItems: 10000
+                  items: {$ref: "#/components/schemas/TopologyEvent"}
+      responses:
+        "202":
+          description: Whole sampling instant accepted
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/ApplyEventResponse"}}
+        "409": {$ref: "#/components/responses/Error"}
+        "422": {$ref: "#/components/responses/Error"}
+        "503": {$ref: "#/components/responses/Error"}
+  /api/v1/intents:
+    get:
+      responses:
+        "200":
+          description: Desired traffic intents
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/IntentList"}}
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json: {schema: {$ref: "#/components/schemas/IntentList"}}
+      responses:
+        "200":
+          description: Intents replaced durably
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/IntentList"}}
+        "422": {$ref: "#/components/responses/Error"}
+        "503": {$ref: "#/components/responses/Error"}
+  /api/v1/plans/preview:
+    post:
+      responses:
+        "200":
+          description: Shadow-validated route plan
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/RoutePlan"}}
+        "422": {$ref: "#/components/responses/Error"}
+  /api/v1/reconcile:
+    post:
+      responses:
+        "200":
+          description: Plan committed and verified
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/ReconcileResponse"}}
+        "409": {$ref: "#/components/responses/Error"}
+        "503": {$ref: "#/components/responses/Error"}
+  /api/v1/status:
+    get:
+      responses:
+        "200":
+          description: Reconciliation and committed-plan state
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/StatusResponse"}}
+  /api/v1/devices:
+    get:
+      responses:
+        "200":
+          description: Observed forwarding state
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/DeviceList"}}
+  /api/v1/faults/device:
+    post:
+      description: Digital-twin failure injection endpoint. Do not expose in production.
+      requestBody:
+        required: true
+        content:
+          application/json: {schema: {$ref: "#/components/schemas/DeviceFaultRequest"}}
+      responses:
+        "202":
+          description: Fault configured
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/DeviceFaultRequest"}}
+        "422": {$ref: "#/components/responses/Error"}
+  /api/v1/predictive/forecast:
+    post:
+      description: Compute and shadow-validate plans at deterministic contact boundaries without changing devices.
+      requestBody:
+        required: true
+        content:
+          application/json: {schema: {$ref: "#/components/schemas/PredictiveRequest"}}
+      responses:
+        "200":
+          description: Forecast activations
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/ForecastResponse"}}
+        "400": {$ref: "#/components/responses/Error"}
+        "422": {$ref: "#/components/responses/Error"}
+  /api/v1/predictive/schedules:
+    post:
+      description: Persist and execute a shadow-validated deterministic schedule.
+      requestBody:
+        required: true
+        content:
+          application/json: {schema: {$ref: "#/components/schemas/PredictiveRequest"}}
+      responses:
+        "202":
+          description: Schedule accepted
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/PredictiveSchedule"}}
+        "400": {$ref: "#/components/responses/Error"}
+        "422": {$ref: "#/components/responses/Error"}
+        "503": {$ref: "#/components/responses/Error"}
+    get:
+      parameters:
+        - in: query
+          name: id
+          description: Return one schedule when supplied; otherwise list all schedules.
+          schema: {type: string}
+      responses:
+        "200":
+          description: One schedule or the schedule collection
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - {$ref: "#/components/schemas/PredictiveSchedule"}
+                  - {$ref: "#/components/schemas/PredictiveScheduleList"}
+        "404": {$ref: "#/components/responses/Error"}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer}
+  responses:
+    Error:
+      description: Structured error
+      content:
+        application/json: {schema: {$ref: "#/components/schemas/ErrorResponse"}}
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: {type: string}
+            message: {type: string}
+            request_id: {type: string}
+    Node:
+      type: object
+      required: [id, enabled]
+      properties:
+        id: {type: string, minLength: 1}
+        kind: {type: string}
+        loopback: {type: string}
+        labels: {type: object, additionalProperties: {type: string}}
+        enabled: {type: boolean}
+    Link:
+      type: object
+      required: [id, source, target, admin_up, operational_up, latency_us, capacity_bps]
+      properties:
+        id: {type: string, minLength: 1}
+        source: {type: string, minLength: 1}
+        target: {type: string, minLength: 1}
+        link_type: {type: string}
+        acquisition_state: {type: string, enum: [search, acquisition, locked, degraded, failure]}
+        admin_up: {type: boolean}
+        operational_up: {type: boolean}
+        latency_us: {type: integer, format: int64, minimum: 0}
+        capacity_bps: {type: integer, format: int64, minimum: 0}
+        loss_ppm: {type: integer, format: int64, minimum: 0, maximum: 1000000}
+        reliability_ppm: {type: integer, format: int64, minimum: 0, maximum: 1000000}
+        range_km: {type: number, minimum: 0}
+        doppler_hz: {type: number}
+        risk_groups: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}
+        telemetry_at: {type: string, format: date-time}
+        valid_until: {type: string, format: date-time}
+        availability_end: {type: string, format: date-time}
+    TopologySnapshot:
+      type: object
+      required: [version, generated_at, valid_from, nodes, links]
+      properties:
+        version: {type: integer, format: int64, minimum: 1}
+        generated_at: {type: string, format: date-time}
+        valid_from: {type: string, format: date-time}
+        valid_until: {type: string, format: date-time}
+        nodes: {type: array, items: {$ref: "#/components/schemas/Node"}}
+        links: {type: array, items: {$ref: "#/components/schemas/Link"}}
+    TopologyEvent:
+      type: object
+      required: [event_id, subject, sequence, type, observed_at, effective_at]
+      properties:
+        event_id: {type: string, minLength: 1}
+        subject: {type: string, minLength: 1}
+        sequence: {type: integer, format: int64, minimum: 1}
+        type: {type: string, enum: [link_up, link_down, link_update, node_up, node_down]}
+        observed_at: {type: string, format: date-time}
+        effective_at: {type: string, format: date-time}
+        link: {$ref: "#/components/schemas/Link"}
+        node: {$ref: "#/components/schemas/Node"}
+        attributes: {type: object, additionalProperties: true}
+    RouteIntent:
+      type: object
+      required: [id, source, destination_prefix]
+      anyOf:
+        - required: [destination]
+        - required: [gateway_candidates]
+      properties:
+        id: {type: string, minLength: 1}
+        source: {type: string, minLength: 1}
+        destination: {type: string}
+        gateway_candidates: {type: array, minItems: 1, uniqueItems: true, items: {type: string, minLength: 1}}
+        destination_prefix: {type: string, minLength: 1}
+        policy: {type: string, enum: [latency, hops, capacity, reliability]}
+        max_latency_us: {type: integer, format: int64, minimum: 0}
+        min_capacity_bps: {type: integer, format: int64, minimum: 0}
+        demand_bps: {type: integer, format: int64, minimum: 0}
+        max_loss_ppm: {type: integer, format: int64, minimum: 0, maximum: 1000000}
+        required_reliability_ppm: {type: integer, format: int64, minimum: 0, maximum: 1000000}
+        redundancy: {type: integer, minimum: 0, maximum: 2}
+        class: {type: string}
+        priority: {type: integer}
+        labels: {type: object, additionalProperties: {type: string}}
+    IntentList:
+      type: object
+      required: [intents]
+      properties:
+        intents: {type: array, items: {$ref: "#/components/schemas/RouteIntent"}}
+    Path:
+      type: object
+      required: [nodes, links, latency_us, capacity_bps, loss_ppm, cost]
+      properties:
+        nodes: {type: array, items: {type: string}}
+        links: {type: array, items: {type: string}}
+        latency_us: {type: integer, format: int64}
+        capacity_bps: {type: integer, format: int64}
+        loss_ppm: {type: integer, format: int64}
+        cost: {type: integer, format: int64}
+        risk_groups: {type: array, items: {type: string}}
+    RouteOperation:
+      type: object
+      required: [device, prefix, next_hop, next_hop_node, intent_id, path_role]
+      properties:
+        device: {type: string}
+        prefix: {type: string}
+        next_hop: {type: string}
+        next_hop_node: {type: string}
+        metric: {type: integer}
+        intent_id: {type: string}
+        path_role: {type: string}
+    RoutePlan:
+      type: object
+      required: [id, topology_version, created_at, expires_at, policy, intents, paths, routes]
+      properties:
+        id: {type: string}
+        topology_version: {type: integer, format: int64}
+        created_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+        policy: {type: string}
+        intents: {type: array, items: {$ref: "#/components/schemas/RouteIntent"}}
+        paths:
+          type: object
+          additionalProperties: {type: array, items: {$ref: "#/components/schemas/Path"}}
+        routes: {type: array, items: {$ref: "#/components/schemas/RouteOperation"}}
+        preconditions: {type: array, items: {type: string}}
+        rollback_plan_id: {type: string}
+        metadata: {type: object, additionalProperties: true}
+    ReconcileStatus:
+      type: object
+      required: [phase]
+      properties:
+        phase: {type: string, enum: [idle, validating, preparing, committing, verifying, committed, rolled_back, failed]}
+        plan_id: {type: string}
+        topology_version: {type: integer, format: int64}
+        started_at: {type: string, format: date-time}
+        finished_at: {type: string, format: date-time}
+        prepared_devices: {type: array, items: {type: string}}
+        committed_devices: {type: array, items: {type: string}}
+        deferred_devices: {type: array, items: {type: string}, description: "Unavailable devices with no desired routes; cleanup is retried after recovery."}
+        failed_devices: {type: array, items: {type: string}}
+        error: {type: string}
+        rollback_reason: {type: string}
+    DeviceState:
+      type: object
+      required: [device, healthy, routes, observed_at]
+      properties:
+        device: {type: string}
+        healthy: {type: boolean}
+        applied_plan_id: {type: string}
+        routes: {type: array, items: {$ref: "#/components/schemas/RouteOperation"}}
+        observed_at: {type: string, format: date-time}
+        message: {type: string}
+    ApplyEventResponse:
+      type: object
+      required: [topology]
+      properties:
+        topology: {$ref: "#/components/schemas/TopologySnapshot"}
+        plan: {$ref: "#/components/schemas/RoutePlan"}
+        status: {$ref: "#/components/schemas/ReconcileStatus"}
+    ReconcileResponse:
+      type: object
+      required: [plan, status]
+      properties:
+        plan: {$ref: "#/components/schemas/RoutePlan"}
+        status: {$ref: "#/components/schemas/ReconcileStatus"}
+    StatusResponse:
+      type: object
+      required: [reconcile]
+      properties:
+        reconcile: {$ref: "#/components/schemas/ReconcileStatus"}
+        committed_plan:
+          oneOf:
+            - {$ref: "#/components/schemas/RoutePlan"}
+            - {type: "null"}
+    DeviceList:
+      type: object
+      required: [devices]
+      properties:
+        devices: {type: array, items: {$ref: "#/components/schemas/DeviceState"}}
+    DeviceFaultRequest:
+      type: object
+      required: [device, mode]
+      properties:
+        device: {type: string, minLength: 1}
+        mode: {type: string, enum: ["", health, prepare, commit, state]}
+    ContactWindow:
+      type: object
+      required: [link, start, end]
+      properties:
+        link: {$ref: "#/components/schemas/Link"}
+        start: {type: string, format: date-time}
+        end: {type: string, format: date-time}
+    PredictiveRequest:
+      type: object
+      required: [windows, horizon_seconds]
+      properties:
+        windows: {type: array, items: {$ref: "#/components/schemas/ContactWindow"}}
+        horizon_seconds: {type: integer, format: int64, minimum: 1, maximum: 86400}
+        lead_seconds: {type: integer, format: int64, minimum: 0, maximum: 86400, default: 0}
+    Activation:
+      type: object
+      required: [topology_at, activate_at, topology, plan, shadow_validated]
+      properties:
+        topology_at: {type: string, format: date-time}
+        activate_at: {type: string, format: date-time}
+        topology: {$ref: "#/components/schemas/TopologySnapshot"}
+        plan: {$ref: "#/components/schemas/RoutePlan"}
+        shadow_validated: {type: boolean}
+        changed_prefixes: {type: array, items: {type: string}}
+    ForecastResponse:
+      type: object
+      required: [activations]
+      properties:
+        activations: {type: array, items: {$ref: "#/components/schemas/Activation"}}
+    PredictiveSchedule:
+      type: object
+      required: [id, state, base_topology_version, expected_topology_version, created_at, updated_at, next_activation, activations]
+      properties:
+        id: {type: string}
+        state: {type: string, enum: [running, completed, failed]}
+        base_topology_version: {type: integer, format: int64}
+        expected_topology_version: {type: integer, format: int64}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+        next_activation: {type: integer, minimum: 0}
+        activations: {type: array, items: {$ref: "#/components/schemas/Activation"}}
+        error: {type: string}
+    PredictiveScheduleList:
+      type: object
+      required: [schedules]
+      properties:
+        schedules: {type: array, items: {$ref: "#/components/schemas/PredictiveSchedule"}}

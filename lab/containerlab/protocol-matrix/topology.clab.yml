@@ -1,0 +1,46 @@
+name: sf-protocol-matrix
+topology:
+  defaults:
+    kind: linux
+    image: quay.io/frrouting/frr@sha256:65e5967b922572c0565d968388fb06af69d7e9b3b3eea40ad7e3810687667f68
+    sysctls:
+      net.ipv4.ip_forward: 1
+      net.ipv6.conf.all.forwarding: 1
+  nodes:
+    sat-a:
+      binds: [configs/daemons:/etc/frr/daemons:ro, configs/vtysh.conf:/etc/frr/vtysh.conf:ro, configs/sat-a.conf:/etc/frr/frr.conf:ro, configs/apply-ldp.sh:/etc/frr/apply-ldp.sh:ro]
+      exec:
+        - sh -c 'test ! -e /proc/sys/net/mpls/platform_labels || sysctl -qw net.mpls.platform_labels=100000'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/lo/input || sysctl -qw net.mpls.conf.lo.input=1'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/eth1/input || sysctl -qw net.mpls.conf.eth1.input=1'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/eth2/input || sysctl -qw net.mpls.conf.eth2.input=1'
+        - sh /etc/frr/apply-ldp.sh
+    sat-b:
+      binds: [configs/daemons:/etc/frr/daemons:ro, configs/vtysh.conf:/etc/frr/vtysh.conf:ro, configs/sat-b.conf:/etc/frr/frr.conf:ro, configs/apply-ldp.sh:/etc/frr/apply-ldp.sh:ro]
+      exec:
+        - sh -c 'test ! -e /proc/sys/net/mpls/platform_labels || sysctl -qw net.mpls.platform_labels=100000'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/lo/input || sysctl -qw net.mpls.conf.lo.input=1'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/eth1/input || sysctl -qw net.mpls.conf.eth1.input=1'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/eth2/input || sysctl -qw net.mpls.conf.eth2.input=1'
+        - sh /etc/frr/apply-ldp.sh
+    sat-c:
+      binds: [configs/daemons:/etc/frr/daemons:ro, configs/vtysh.conf:/etc/frr/vtysh.conf:ro, configs/sat-c.conf:/etc/frr/frr.conf:ro, configs/apply-ldp.sh:/etc/frr/apply-ldp.sh:ro]
+      exec:
+        - sh -c 'test ! -e /proc/sys/net/mpls/platform_labels || sysctl -qw net.mpls.platform_labels=100000'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/lo/input || sysctl -qw net.mpls.conf.lo.input=1'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/eth1/input || sysctl -qw net.mpls.conf.eth1.input=1'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/eth2/input || sysctl -qw net.mpls.conf.eth2.input=1'
+        - sh /etc/frr/apply-ldp.sh
+    gw-a:
+      binds: [configs/daemons:/etc/frr/daemons:ro, configs/vtysh.conf:/etc/frr/vtysh.conf:ro, configs/gw-a.conf:/etc/frr/frr.conf:ro, configs/apply-ldp.sh:/etc/frr/apply-ldp.sh:ro]
+      exec:
+        - sh -c 'test ! -e /proc/sys/net/mpls/platform_labels || sysctl -qw net.mpls.platform_labels=100000'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/lo/input || sysctl -qw net.mpls.conf.lo.input=1'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/eth1/input || sysctl -qw net.mpls.conf.eth1.input=1'
+        - sh -c 'test ! -e /proc/sys/net/mpls/conf/eth2/input || sysctl -qw net.mpls.conf.eth2.input=1'
+        - sh /etc/frr/apply-ldp.sh
+  links:
+    - endpoints: [sat-a:eth1, sat-b:eth1]
+    - endpoints: [sat-b:eth2, gw-a:eth1]
+    - endpoints: [sat-a:eth2, sat-c:eth1]
+    - endpoints: [sat-c:eth2, gw-a:eth2]

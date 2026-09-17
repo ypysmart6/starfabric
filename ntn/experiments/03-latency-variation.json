@@ -1,0 +1,14 @@
+{
+  "id": "ntn-latency-variation",
+  "duration_s": 30,
+  "sample_interval_ms": 250,
+  "ue_namespace": "ue1",
+  "n3_interface": "n3-sat",
+  "flows": [{"name": "pdu-session", "destination": "10.45.0.1", "dscp": 0}],
+  "actions": [
+    {"at_s": 5, "type": "netem", "delay_ms": 40, "loss_percent": 0},
+    {"at_s": 12, "type": "netem", "delay_ms": 120, "loss_percent": 0},
+    {"at_s": 20, "type": "netem", "delay_ms": 20, "loss_percent": 0}
+  ],
+  "assertions": {"max_loss_percent": 5, "max_outage_ms": 2000}
+}

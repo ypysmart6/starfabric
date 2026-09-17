@@ -1,0 +1,18 @@
+replicaCount: 3
+ha:
+  enabled: true
+persistence:
+  enabled: true
+  accessModes: [ReadWriteMany]
+  storageClassName: rwx-storage
+tls:
+  enabled: true
+  existingSecret: starfabric-mtls
+auth:
+  existingSecret: starfabric-api-token
+ciliumNetworkPolicy:
+  enabled: true
+  deviceCIDRs: ["10.0.0.0/8"]
+observability:
+  otlpEndpoint: otel-collector.observability.svc:4318
+  otlpInsecure: true

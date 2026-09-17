@@ -1,0 +1,3 @@
+services:
+  nr_gnb:
+    image: ghcr.io/herlesupreeth/docker_ueransim@sha256:dd94add6d0b2ab7a59a5564bd6d50b44c80afa0a64fe958f344fccaae5b4eda8

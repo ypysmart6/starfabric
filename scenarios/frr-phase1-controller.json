@@ -1,0 +1,31 @@
+{
+  "scenario_id": "frr-phase1-controller-live",
+  "description": "Bidirectional controller-driven TE over the phase1 FRR/Ixia-c diamond.",
+  "random_seed": 20260904,
+  "topology": {
+    "version": 1,
+    "generated_at": "2026-09-04T00:00:00Z",
+    "valid_from": "2026-09-04T00:00:00Z",
+    "nodes": [
+      {"id":"r1","kind":"gateway","loopback":"10.255.0.1","labels":{"frr_container":"clab-sf-phase1-r1","probe_target":"10.255.0.1"},"enabled":true},
+      {"id":"r2","kind":"satellite","loopback":"10.255.0.2","labels":{"frr_container":"clab-sf-phase1-r2"},"enabled":true},
+      {"id":"r3","kind":"satellite","loopback":"10.255.0.3","labels":{"frr_container":"clab-sf-phase1-r3"},"enabled":true},
+      {"id":"r4","kind":"gateway","loopback":"10.255.0.4","labels":{"frr_container":"clab-sf-phase1-r4","probe_target":"10.255.0.4"},"enabled":true}
+    ],
+    "links": [
+      {"id":"r1-r2","source":"r1","target":"r2","admin_up":true,"operational_up":true,"latency_us":1000,"capacity_bps":1000000000,"risk_groups":["primary-link"]},
+      {"id":"r2-r1","source":"r2","target":"r1","admin_up":true,"operational_up":true,"latency_us":1000,"capacity_bps":1000000000,"risk_groups":["primary-link"]},
+      {"id":"r2-r4","source":"r2","target":"r4","admin_up":true,"operational_up":true,"latency_us":1000,"capacity_bps":1000000000},
+      {"id":"r4-r2","source":"r4","target":"r2","admin_up":true,"operational_up":true,"latency_us":1000,"capacity_bps":1000000000},
+      {"id":"r1-r3","source":"r1","target":"r3","admin_up":true,"operational_up":true,"latency_us":2000,"capacity_bps":1000000000},
+      {"id":"r3-r1","source":"r3","target":"r1","admin_up":true,"operational_up":true,"latency_us":2000,"capacity_bps":1000000000},
+      {"id":"r3-r4","source":"r3","target":"r4","admin_up":true,"operational_up":true,"latency_us":2000,"capacity_bps":1000000000},
+      {"id":"r4-r3","source":"r4","target":"r3","admin_up":true,"operational_up":true,"latency_us":2000,"capacity_bps":1000000000}
+    ]
+  },
+  "intents": [
+    {"id":"n3-forward","source":"r1","destination":"r4","destination_prefix":"198.51.100.0/24","policy":"latency","demand_bps":10000000,"class":"n3-user-plane","priority":100},
+    {"id":"n3-reverse","source":"r4","destination":"r1","destination_prefix":"192.0.2.0/24","policy":"latency","demand_bps":10000000,"class":"n3-user-plane","priority":100}
+  ],
+  "timeline": []
+}

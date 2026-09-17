@@ -1,0 +1,12 @@
+{{- if and .Values.ha.enabled .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "starfabric.fullname" . }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "starfabric.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

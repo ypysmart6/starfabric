@@ -1,0 +1,14 @@
+[
+  {
+    "id": "ground-a",
+    "latitude_deg": 45.5017,
+    "longitude_deg": -73.5673,
+    "altitude_m": 36.0
+  },
+  {
+    "id": "ground-b",
+    "latitude_deg": 45.4215,
+    "longitude_deg": -75.6972,
+    "altitude_m": 70.0
+  }
+]

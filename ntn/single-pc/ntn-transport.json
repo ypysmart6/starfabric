@@ -1,0 +1,27 @@
+{
+  "id": "single-pc-5g-ntn-transport",
+  "duration_s": 9,
+  "sample_interval_ms": 250,
+  "ue_container": "nr_ue",
+  "transport_container": "upf",
+  "controller": "http://127.0.0.1:18081",
+  "n3_interface": "eth0",
+  "flows": [
+    {"name": "pdu-session", "destination": "192.168.100.1", "protocol": "icmp", "source_interface": "uesimtun0", "dscp": 0}
+  ],
+  "actions": [
+    {"at_s": 2, "type": "controller_event", "event": {"event_id": "5g-primary-degrade-1", "subject": "gnb-a", "sequence": 1, "type": "link_update", "link": {"id": "gnb-a", "source": "gnb", "target": "sat-a", "link_type": "feeder", "admin_up": true, "operational_up": true, "latency_us": 50000, "capacity_bps": 1000000000}}},
+    {"at_s": 2, "type": "controller_netem", "intent_id": "n3-gtpu"},
+    {"at_s": 5, "type": "controller_event", "event": {"event_id": "5g-backup-feeder-degrade-1", "subject": "gnb-b", "sequence": 1, "type": "link_update", "link": {"id": "gnb-b", "source": "gnb", "target": "sat-b", "link_type": "feeder", "admin_up": true, "operational_up": true, "latency_us": 40000, "capacity_bps": 1000000000}}},
+    {"at_s": 5, "type": "controller_event", "event": {"event_id": "5g-backup-egress-degrade-1", "subject": "b-upf", "sequence": 1, "type": "link_update", "link": {"id": "b-upf", "source": "sat-b", "target": "upf", "link_type": "sat-ground", "admin_up": true, "operational_up": true, "latency_us": 40000, "capacity_bps": 1000000000}}},
+    {"at_s": 5, "type": "controller_netem", "intent_id": "n3-gtpu"},
+    {"at_s": 7, "type": "clear_netem"}
+  ],
+  "assertions": {
+    "max_loss_percent": 5,
+    "max_outage_ms": 1000,
+    "max_p99_latency_ms": 250,
+    "require_gtpu_capture": true,
+    "require_controller_closed_loop": true
+  }
+}

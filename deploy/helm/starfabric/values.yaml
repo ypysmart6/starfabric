@@ -1,0 +1,91 @@
+replicaCount: 1
+
+adapter:
+  kind: memory
+  frrAgentEndpoint: ""
+  frrAgentSecret: ""
+  frrAgentInsecure: false
+
+reconcileInterval: 5s
+
+ha:
+  enabled: false
+  leaseName: starfabric-controller
+  leaseDuration: 15s
+  retryPeriod: 2s
+
+image:
+  repository: starfabric/controller
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8080
+
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClassName: ""
+  accessModes: [ReadWriteOnce]
+
+auth:
+  existingSecret: ""
+  tokenKey: token
+
+tls:
+  enabled: false
+  existingSecret: ""
+  certKey: tls.crt
+  privateKeyKey: tls.key
+  clientCAKey: ca.crt
+
+ciliumNetworkPolicy:
+  enabled: false
+  # Include the API backend port after Service DNAT (kubeadm/kind uses 6443).
+  kubeAPIServerPorts: ["443", "6443"]
+  deviceCIDRs: []
+  extraEgress: []
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+observability:
+  otlpEndpoint: ""
+  otlpInsecure: false
+
+resources:
+  requests: {cpu: 100m, memory: 128Mi}
+  limits: {cpu: 1000m, memory: 512Mi}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+
+scenario:
+  scenario_id: helm-diamond
+  random_seed: 1
+  topology:
+    version: 1
+    generated_at: "2026-09-03T00:00:00Z"
+    valid_from: "2026-09-03T00:00:00Z"
+    nodes:
+      - {id: a, kind: gateway, loopback: "2001:db8::1", enabled: true}
+      - {id: b, kind: satellite, loopback: "2001:db8::2", enabled: true}
+      - {id: c, kind: satellite, loopback: "2001:db8::3", enabled: true}
+      - {id: d, kind: gateway, loopback: "2001:db8::4", enabled: true}
+    links:
+      - {id: ab, source: a, target: b, admin_up: true, operational_up: true, latency_us: 1000, capacity_bps: 1000000000}
+      - {id: bd, source: b, target: d, admin_up: true, operational_up: true, latency_us: 1000, capacity_bps: 1000000000}
+      - {id: ac, source: a, target: c, admin_up: true, operational_up: true, latency_us: 2000, capacity_bps: 1000000000}
+      - {id: cd, source: c, target: d, admin_up: true, operational_up: true, latency_us: 2000, capacity_bps: 1000000000}
+  intents:
+    - {id: a-d, source: a, destination: d, destination_prefix: "2001:db8:100::/64", policy: latency, redundancy: 1}
+  timeline: []
+
+controllerTuning:
+  planTTL: 30s
+  operationTimeout: 2s
+  httpWriteTimeout: 30s

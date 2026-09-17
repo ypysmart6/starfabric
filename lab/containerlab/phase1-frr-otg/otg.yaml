@@ -1,0 +1,30 @@
+ports:
+  - {name: p1, location: "otg-a:5555"}
+  - {name: p2, location: "otg-b:5555"}
+flows:
+  - name: leo-service-forward
+    duration: {choice: fixed_packets, fixed_packets: {packets: 50000, gap: 12}}
+    rate: {choice: pps, pps: 2500}
+    size: {choice: fixed, fixed: 512}
+    metrics: {enable: true, loss: false, timestamps: true}
+    packet:
+      - choice: ethernet
+        ethernet: {src: {choice: value, value: "00:00:00:00:11:aa"}, dst: {choice: value, value: "00:00:00:00:11:bb"}}
+      - choice: ipv4
+        ipv4: {src: {choice: value, value: 192.0.2.2}, dst: {choice: value, value: 198.51.100.2}}
+      - choice: udp
+        udp: {src_port: {choice: value, value: 2152}, dst_port: {choice: value, value: 2152}}
+    tx_rx: {choice: port, port: {tx_name: p1, rx_names: [p2]}}
+  - name: leo-service-reverse
+    duration: {choice: fixed_packets, fixed_packets: {packets: 50000, gap: 12}}
+    rate: {choice: pps, pps: 2500}
+    size: {choice: fixed, fixed: 512}
+    metrics: {enable: true, loss: false, timestamps: true}
+    packet:
+      - choice: ethernet
+        ethernet: {src: {choice: value, value: "00:00:00:00:22:aa"}, dst: {choice: value, value: "00:00:00:00:22:bb"}}
+      - choice: ipv4
+        ipv4: {src: {choice: value, value: 198.51.100.2}, dst: {choice: value, value: 192.0.2.2}}
+      - choice: udp
+        udp: {src_port: {choice: value, value: 2152}, dst_port: {choice: value, value: 2152}}
+    tx_rx: {choice: port, port: {tx_name: p2, rx_names: [p1]}}

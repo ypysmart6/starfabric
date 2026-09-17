@@ -1,0 +1,41 @@
+name: sf-advanced-evpn
+topology:
+  nodes:
+    vtep-a:
+      kind: linux
+      image: quay.io/frrouting/frr@sha256:65e5967b922572c0565d968388fb06af69d7e9b3b3eea40ad7e3810687667f68
+      sysctls: {net.ipv4.ip_forward: 1}
+      binds:
+        - configs/daemons-vtep:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/vtep-a.conf:/etc/frr/frr.conf:ro
+        - setup-vxlan.sh:/opt/advanced/setup-vxlan.sh:ro
+      exec: [sh /opt/advanced/setup-vxlan.sh]
+    vtep-b:
+      kind: linux
+      image: quay.io/frrouting/frr@sha256:65e5967b922572c0565d968388fb06af69d7e9b3b3eea40ad7e3810687667f68
+      sysctls: {net.ipv4.ip_forward: 1}
+      binds:
+        - configs/daemons-vtep:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/vtep-b.conf:/etc/frr/frr.conf:ro
+        - setup-vxlan.sh:/opt/advanced/setup-vxlan.sh:ro
+      exec: [sh /opt/advanced/setup-vxlan.sh]
+    host-a:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool@sha256:9bc1e46dd105a054bce724b6744200e951e8fdf4c17658912fbc54fd2e8a4b06
+      exec:
+        - ip link set eth1 address 02:00:00:00:01:01
+        - ip address add 192.168.50.1/24 dev eth1
+    host-b:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool@sha256:9bc1e46dd105a054bce724b6744200e951e8fdf4c17658912fbc54fd2e8a4b06
+      exec:
+        - ip link set eth1 address 02:00:00:00:02:02
+        - ip address add 192.168.50.2/24 dev eth1
+  links:
+    - endpoints: [vtep-a:eth1, vtep-b:eth1]
+    - endpoints: [vtep-a:eth2, vtep-b:eth2]
+    - endpoints: [vtep-a:eth3, host-a:eth1]
+    - endpoints: [vtep-b:eth3, host-b:eth1]
+

@@ -1,0 +1,74 @@
+name: sf-l03-bfd
+
+topology:
+  defaults:
+    kind: linux
+
+  nodes:
+    h1:
+      image: ghcr.io/srl-labs/network-multitool@sha256:9bc1e46dd105a054bce724b6744200e951e8fdf4c17658912fbc54fd2e8a4b06
+      exec:
+        - ip route del default
+        - ip address add 192.0.2.2/24 dev eth1
+        - ip link set eth1 up
+        - ip route replace 198.51.100.0/24 via 192.0.2.1 dev eth1
+
+    r1:
+      image: quay.io/frrouting/frr@sha256:65e5967b922572c0565d968388fb06af69d7e9b3b3eea40ad7e3810687667f68
+      exec:
+        - ip route del default
+      sysctls:
+        net.ipv4.ip_forward: 1
+      binds:
+        - configs/daemons:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/r1/frr.conf:/etc/frr/frr.conf:ro
+
+    r2:
+      image: quay.io/frrouting/frr@sha256:65e5967b922572c0565d968388fb06af69d7e9b3b3eea40ad7e3810687667f68
+      exec:
+        - ip route del default
+      sysctls:
+        net.ipv4.ip_forward: 1
+      binds:
+        - configs/daemons:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/r2/frr.conf:/etc/frr/frr.conf:ro
+
+    r3:
+      image: quay.io/frrouting/frr@sha256:65e5967b922572c0565d968388fb06af69d7e9b3b3eea40ad7e3810687667f68
+      exec:
+        - ip route del default
+      sysctls:
+        net.ipv4.ip_forward: 1
+      binds:
+        - configs/daemons:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/r3/frr.conf:/etc/frr/frr.conf:ro
+
+    r4:
+      image: quay.io/frrouting/frr@sha256:65e5967b922572c0565d968388fb06af69d7e9b3b3eea40ad7e3810687667f68
+      exec:
+        - ip route del default
+      sysctls:
+        net.ipv4.ip_forward: 1
+      binds:
+        - configs/daemons:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/r4/frr.conf:/etc/frr/frr.conf:ro
+
+    h2:
+      image: ghcr.io/srl-labs/network-multitool@sha256:9bc1e46dd105a054bce724b6744200e951e8fdf4c17658912fbc54fd2e8a4b06
+      exec:
+        - ip route del default
+        - ip address add 198.51.100.2/24 dev eth1
+        - ip link set eth1 up
+        - ip route replace 192.0.2.0/24 via 198.51.100.1 dev eth1
+
+  links:
+    - endpoints: ["h1:eth1", "r1:eth1"]
+    - endpoints: ["r1:eth2", "r2:eth1"]
+    - endpoints: ["r1:eth3", "r3:eth1"]
+    - endpoints: ["r2:eth2", "r4:eth1"]
+    - endpoints: ["r3:eth2", "r4:eth2"]
+    - endpoints: ["r4:eth3", "h2:eth1"]

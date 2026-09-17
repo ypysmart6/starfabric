@@ -1,0 +1,46 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  filelog:
+    include: [/var/log/starfabric/controller.log]
+    start_at: beginning
+    operators:
+      - type: json_parser
+        parse_from: body
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+  batch: {}
+  resource/starfabric:
+    attributes:
+      - {key: service.name, action: upsert, value: starfabric-controller}
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+exporters:
+  otlphttp/tempo:
+    endpoint: http://tempo:4318
+    tls: {insecure: true}
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+    tls: {insecure: true}
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource/starfabric, batch]
+      exporters: [otlphttp/tempo]
+    logs:
+      receivers: [filelog]
+      processors: [memory_limiter, resource/starfabric, batch]
+      exporters: [otlphttp/loki]

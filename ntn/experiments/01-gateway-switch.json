@@ -1,0 +1,12 @@
+{
+  "id": "ntn-gateway-switch",
+  "duration_s": 20,
+  "sample_interval_ms": 200,
+  "controller": "http://127.0.0.1:8080",
+  "ue_namespace": "ue1",
+  "transport_namespace": "",
+  "n3_interface": "n3-sat",
+  "flows": [{"name": "gtpu-default", "destination": "10.45.0.1", "dscp": 0}],
+  "actions": [{"at_s": 5, "type": "controller_event", "event": {"event_id": "ntn-gw-switch-1", "subject": "gnb-a", "sequence": 1, "type": "link_down", "observed_at": "2026-09-04T00:00:05Z", "effective_at": "2026-09-04T00:00:05Z", "link": {"id": "gnb-a", "source": "gnb", "target": "sat-a", "admin_up": true, "operational_up": false, "latency_us": 12000, "capacity_bps": 1000000000}}}],
+  "assertions": {"max_loss_percent": 10, "max_outage_ms": 2500}
+}

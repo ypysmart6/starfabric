@@ -1,0 +1,18 @@
+duts {
+  id: "sonic-satellite-switch"
+  name: "sonic-satellite-switch"
+  vendor: "sonic"
+  hardware_model: "vs"
+  software_version: "integration-supplied"
+  ports { id: "Ethernet0" name: "Ethernet0" }
+  ports { id: "Ethernet4" name: "Ethernet4" }
+}
+ates {
+  id: "otg"
+  name: "otg"
+  vendor: "ixia"
+  ports { id: "p1" name: "p1" }
+  ports { id: "p2" name: "p2" }
+}
+links { a: "sonic-satellite-switch:Ethernet0" b: "otg:p1" }
+links { a: "sonic-satellite-switch:Ethernet4" b: "otg:p2" }

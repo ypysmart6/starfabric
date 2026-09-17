@@ -1,0 +1,10 @@
+1. Port-forward the API:
+   kubectl port-forward service/{{ include "starfabric.fullname" . }} 8080:{{ .Values.service.port }}
+2. Check readiness:
+   curl http://127.0.0.1:8080/readyz
+3. Run reconciliation:
+   sfctl reconcile
+
+The bundled store is single-writer; replicaCount must remain 1 until an external
+consensus store and leader election are configured.
+

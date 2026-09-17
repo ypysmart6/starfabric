@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "mappings": [
+    {
+      "name": "mission-control",
+      "snssai": {"sst": 2, "sd": "000001"},
+      "five_qi": 5,
+      "dscp": 46,
+      "transport_class": "control",
+      "tc_classid": "1:10"
+    },
+    {
+      "name": "broadband",
+      "snssai": {"sst": 1},
+      "five_qi": 9,
+      "dscp": 26,
+      "transport_class": "broadband",
+      "tc_classid": "1:20"
+    }
+  ]
+}

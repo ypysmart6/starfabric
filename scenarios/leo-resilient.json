@@ -1,0 +1,51 @@
+{
+  "scenario_id": "leo-resilient-6x2",
+  "description": "Two-gateway LEO transport with disjoint paths, link recovery, partial programming failure, and rollback.",
+  "random_seed": 20260903,
+  "topology": {
+    "version": 1,
+    "generated_at": "2026-09-03T00:00:00Z",
+    "valid_from": "2026-09-03T00:00:00Z",
+    "nodes": [
+      {"id": "gw-a", "kind": "gateway", "loopback": "2001:db8::1", "enabled": true},
+      {"id": "sat-01", "kind": "satellite", "loopback": "2001:db8::11", "enabled": true},
+      {"id": "sat-02", "kind": "satellite", "loopback": "2001:db8::12", "enabled": true},
+      {"id": "sat-03", "kind": "satellite", "loopback": "2001:db8::13", "enabled": true},
+      {"id": "sat-04", "kind": "satellite", "loopback": "2001:db8::14", "enabled": true},
+      {"id": "gw-b", "kind": "gateway", "loopback": "2001:db8::2", "enabled": true}
+    ],
+    "links": [
+      {"id":"ga-s1","source":"gw-a","target":"sat-01","admin_up":true,"operational_up":true,"latency_us":8000,"capacity_bps":1000000000,"loss_ppm":100,"reliability_ppm":999900},
+      {"id":"s1-ga","source":"sat-01","target":"gw-a","admin_up":true,"operational_up":true,"latency_us":8000,"capacity_bps":1000000000,"loss_ppm":100,"reliability_ppm":999900},
+      {"id":"s1-s2","source":"sat-01","target":"sat-02","admin_up":true,"operational_up":true,"latency_us":5000,"capacity_bps":1000000000,"loss_ppm":100,"reliability_ppm":999900},
+      {"id":"s2-s1","source":"sat-02","target":"sat-01","admin_up":true,"operational_up":true,"latency_us":5000,"capacity_bps":1000000000,"loss_ppm":100,"reliability_ppm":999900},
+      {"id":"s2-gb","source":"sat-02","target":"gw-b","admin_up":true,"operational_up":true,"latency_us":8000,"capacity_bps":1000000000,"loss_ppm":100,"reliability_ppm":999900},
+      {"id":"gb-s2","source":"gw-b","target":"sat-02","admin_up":true,"operational_up":true,"latency_us":8000,"capacity_bps":1000000000,"loss_ppm":100,"reliability_ppm":999900},
+      {"id":"ga-s3","source":"gw-a","target":"sat-03","admin_up":true,"operational_up":true,"latency_us":9000,"capacity_bps":800000000,"loss_ppm":200,"reliability_ppm":999800},
+      {"id":"s3-ga","source":"sat-03","target":"gw-a","admin_up":true,"operational_up":true,"latency_us":9000,"capacity_bps":800000000,"loss_ppm":200,"reliability_ppm":999800},
+      {"id":"s3-s4","source":"sat-03","target":"sat-04","admin_up":true,"operational_up":true,"latency_us":7000,"capacity_bps":800000000,"loss_ppm":200,"reliability_ppm":999800},
+      {"id":"s4-s3","source":"sat-04","target":"sat-03","admin_up":true,"operational_up":true,"latency_us":7000,"capacity_bps":800000000,"loss_ppm":200,"reliability_ppm":999800},
+      {"id":"s4-gb","source":"sat-04","target":"gw-b","admin_up":true,"operational_up":true,"latency_us":9000,"capacity_bps":800000000,"loss_ppm":200,"reliability_ppm":999800},
+      {"id":"gb-s4","source":"gw-b","target":"sat-04","admin_up":true,"operational_up":true,"latency_us":9000,"capacity_bps":800000000,"loss_ppm":200,"reliability_ppm":999800},
+      {"id":"s1-s3","source":"sat-01","target":"sat-03","admin_up":true,"operational_up":true,"latency_us":6000,"capacity_bps":600000000,"loss_ppm":300,"reliability_ppm":999700},
+      {"id":"s3-s1","source":"sat-03","target":"sat-01","admin_up":true,"operational_up":true,"latency_us":6000,"capacity_bps":600000000,"loss_ppm":300,"reliability_ppm":999700},
+      {"id":"s2-s4","source":"sat-02","target":"sat-04","admin_up":true,"operational_up":true,"latency_us":6000,"capacity_bps":600000000,"loss_ppm":300,"reliability_ppm":999700},
+      {"id":"s4-s2","source":"sat-04","target":"sat-02","admin_up":true,"operational_up":true,"latency_us":6000,"capacity_bps":600000000,"loss_ppm":300,"reliability_ppm":999700},
+      {"id":"s1-s4","source":"sat-01","target":"sat-04","admin_up":true,"operational_up":true,"latency_us":10000,"capacity_bps":600000000,"loss_ppm":300,"reliability_ppm":999700},
+      {"id":"s4-s1","source":"sat-04","target":"sat-01","admin_up":true,"operational_up":true,"latency_us":10000,"capacity_bps":600000000,"loss_ppm":300,"reliability_ppm":999700},
+      {"id":"s3-s2","source":"sat-03","target":"sat-02","admin_up":true,"operational_up":true,"latency_us":10000,"capacity_bps":600000000,"loss_ppm":300,"reliability_ppm":999700},
+      {"id":"s2-s3","source":"sat-02","target":"sat-03","admin_up":true,"operational_up":true,"latency_us":10000,"capacity_bps":600000000,"loss_ppm":300,"reliability_ppm":999700}
+    ]
+  },
+  "intents": [
+    {"id":"control-a-b","source":"gw-a","destination":"gw-b","destination_prefix":"2001:db8:100::/64","policy":"latency","max_latency_us":40000,"min_capacity_bps":500000000,"demand_bps":100000000,"max_loss_ppm":2000,"required_reliability_ppm":999000,"redundancy":1,"class":"control","priority":100}
+  ],
+  "timeline": [
+    {"at_ms":0,"type":"reconcile"},
+    {"at_ms":1000,"type":"link_down","link_ids":["s1-s2","s2-s1"],"reconcile":true},
+    {"at_ms":2000,"type":"device_fault","node_id":"sat-03","fault":"commit"},
+    {"at_ms":2100,"type":"link_up","link_ids":["s1-s2","s2-s1"],"reconcile":true,"expect_failure":true},
+    {"at_ms":2200,"type":"clear_faults"},
+    {"at_ms":2300,"type":"reconcile"}
+  ]
+}

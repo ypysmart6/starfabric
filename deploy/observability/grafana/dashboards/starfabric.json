@@ -1,0 +1,16 @@
+{
+  "title": "StarFabric NOC",
+  "uid": "starfabric-noc",
+  "schemaVersion": 41,
+  "refresh": "5s",
+  "time": {"from": "now-15m", "to": "now"},
+  "panels": [
+    {"type":"stat","title":"Topology version","gridPos":{"x":0,"y":0,"w":4,"h":4},"targets":[{"expr":"starfabric_topology_version"}]},
+    {"type":"stat","title":"Active nodes","gridPos":{"x":4,"y":0,"w":4,"h":4},"targets":[{"expr":"starfabric_active_nodes"}]},
+    {"type":"stat","title":"Active links","gridPos":{"x":8,"y":0,"w":4,"h":4},"targets":[{"expr":"starfabric_active_links"}]},
+    {"type":"stat","title":"Desired/actual mismatch","gridPos":{"x":12,"y":0,"w":4,"h":4},"targets":[{"expr":"starfabric_desired_actual_mismatch"}]},
+    {"type":"timeseries","title":"Reconciliation outcomes","gridPos":{"x":0,"y":4,"w":12,"h":7},"targets":[{"expr":"rate(starfabric_reconcile_success_total[1m])","legendFormat":"success"},{"expr":"rate(starfabric_reconcile_failure_total[1m])","legendFormat":"failure"}]},
+    {"type":"timeseries","title":"Control latency","gridPos":{"x":12,"y":4,"w":12,"h":7},"targets":[{"expr":"starfabric_path_computation_last_seconds","legendFormat":"path compute"},{"expr":"starfabric_reconcile_last_seconds","legendFormat":"reconcile"}]}
+  ]
+}
+

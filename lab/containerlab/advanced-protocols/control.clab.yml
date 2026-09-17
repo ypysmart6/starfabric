@@ -1,0 +1,52 @@
+name: sf-advanced-control
+topology:
+  defaults:
+    kind: linux
+    image: quay.io/frrouting/frr@sha256:65e5967b922572c0565d968388fb06af69d7e9b3b3eea40ad7e3810687667f68
+    sysctls:
+      net.ipv4.ip_forward: 1
+      net.ipv6.conf.all.forwarding: 1
+  nodes:
+    head:
+      binds:
+        - configs/daemons-head:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/control-head.conf:/etc/frr/frr.conf:ro
+        - configs/bgpls-head.conf:/etc/frr/bgpls-head.conf:ro
+        - configs/pathd-head.conf:/etc/frr/pathd-head.conf:ro
+        - setup-srv6.sh:/opt/advanced/setup-srv6.sh:ro
+      exec: [sh /opt/advanced/setup-srv6.sh]
+    primary:
+      binds:
+        - configs/daemons-router:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/control-primary.conf:/etc/frr/frr.conf:ro
+        - setup-srv6.sh:/opt/advanced/setup-srv6.sh:ro
+      exec: [sh /opt/advanced/setup-srv6.sh]
+    backup:
+      binds:
+        - configs/daemons-router:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/control-backup.conf:/etc/frr/frr.conf:ro
+        - setup-srv6.sh:/opt/advanced/setup-srv6.sh:ro
+      exec: [sh /opt/advanced/setup-srv6.sh]
+    tail:
+      binds:
+        - configs/daemons-router:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/control-tail.conf:/etc/frr/frr.conf:ro
+        - setup-srv6.sh:/opt/advanced/setup-srv6.sh:ro
+      exec: [sh /opt/advanced/setup-srv6.sh]
+    pce:
+      binds:
+        - configs/daemons-router:/etc/frr/daemons:ro
+        - configs/vtysh.conf:/etc/frr/vtysh.conf:ro
+        - configs/control-pce.conf:/etc/frr/frr.conf:ro
+        - pcep_server.py:/opt/advanced/pcep_server.py:ro
+        - artifacts:/var/log/advanced
+  links:
+    - endpoints: [head:eth1, primary:eth1]
+    - endpoints: [primary:eth2, tail:eth1]
+    - endpoints: [head:eth2, backup:eth1]
+    - endpoints: [backup:eth2, tail:eth2]
+    - endpoints: [head:eth3, pce:eth1]

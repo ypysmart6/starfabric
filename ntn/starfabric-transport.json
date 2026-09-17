@@ -1,0 +1,26 @@
+{
+  "scenario_id": "ntn-n3-transport",
+  "description": "Two satellite paths between srsRAN gNB and Open5GS UPF",
+  "random_seed": 20260904,
+  "topology": {
+    "version": 1,
+    "generated_at": "2026-09-04T00:00:00Z",
+    "valid_from": "2026-09-04T00:00:00Z",
+    "nodes": [
+      {"id": "gnb", "kind": "ran", "loopback": "10.53.1.1", "enabled": true},
+      {"id": "sat-a", "kind": "satellite", "loopback": "10.200.0.1", "enabled": true},
+      {"id": "sat-b", "kind": "satellite", "loopback": "10.200.0.2", "enabled": true},
+      {"id": "upf", "kind": "gateway", "loopback": "10.53.1.2", "enabled": true}
+    ],
+    "links": [
+      {"id": "gnb-a", "source": "gnb", "target": "sat-a", "link_type": "feeder", "admin_up": true, "operational_up": true, "latency_us": 12000, "capacity_bps": 1000000000},
+      {"id": "a-upf", "source": "sat-a", "target": "upf", "link_type": "sat-ground", "admin_up": true, "operational_up": true, "latency_us": 12000, "capacity_bps": 1000000000},
+      {"id": "gnb-b", "source": "gnb", "target": "sat-b", "link_type": "feeder", "admin_up": true, "operational_up": true, "latency_us": 18000, "capacity_bps": 1000000000},
+      {"id": "b-upf", "source": "sat-b", "target": "upf", "link_type": "sat-ground", "admin_up": true, "operational_up": true, "latency_us": 18000, "capacity_bps": 1000000000}
+    ]
+  },
+  "intents": [
+    {"id": "n3-gtpu", "source": "gnb", "destination": "upf", "destination_prefix": "10.45.0.0/16", "policy": "latency", "max_latency_us": 100000, "min_capacity_bps": 100000000, "demand_bps": 100000000, "redundancy": 1, "class": "5g-user-plane", "priority": 100}
+  ],
+  "timeline": []
+}

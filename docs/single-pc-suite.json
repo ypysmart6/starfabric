@@ -1,0 +1,436 @@
+{
+  "schema_version": 1,
+  "scope": "Single-host software integration acceptance; full success also requires every closure entry.",
+  "stages": [
+    {
+      "id": "build",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "build"
+      ],
+      "profile": "core",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": []
+    },
+    {
+      "id": "core",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-core-quality"
+      ],
+      "profile": "core",
+      "depends_on": [],
+      "timeout_seconds": 1200,
+      "reports": [
+        "reports/core-quality.json"
+      ]
+    },
+    {
+      "id": "python",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-python"
+      ],
+      "profile": "core",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": []
+    },
+    {
+      "id": "scenario",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-e2e"
+      ],
+      "profile": "core",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/latest.json"
+      ]
+    },
+    {
+      "id": "api",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-api-contract"
+      ],
+      "profile": "core",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/api-contract.json"
+      ]
+    },
+    {
+      "id": "dependencies",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-dependency-security"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/dependency-security.json"
+      ]
+    },
+    {
+      "id": "linux",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-linux"
+      ],
+      "profile": "full",
+      "depends_on": [
+        "build"
+      ],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/linux-networking.json"
+      ]
+    },
+    {
+      "id": "frr",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-live"
+      ],
+      "profile": "full",
+      "depends_on": [
+        "build"
+      ],
+      "timeout_seconds": 900,
+      "reports": [
+        "lab/containerlab/phase1-frr-otg/artifacts/closed-loop/summary.json"
+      ]
+    },
+    {
+      "id": "orbit",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-orbit-live"
+      ],
+      "profile": "full",
+      "depends_on": [
+        "build"
+      ],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/orbit-network-closed-loop.json"
+      ]
+    },
+    {
+      "id": "protocols",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-protocol-live"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/protocol-matrix-closed-loop.json"
+      ]
+    },
+    {
+      "id": "advanced",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-advanced-live"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/advanced-protocols-closed-loop.json",
+        "reports/advanced-control-closed-loop.json",
+        "reports/evpn-vxlan-closed-loop.json"
+      ]
+    },
+    {
+      "id": "5g",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-5g"
+      ],
+      "profile": "full",
+      "depends_on": [
+        "build"
+      ],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/5g-sa-baseline.json",
+        "reports/5g-ntn-transport.json"
+      ]
+    },
+    {
+      "id": "ntn-channel",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-ntn-r17"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/ntn-r17-channel.json"
+      ]
+    },
+    {
+      "id": "srsran",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-srsran"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 3900,
+      "reports": [
+        "reports/srsran-rel17-ntn.json"
+      ]
+    },
+    {
+      "id": "qos",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-qos"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/qos-slicing.json"
+      ]
+    },
+    {
+      "id": "xdp",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-xdp"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/xdp-runtime.json"
+      ]
+    },
+    {
+      "id": "openconfig",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-openconfig"
+      ],
+      "profile": "full",
+      "depends_on": [
+        "build"
+      ],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/openconfig-closed-loop.json"
+      ]
+    },
+    {
+      "id": "p4",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-p4"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/p4-closed-loop.json"
+      ]
+    },
+    {
+      "id": "batfish",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-batfish"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/batfish.json"
+      ]
+    },
+    {
+      "id": "inventory",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-inventory"
+      ],
+      "profile": "full",
+      "depends_on": [
+        "build"
+      ],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/inventory-closed-loop.json"
+      ]
+    },
+    {
+      "id": "ha",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-ha"
+      ],
+      "profile": "full",
+      "depends_on": [
+        "build"
+      ],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/ha-failover.json"
+      ]
+    },
+    {
+      "id": "reliability",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-reliability"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/reliability-scale.json"
+      ]
+    },
+    {
+      "id": "security",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-security"
+      ],
+      "profile": "full",
+      "depends_on": [
+        "build"
+      ],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/security-operations.json"
+      ]
+    },
+    {
+      "id": "cloud",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-cloud"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/cloud-native.json"
+      ]
+    },
+    {
+      "id": "cloud-runtime",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-cloud-runtime"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 3600,
+      "reports": [
+        "reports/cloud-runtime.json"
+      ],
+      "artifact_reports": {
+        "reports/cloud-runtime.json": "lab/cloud/artifacts"
+      }
+    },
+    {
+      "id": "observability",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-observability"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 900,
+      "reports": [
+        "reports/observability-closed-loop.json"
+      ]
+    },
+    {
+      "id": "onboard",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-onboard"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 3600,
+      "reports": [
+        "reports/onboard-runtime.json"
+      ]
+    },
+    {
+      "id": "unified",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-unified"
+      ],
+      "profile": "full",
+      "depends_on": [
+        "build",
+        "onboard"
+      ],
+      "timeout_seconds": 7200,
+      "reports": [
+        "reports/platform-runtime.json"
+      ],
+      "artifact_reports": {
+        "reports/platform-runtime.json": "lab/unified/artifacts"
+      }
+    },
+    {
+      "id": "qemu",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "test-qemu"
+      ],
+      "profile": "full",
+      "depends_on": [],
+      "timeout_seconds": 3600,
+      "reports": [
+        "reports/qemu-arm64-sil.json"
+      ]
+    }
+  ]
+}

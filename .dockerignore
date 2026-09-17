@@ -1,0 +1,16 @@
+.git
+.github
+.cache
+.ruff_cache
+bin
+data
+data-*
+reports
+onboard/target
+**/artifacts
+**/__pycache__
+**/*.log
+learning/**/clab-*
+learning/**/__pycache__
+*.pcap
+*.pcapng

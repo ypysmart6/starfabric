@@ -1,0 +1,196 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 45104523
+    name: "IngressImpl.qos_classification"
+    alias: "qos_classification"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.diffserv"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22947500
+  }
+  action_refs {
+    id: 21257015
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 64
+}
+tables {
+  preamble {
+    id: 50085028
+    name: "IngressImpl.ipv6_qos_classification"
+    alias: "ipv6_qos_classification"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv6.traffic_class"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22947500
+  }
+  action_refs {
+    id: 21257015
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 64
+}
+tables {
+  preamble {
+    id: 47602681
+    name: "IngressImpl.ipv4_lpm"
+    alias: "ipv4_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dst_addr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  match_fields {
+    id: 2
+    name: "meta.traffic_class"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 31349783
+  }
+  action_refs {
+    id: 17676690
+  }
+  initial_default_action {
+    action_id: 17676690
+  }
+  direct_resource_ids: 334982510
+  size: 4096
+}
+tables {
+  preamble {
+    id: 35700237
+    name: "IngressImpl.ipv6_lpm"
+    alias: "ipv6_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv6.dst_addr"
+    bitwidth: 128
+    match_type: LPM
+  }
+  match_fields {
+    id: 2
+    name: "meta.traffic_class"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 31349783
+  }
+  action_refs {
+    id: 17676690
+  }
+  initial_default_action {
+    action_id: 17676690
+  }
+  direct_resource_ids: 332182201
+  size: 4096
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 17676690
+    name: "IngressImpl.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 31349783
+    name: "IngressImpl.set_nexthop"
+    alias: "set_nexthop"
+  }
+  params {
+    id: 1
+    name: "dst_mac"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+  params {
+    id: 3
+    name: "meter_index"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 22947500
+    name: "IngressImpl.classify"
+    alias: "classify"
+  }
+  params {
+    id: 1
+    name: "traffic_class"
+    bitwidth: 3
+  }
+}
+direct_counters {
+  preamble {
+    id: 334982510
+    name: "IngressImpl.ipv4_route_counter"
+    alias: "ipv4_route_counter"
+  }
+  spec {
+    unit: BOTH
+  }
+  direct_table_id: 47602681
+}
+direct_counters {
+  preamble {
+    id: 332182201
+    name: "IngressImpl.ipv6_route_counter"
+    alias: "ipv6_route_counter"
+  }
+  spec {
+    unit: BOTH
+  }
+  direct_table_id: 35700237
+}
+meters {
+  preamble {
+    id: 339926854
+    name: "IngressImpl.service_meter"
+    alias: "service_meter"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+type_info {
+}

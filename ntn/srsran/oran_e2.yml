@@ -1,0 +1,20 @@
+# Optional deterministic O-RAN E2 integration overlay. The RIC only exports KPM
+# telemetry and accepts explicitly configured RC actions; it is never placed
+# in StarFabric's autonomous route-programming path.
+e2:
+  enable_du_e2: true
+  e2sm_kpm_enabled: true
+  e2sm_rc_enabled: true
+  addr: 127.0.0.1
+  port: 36421
+pcap:
+  e2ap_enable: true
+  e2ap_du_filename: /tmp/gnb_du_e2ap.pcap
+  e2ap_cu_cp_filename: /tmp/gnb_cu_cp_e2ap.pcap
+  e2ap_cu_up_filename: /tmp/gnb_cu_up_e2ap.pcap
+metrics:
+  layers:
+    enable_rlc: true
+    enable_sched: true
+  periodicity:
+    du_report_period: 1000

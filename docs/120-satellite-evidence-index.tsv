@@ -1,0 +1,873 @@
+run_id	path_from_project_root	bytes	purpose
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/autonomous-kernel-fib.json	224	选定星上实际备用下一跳
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/capture-namespaces.json	2643	卫星抓包点与命名空间
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/cilium-pods.json	227570	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/controller-build.log	3005	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/create.log	850	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/final-deployments.json	52368	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/final-endpointslices.json	11976	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/final-events.json	266282	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/final-leases.json	6737	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/final-pods.json	344814	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/final-services.json	8729	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/nodes.json	22540	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/platform-controller-deployment.json	6827	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/cloud/platform-lease.json	511	本轮 Kubernetes／控制器部署、Lease、构建日志和最终状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/constellation-input.json	9731989	输入物理场景副本
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/continuous-ping.log	318949	持续 UE 用户面探测，含发收总数
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/controller.log	108617	Go 控制器实际日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/deployment-manifest.json	135097	节点、链路、N3 网关实际绑定
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/fleet-autonomous.json	25203	全星座进入自治的状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/fleet-inventory.json	566862	全节点进程、邻接和运行配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/fleet-probes-after-faults.json	40110	全部节点实际 ping 探测
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/fleet-probes-initial.json	40042	全部节点实际 ping 探测
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/frr-agent.jsonl	295309	实际设备操作审计日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/gateway-business-after-faults.json	3643	8 条网关业务目的地址的实际探测
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/gateway-business-initial.json	3641	8 条网关业务目的地址的实际探测
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/ground-restored-commit.json	41776	地面恢复后提交
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/host-budget.json	187	inotify 预算和恢复
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/initial-commit.json	42598	初始主备计划与提交
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/last-http-error.json	492	最近 HTTP 错误（也可能来自预期故障注入）
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-capture-ready.json	1471	全部 native 抓包点就绪
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0001-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0001.pcap	2103456	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0002-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0002.pcap	2105099	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0003-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0003.pcap	2104749	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0004-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0004.pcap	2115023	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0005-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0005.pcap	2116083	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0006-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0006.pcap	2120655	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0007-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0007.pcap	2118710	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0008-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0008.pcap	2116347	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0009-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0009.pcap	2108279	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0010-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0010.pcap	2112308	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0011-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0011.pcap	2107684	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0012-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0012.pcap	2086026	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0013-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0013.pcap	2118083	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0014-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0014.pcap	2115540	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0015-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0015.pcap	2097119	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0016-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0016.pcap	2096512	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0017-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0017.pcap	2091883	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0018-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0018.pcap	2103431	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0019-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0019.pcap	2105410	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0020-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0020.pcap	2112025	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0021-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0021.pcap	2108191	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0022-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0022.pcap	1594817	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0023-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0023.pcap	2101018	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0024-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0024.pcap	2106663	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0025-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0025.pcap	2116690	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0026-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0026.pcap	2113152	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0027-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0027.pcap	1588355	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0028-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0028.pcap	2100212	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0029-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0029.pcap	2103480	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0030-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0030.pcap	2103847	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0031-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0031.pcap	2673343	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0032-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0032.pcap	2134061	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0033-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0033.pcap	2140479	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0034-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0034.pcap	2679869	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0035-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0035.pcap	1595217	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0036-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0036.pcap	2109666	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0037-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0037.pcap	2105503	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0038-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0038.pcap	2099758	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0039-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0039.pcap	2100497	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0040-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0040.pcap	2110669	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0041-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0041.pcap	2109424	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0042-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0042.pcap	2100954	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0043-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0043.pcap	2107967	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0044-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0044.pcap	2788677	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0045-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0045.pcap	2100954	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0046-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0046.pcap	2102513	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0047-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0047.pcap	2091425	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0048-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0048.pcap	2102970	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0049-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0049.pcap	2105501	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0050-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0050.pcap	2411633	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0051-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0051.pcap	2121291	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0052-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0052.pcap	2114210	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0053-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0053.pcap	3368085	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0054-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0054.pcap	2549909	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0055-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0055.pcap	2113791	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0056-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0056.pcap	2104917	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0057-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0057.pcap	2107493	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0058-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0058.pcap	2110348	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0059-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0059.pcap	2117477	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0060-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0060.pcap	2113597	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0061-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0061.pcap	2122888	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0062-tcpdump.log	215	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0062.pcap	4569032	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0063-tcpdump.log	215	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0063.pcap	5238220	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0064-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0064.pcap	2112882	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0065-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0065.pcap	2106857	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0066-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0066.pcap	2102065	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0067-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0067.pcap	2104494	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0068-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0068.pcap	2112914	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0069-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0069.pcap	2104455	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0070-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0070.pcap	2115623	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0071-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0071.pcap	2105066	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0072-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0072.pcap	2805397	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0073-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0073.pcap	2135077	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0074-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0074.pcap	2648228	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0075-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0075.pcap	2105527	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0076-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0076.pcap	2101735	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0077-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0077.pcap	2097113	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0078-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0078.pcap	2104095	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0079-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0079.pcap	2102768	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0080-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0080.pcap	2105969	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0081-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0081.pcap	2099780	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0082-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0082.pcap	2662484	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0083-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0083.pcap	2132038	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0084-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0084.pcap	2101047	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0085-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0085.pcap	2101753	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0086-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0086.pcap	2109003	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0087-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0087.pcap	2101995	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0088-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0088.pcap	2098884	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0089-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0089.pcap	2107442	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0090-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0090.pcap	2101672	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0091-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0091.pcap	2106223	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0092-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0092.pcap	2104015	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0093-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0093.pcap	2652274	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0094-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0094.pcap	2120639	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0095-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0095.pcap	2669053	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0096-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0096.pcap	2111993	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0097-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0097.pcap	2096794	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0098-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0098.pcap	2087137	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0099-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0099.pcap	2084945	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0100-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0100.pcap	2104259	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0101-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0101.pcap	2091216	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0102-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0102.pcap	2614477	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0103-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0103.pcap	2090367	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0104-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0104.pcap	1585108	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0105-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0105.pcap	2350276	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0106-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0106.pcap	2101660	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0107-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0107.pcap	2105264	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0108-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0108.pcap	2100354	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0109-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0109.pcap	2104496	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0110-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0110.pcap	2100775	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0111-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0111.pcap	2105658	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0112-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0112.pcap	2102189	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0113-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0113.pcap	2094681	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0114-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0114.pcap	2103256	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0115-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0115.pcap	2108260	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0116-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0116.pcap	2110002	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0117-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0117.pcap	2100586	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0118-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0118.pcap	2104277	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0119-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0119.pcap	2109912	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0120-tcpdump.log	213	该卫星抓包日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/native-sat-0120.pcap	2111659	该卫星原始抓包；有抓包点不代表该星转发了这条业务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/alerts.json	385	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/cleanup.log	1598	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/compose.json	2939	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/dashboards/starfabric-noc.json	2122	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/grafana-dashboard.json	3307	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/grafana-datasources.json	1142	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/loki-correlated-logs.json	148495	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/loki.json	857	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/otel-collector.json	1877	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/outage-alert.json	1535	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/prometheus.json	414	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/provisioning/dashboards/provider.yaml	163	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/provisioning/datasources/sources.yaml	566	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/services.log	291175	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/start.log	2046	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/tempo-api-trace.json	329421	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/tempo.json	683	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/noc/topology-metric.json	253	本轮 NOC 配置／监控查询／服务日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/onboard-inventory.json	25323	120 个星上实例初始状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/pdu-identity-final.json	598	结束 PDU 身份
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/pdu-identity-initial.json	598	初始 PDU 身份
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-10.json	39291	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-12.json	38732	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-18.json	39138	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-19.json	39176	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-2.json	42601	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-23.json	39848	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-29.json	39810	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-30.json	41776	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-4.json	42607	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-6.json	42610	该帧路由改变后实际 reconcile 结果
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-0.json	378882	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-1.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-10.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-11.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-12.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-13.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-14.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-15.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-16.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-17.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-18.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-19.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-2.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-20.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-21.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-22.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-23.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-24.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-25.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-26.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-27.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-28.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-29.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-3.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-30.json	378651	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-4.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-5.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-6.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-7.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-8.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-9.json	1976	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-channels-held-100031.json	378668	内核执行结果；首末帧和保持快照含读回
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-held-snapshot.json	228	结束快照的重新观测
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-0.json	326389	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-1.json	164531	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-10.json	164525	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-11.json	164521	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-12.json	164529	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-13.json	164523	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-14.json	164529	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-15.json	164523	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-16.json	164523	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-17.json	164523	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-18.json	164715	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-19.json	164711	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-2.json	164527	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-20.json	164519	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-21.json	164521	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-22.json	164521	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-23.json	164533	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-24.json	164531	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-25.json	164533	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-26.json	164529	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-27.json	164531	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-28.json	164531	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-29.json	164541	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-3.json	163913	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-30.json	324747	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-4.json	164529	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-5.json	164529	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-6.json	163909	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-7.json	164533	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-8.json	164533	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-9.json	164527	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-jobs-held-100031.json	169927	逐帧或保持快照的内核更新／读回任务
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-model.json	8863140	逐星轨道与全时段物理帧
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-path-preflight.log	95	初始路径预检查
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/physical-replay.json	13960	全部物理帧应用结果和时间
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/ping-cloud-controlled-initial.log	1044	该阶段 UE 短探测日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/ping-ground-recovered.log	1855	该阶段 UE 短探测日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/ping-onboard-autonomy.log	1855	该阶段 UE 短探测日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/ping-physical-final.log	1855	该阶段 UE 短探测日志
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/platform-report.json	42784	本轮最终平台报告
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/protocol-initial-protocol-state.json	163567899	全图初始协议状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/protocol-packet-proofs.json	9065	同包 GTP-U 解码和实际经过的卫星
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/radio-cpu-budget.json	562	无线模拟器 CPU 分配和恢复
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/resource-estimate.json	308	资源需求与可用内存估算
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/gw-001/daemons	88	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/gw-001/frr.conf	3362	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/gw-002/daemons	88	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/gw-002/frr.conf	2899	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/gw-003/daemons	88	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/gw-003/frr.conf	2867	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/gw-004/daemons	88	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/gw-004/frr.conf	3320	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0001/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0001/frr.conf	2748	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0002/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0002/frr.conf	2748	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0003/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0003/frr.conf	2748	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0004/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0004/frr.conf	2748	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0005/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0005/frr.conf	2748	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0006/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0006/frr.conf	2756	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0007/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0007/frr.conf	2756	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0008/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0008/frr.conf	2756	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0009/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0009/frr.conf	2756	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0010/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0010/frr.conf	2756	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0011/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0011/frr.conf	2756	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0012/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0012/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0013/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0013/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0014/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0014/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0015/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0015/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0016/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0016/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0017/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0017/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0018/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0018/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0019/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0019/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0020/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0020/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0021/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0021/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0022/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0022/frr.conf	2307	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0023/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0023/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0024/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0024/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0025/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0025/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0026/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0026/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0027/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0027/frr.conf	2307	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0028/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0028/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0029/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0029/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0030/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0030/frr.conf	2757	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0031/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0031/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0032/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0032/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0033/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0033/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0034/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0034/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0035/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0035/frr.conf	2313	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0036/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0036/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0037/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0037/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0038/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0038/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0039/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0039/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0040/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0040/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0041/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0041/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0042/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0042/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0043/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0043/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0044/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0044/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0045/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0045/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0046/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0046/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0047/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0047/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0048/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0048/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0049/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0049/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0050/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0050/frr.conf	3214	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0051/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0051/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0052/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0052/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0053/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0053/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0054/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0054/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0055/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0055/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0056/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0056/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0057/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0057/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0058/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0058/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0059/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0059/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0060/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0060/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0061/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0061/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0062/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0062/frr.conf	3210	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0063/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0063/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0064/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0064/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0065/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0065/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0066/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0066/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0067/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0067/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0068/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0068/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0069/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0069/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0070/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0070/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0071/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0071/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0072/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0072/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0073/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0073/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0074/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0074/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0075/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0075/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0076/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0076/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0077/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0077/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0078/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0078/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0079/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0079/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0080/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0080/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0081/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0081/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0082/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0082/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0083/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0083/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0084/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0084/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0085/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0085/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0086/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0086/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0087/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0087/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0088/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0088/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0089/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0089/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0090/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0090/frr.conf	2761	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0091/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0091/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0092/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0092/frr.conf	2765	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0093/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0093/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0094/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0094/frr.conf	2763	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0095/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0095/frr.conf	3212	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0096/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0096/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0097/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0097/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0098/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0098/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0099/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0099/frr.conf	2771	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0100/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0100/frr.conf	2771	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0101/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0101/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0102/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0102/frr.conf	3222	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0103/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0103/frr.conf	2771	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0104/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0104/frr.conf	2319	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0105/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0105/frr.conf	3222	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0106/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0106/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0107/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0107/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0108/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0108/frr.conf	2771	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0109/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0109/frr.conf	2771	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0110/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0110/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0111/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0111/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0112/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0112/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0113/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0113/frr.conf	2769	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0114/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0114/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0115/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0115/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0116/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0116/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0117/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0117/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0118/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0118/frr.conf	2769	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0119/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0119/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0120/daemons	79	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/routers/sat-0120/frr.conf	2773	本轮 FRR 初始配置／进程启用配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0001-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0001-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0002-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0002-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0003-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0003-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0004-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0004-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0005-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0005-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0006-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0006-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0007-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0007-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0008-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0008-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0009-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0009-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0010-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0010-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0011-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0011-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0012-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0012-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0013-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0013-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0014-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0014-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0015-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0015-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0016-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0016-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0017-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0017-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0018-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0018-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0019-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0019-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0020-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0020-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0021-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0021-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0022-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0022-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0023-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0023-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0024-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0024-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0025-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0025-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0026-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0026-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0027-onboard/config.json	420	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0027-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0028-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0028-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0029-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0029-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0030-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0030-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0031-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0031-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0032-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0032-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0033-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0033-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0034-onboard/config.json	420	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0034-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0035-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0035-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0036-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0036-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0037-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0037-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0038-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0038-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0039-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0039-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0040-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0040-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0041-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0041-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0042-onboard/config.json	420	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0042-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0043-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0043-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0044-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0044-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0045-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0045-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0046-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0046-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0047-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0047-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0048-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0048-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0049-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0049-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0050-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0050-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0051-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0051-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0052-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0052-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0053-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0053-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0054-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0054-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0055-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0055-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0056-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0056-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0057-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0057-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0058-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0058-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0059-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0059-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0060-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0060-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0061-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0061-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0062-onboard/config.json	420	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0062-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0063-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0063-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0064-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0064-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0065-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0065-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0066-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0066-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0067-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0067-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0068-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0068-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0069-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0069-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0070-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0070-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0071-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0071-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0072-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0072-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0073-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0073-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0074-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0074-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0075-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0075-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0076-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0076-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0077-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0077-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0078-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0078-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0079-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0079-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0080-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0080-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0081-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0081-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0082-onboard/config.json	420	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0082-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0083-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0083-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0084-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0084-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0085-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0085-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0086-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0086-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0087-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0087-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0088-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0088-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0089-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0089-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0090-onboard/config.json	420	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0090-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0091-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0091-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0092-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0092-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0093-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0093-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0094-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0094-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0095-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0095-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0096-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0096-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0097-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0097-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0098-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0098-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0099-onboard/config.json	417	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0099-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0100-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0100-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0101-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0101-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0102-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0102-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0103-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0103-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0104-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0104-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0105-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0105-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0106-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0106-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0107-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0107-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0108-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0108-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0109-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0109-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0110-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0110-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0111-onboard/config.json	419	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0111-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0112-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0112-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0113-onboard/config.json	422	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0113-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0114-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0114-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0115-onboard/config.json	421	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0115-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0116-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0116-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0117-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0117-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0118-onboard/config.json	420	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0118-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0119-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0119-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0120-onboard/config.json	423	逐星配置
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/sat-0120-onboard/state/state.json	178	逐星 Rust 持久状态
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/scenario.json	311364	绑定后云控制器实际场景
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/service-path-selection.json	41361	业务路径和故障边选择
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/timeline.json	22219	完整事件时间线
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/timeline.jsonl	19400	逐行事件时间线
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/wiring.json	714325	实际接线命令
+sf-unified-d180f84868	lab/unified/artifacts/sf-unified-d180f84868/wiring.log	36	接线执行日志

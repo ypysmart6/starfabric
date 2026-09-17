@@ -1,0 +1,13 @@
+{
+  "id": "ntn-qos-classes",
+  "duration_s": 30,
+  "sample_interval_ms": 250,
+  "ue_namespace": "ue1",
+  "n3_interface": "n3-sat",
+  "flows": [
+    {"name": "control-ef", "destination": "10.45.0.1", "dscp": 46},
+    {"name": "broadband-af31", "destination": "10.45.0.1", "dscp": 26}
+  ],
+  "actions": [{"at_s": 5, "type": "netem", "delay_ms": 40, "loss_percent": 2}],
+  "assertions": {"max_loss_percent": 10, "max_outage_ms": 2500}
+}

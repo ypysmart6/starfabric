@@ -1,0 +1,15 @@
+# Replace the matching UPF sections in the upstream Open5GS configuration.
+upf:
+  pfcp:
+    server:
+      - address: 127.0.0.7
+  gtpu:
+    server:
+      - address: 10.53.1.2
+  session:
+    - subnet: 10.45.0.0/16
+      gateway: 10.45.0.1
+      dnn: internet
+    - subnet: 2001:db8:cafe::/48
+      gateway: 2001:db8:cafe::1
+      dnn: internet

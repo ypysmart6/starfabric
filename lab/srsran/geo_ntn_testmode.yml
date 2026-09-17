@@ -1,0 +1,106 @@
+# Runtime-validated srsRAN Project release_25_10 configuration.
+metrics:
+  enable_log: true
+  enable_json: true
+  layers:
+    enable_app_usage: true
+    enable_pdcp: true
+    enable_sched: true
+    enable_rlc: true
+    enable_mac: true
+    enable_du_low: true
+    enable_ru: true
+  periodicity:
+    app_usage_report_period: 1000
+    cu_cp_report_period: 1000
+    cu_up_report_period: 1000
+    du_report_period: 500
+
+log:
+  all_level: warning
+  config_level: info
+  filename: stdout
+
+pcap:
+  mac_enable: true
+  mac_type: dlt
+  mac_filename: /evidence/srsran_mac.pcap
+
+cell_cfg:
+  dl_arfcn: 437000
+  band: 256
+  channel_bandwidth_MHz: 5
+  common_scs: 15
+  plmn: "00101"
+  tac: 7
+  pci: 1
+  nof_antennas_dl: 1
+  nof_antennas_ul: 1
+  sib:
+    t300: 2000
+    t301: 2000
+    t311: 3000
+    t319: 2000
+    si_window_length: 40
+    si_sched_info:
+      - si_period: 16
+        sib_mapping: 2
+      - si_period: 16
+        sib_mapping: 19
+        si_window_position: 2
+  pucch:
+    sr_period_ms: 320
+    nof_ue_res_harq_per_set: 8
+    f0_or_f1_nof_cell_res_sr: 2
+    f0_intraslot_freq_hop: false
+    f1_enable_occ: true
+    f1_nof_cyclic_shifts: 12
+  csi:
+    csi_rs_period: 80
+  pdsch:
+    nof_harqs: 16
+    max_nof_harq_retxs: 0
+  prach:
+    prach_config_index: 31
+    max_msg3_harq_retx: 0
+  # release_25_10 moved timing-advance settings to cell_cfg.ta.
+  ta:
+    ta_cmd_offset_threshold: 1
+    ta_measurement_slot_period: 80
+    ta_measurement_slot_prohibit_period: 250
+    ta_target: 0
+
+ntn:
+  cell_specific_koffset: 239
+  ta_info:
+    ta_common: 0
+  ephemeris_info_ecef:
+    pos_x: -28105880
+    pos_y: 31509747
+    pos_z: -1691895
+    vel_x: 34
+    vel_y: 9
+    vel_z: -385
+
+cu_cp:
+  amf:
+    no_core: true
+  rrc:
+    rrc_procedure_guard_time_ms: 12800
+
+ru_dummy:
+  time_scaling: 10
+
+test_mode:
+  test_ue:
+    rnti: 0x44
+    ri: 1
+    cqi: 15
+    nof_ues: 1
+    pusch_active: true
+    pdsch_active: true
+
+expert_phy:
+  max_request_headroom_slots: 3
+  max_proc_delay: 6
+  pusch_dec_max_iterations: 2

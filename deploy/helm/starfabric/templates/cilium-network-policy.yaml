@@ -1,0 +1,46 @@
+{{- if .Values.ciliumNetworkPolicy.enabled }}
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: {{ include "starfabric.fullname" . }}
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "starfabric.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  ingress:
+    - fromEntities: [cluster, host, remote-node]
+      toPorts:
+        - ports: [{port: "8080", protocol: TCP}, {port: "8081", protocol: TCP}]
+  egress:
+    {{- with .Values.ciliumNetworkPolicy.extraEgress }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    - toEntities: [kube-apiserver]
+      toPorts:
+        - ports:
+            {{- range .Values.ciliumNetworkPolicy.kubeAPIServerPorts }}
+            - {port: {{ . | quote }}, protocol: TCP}
+            {{- end }}
+    - toEndpoints:
+        - matchLabels: {k8s:io.kubernetes.pod.namespace: kube-system, k8s:k8s-app: kube-dns}
+      toPorts:
+        - ports: [{port: "53", protocol: UDP}, {port: "53", protocol: TCP}]
+          rules: {dns: [{matchPattern: "*"}]}
+    {{- if .Values.observability.otlpEndpoint }}
+    - toEntities: [cluster]
+      toPorts:
+        - ports: [{port: "4317", protocol: TCP}, {port: "4318", protocol: TCP}]
+    {{- end }}
+    {{- if .Values.ciliumNetworkPolicy.deviceCIDRs }}
+    - toCIDRSet:
+        {{- range .Values.ciliumNetworkPolicy.deviceCIDRs }}
+        - cidr: {{ . | quote }}
+        {{- end }}
+      toPorts:
+        - ports:
+            - {port: "9339", protocol: TCP}
+            - {port: "9340", protocol: TCP}
+            - {port: "57400", protocol: TCP}
+    {{- end }}
+{{- end }}

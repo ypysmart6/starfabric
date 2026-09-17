@@ -1,0 +1,26 @@
+{
+  "scenario_id": "openconfig-gribi-closed-loop",
+  "description": "Standards target test for gNMI, gNOI and transactional gRIBI FIB programming.",
+  "random_seed": 20260905,
+  "topology": {
+    "version": 1,
+    "generated_at": "2026-09-05T00:00:00Z",
+    "valid_from": "2026-09-05T00:00:00Z",
+    "nodes": [
+      {"id":"edge","kind":"gateway","loopback":"10.255.0.1","labels":{"gnmi_target":"127.0.0.1:19339","gribi_target":"127.0.0.1:19339","network_instance":"DEFAULT"},"enabled":true},
+      {"id":"sat-primary","kind":"satellite","loopback":"10.255.0.2","labels":{"gnmi_target":"127.0.0.1:19340","gribi_target":"127.0.0.1:19340","network_instance":"DEFAULT"},"enabled":true},
+      {"id":"sat-backup","kind":"satellite","loopback":"10.255.0.3","labels":{"gnmi_target":"127.0.0.1:19341","gribi_target":"127.0.0.1:19341","network_instance":"DEFAULT"},"enabled":true},
+      {"id":"gateway","kind":"gateway","loopback":"10.255.0.4","labels":{"gnmi_target":"127.0.0.1:19342","gribi_target":"127.0.0.1:19342","network_instance":"DEFAULT"},"enabled":true}
+    ],
+    "links": [
+      {"id":"edge-primary","source":"edge","target":"sat-primary","admin_up":true,"operational_up":true,"latency_us":1000,"capacity_bps":1000000000},
+      {"id":"primary-gateway","source":"sat-primary","target":"gateway","admin_up":true,"operational_up":true,"latency_us":1000,"capacity_bps":1000000000},
+      {"id":"edge-backup","source":"edge","target":"sat-backup","admin_up":true,"operational_up":true,"latency_us":5000,"capacity_bps":1000000000},
+      {"id":"backup-gateway","source":"sat-backup","target":"gateway","admin_up":true,"operational_up":true,"latency_us":5000,"capacity_bps":1000000000}
+    ]
+  },
+  "intents": [
+    {"id":"service","source":"edge","destination":"gateway","destination_prefix":"203.0.113.0/24","policy":"latency","redundancy":0,"class":"production"}
+  ],
+  "timeline": []
+}

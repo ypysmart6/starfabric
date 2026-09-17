@@ -1,0 +1,11 @@
+{
+  "satellites": 120,
+  "gateways": 24,
+  "planes": 12,
+  "gateway_uplinks": 3,
+  "flows": 48,
+  "capacity_bps": 10000000000,
+  "demand_bps": 1000000,
+  "isl_latency_us": 2000,
+  "feeder_latency_us": 4000
+}

@@ -1,0 +1,23 @@
+[Unit]
+Description=StarFabric Satellite Node Runtime
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/starfabric-node --config=/etc/starfabric-node/config.json --state-dir=/var/lib/starfabric-node --listen=127.0.0.1:9080
+DynamicUser=yes
+StateDirectory=starfabric-node
+RuntimeDirectory=starfabric-node
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_NET_ADMIN
+AmbientCapabilities=CAP_NET_ADMIN
+WatchdogSec=15s
+Restart=on-failure
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target

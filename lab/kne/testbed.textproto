@@ -1,0 +1,24 @@
+# proto-file: proto/testbed.proto
+# proto-message: ondatra.Testbed
+duts {
+  id: "dut"
+  vendor: OPENCONFIG
+  hardware_model: "LEMMING"
+  ports { id: "ate" }
+  ports { id: "peer" }
+}
+duts {
+  id: "peer"
+  vendor: OPENCONFIG
+  hardware_model: "LEMMING"
+  ports { id: "ate" }
+  ports { id: "dut" }
+}
+ates {
+  id: "ate"
+  ports { id: "dut" }
+  ports { id: "peer" }
+}
+links { a: "dut:ate" b: "ate:dut" }
+links { a: "peer:ate" b: "ate:peer" }
+links { a: "dut:peer" b: "peer:dut" }

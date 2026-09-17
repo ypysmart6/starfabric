@@ -1,0 +1,21 @@
+# Merge after the upstream gnb_zmq.yml and geo_ntn.yml. N2/N3 addresses must
+# match the selected Open5GS deployment and the StarFabric transport namespace.
+cu_cp:
+  amf:
+    addr: 10.53.1.2
+    bind_addr: 10.53.1.1
+    supported_tracking_areas:
+      - tac: 7
+        plmn_list:
+          - plmn: "00101"
+            tai_slice_support_list:
+              - {sst: 1}
+              - {sst: 2, sd: 1}
+cu_up:
+  ngu:
+    socket:
+      - bind_addr: 10.53.1.1
+ru_sdr:
+  device_driver: zmq
+  device_args: tx_port=tcp://127.0.0.1:2000,rx_port=tcp://127.0.0.1:2001
+  srate: 5.76

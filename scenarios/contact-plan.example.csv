@@ -1,0 +1,3 @@
+link_id,source,target,start_ms,end_ms,latency_us,capacity_bps,risk_groups
+forecast-s1-s4,sat-01,sat-04,5000,15000,9500,700000000
+forecast-s4-s1,sat-04,sat-01,5000,15000,9500,700000000

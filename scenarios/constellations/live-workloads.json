@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "enabled": true,
+  "copies_per_profile": 48,
+  "pairing": "balanced_mesh",
+  "rate_scale": 1.0,
+  "initial_rate_fraction": 0.25,
+  "sample_seconds": 5,
+  "capture_seconds": 2,
+  "capture_interval_seconds": 30,
+  "profiles": [
+    {"id": "telemetry", "name": "遥测", "carrier": "ospf", "control": "distributed", "transport": "udp", "rate_bps": 64000, "payload_bytes": 256, "dscp": 8, "priority": 100, "max_rtt_ms": 300},
+    {"id": "management", "name": "IPv6 运维", "carrier": "ospf6", "control": "distributed", "transport": "udp", "rate_bps": 32000, "payload_bytes": 256, "dscp": 16, "priority": 100, "max_rtt_ms": 300},
+    {"id": "command", "name": "指令", "carrier": "native", "control": "centralized", "transport": "udp", "rate_bps": 64000, "payload_bytes": 256, "dscp": 48, "priority": 180, "max_rtt_ms": 200},
+    {"id": "bulk", "name": "批量传输", "carrier": "ldp", "control": "hybrid", "transport": "tcp", "rate_bps": 512000, "payload_bytes": 1024, "dscp": 0, "priority": 40, "max_rtt_ms": 1000},
+    {"id": "video", "name": "视频", "carrier": "sr-mpls", "control": "hybrid", "transport": "udp", "rate_bps": 1000000, "payload_bytes": 1024, "dscp": 34, "priority": 80, "max_rtt_ms": 250},
+    {"id": "protected", "name": "动态路径指令", "carrier": "pcep", "control": "hybrid", "transport": "udp", "rate_bps": 64000, "payload_bytes": 256, "dscp": 46, "priority": 180, "max_rtt_ms": 200},
+    {"id": "interactive", "name": "交互", "carrier": "srv6", "control": "hybrid", "transport": "udp", "rate_bps": 128000, "payload_bytes": 512, "dscp": 26, "priority": 120, "max_rtt_ms": 250},
+    {"id": "enterprise", "name": "企业互联", "carrier": "evpn", "control": "hybrid", "transport": "tcp", "rate_bps": 256000, "payload_bytes": 1024, "dscp": 18, "priority": 60, "max_rtt_ms": 500}
+  ]
+}

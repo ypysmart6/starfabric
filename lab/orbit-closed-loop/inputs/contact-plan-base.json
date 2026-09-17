@@ -1,0 +1,30 @@
+{
+  "scenario_id": "orbit-contact-plan-source",
+  "description": "TLE-derived duplex contacts before compression into the live FRR replay",
+  "random_seed": 20260904,
+  "topology": {
+    "version": 1,
+    "generated_at": "2026-09-04T00:00:00Z",
+    "valid_from": "2026-09-04T00:00:00Z",
+    "nodes": [
+      {"id": "ground-a", "kind": "gateway", "loopback": "10.255.0.1", "enabled": true},
+      {"id": "orbit-a", "kind": "satellite", "loopback": "10.255.0.2", "enabled": true},
+      {"id": "orbit-b", "kind": "satellite", "loopback": "10.255.0.3", "enabled": true},
+      {"id": "ground-b", "kind": "gateway", "loopback": "10.255.0.4", "enabled": true}
+    ],
+    "links": []
+  },
+  "intents": [
+    {
+      "id": "orbit-service",
+      "source": "ground-a",
+      "destination": "ground-b",
+      "destination_prefix": "198.51.100.0/24",
+      "policy": "latency",
+      "demand_bps": 10000000,
+      "class": "orbit-derived-transport",
+      "priority": 100
+    }
+  ],
+  "timeline": []
+}

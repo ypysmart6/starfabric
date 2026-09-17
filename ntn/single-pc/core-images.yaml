@@ -1,0 +1,25 @@
+services:
+  mongo:
+    image: mongo@sha256:8b6d8f5bbedb25cb73517b65cf99f13aeb75ad5b157a56c479287a840bbad3ac
+  webui:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  nrf:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  scp:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  ausf:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  udr:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  udm:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  smf:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  upf:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  amf:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  pcf:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c
+  bsf:
+    image: ghcr.io/herlesupreeth/docker_open5gs@sha256:985d89d67ad9c3e25ea8a98b0897c14a2420dc15909c69f3e0794a043327407c

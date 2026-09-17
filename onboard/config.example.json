@@ -1,0 +1,7 @@
+{
+  "node_id": "sat-01",
+  "update_public_key_hex": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+  "fallback_routes": [
+    {"prefix": "2001:db8:100::/64", "via": "fe80::1", "interface": "eth0", "metric": 42760}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "openconfig-primary-degrade-1",
+  "subject": "edge-primary",
+  "sequence": 1,
+  "type": "link_update",
+  "link": {
+    "id": "edge-primary",
+    "source": "edge",
+    "target": "sat-primary",
+    "admin_up": true,
+    "operational_up": true,
+    "latency_us": 20000,
+    "capacity_bps": 1000000000
+  }
+}

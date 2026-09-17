@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: StarFabric
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards
+

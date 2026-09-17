@@ -1,0 +1,998 @@
+{
+  "schema_version": 1,
+  "scope": "deterministic satellite, NTN, network-systems, validation, deployment and onboard technologies",
+  "policy": "Every roadmap technology is represented by tested code, an executable external integration, or a named hardware acceptance gate. Learned policies and generative automation are forbidden.",
+  "forbidden_dependencies": [
+    "tensorflow",
+    "pytorch",
+    "torch",
+    "onnx",
+    "openai",
+    "langchain",
+    "llama",
+    "transformers"
+  ],
+  "entries": [
+    {
+      "id": "p0-toolchain",
+      "phase": 0,
+      "level": "A",
+      "technologies": [
+        "Go",
+        "Python",
+        "Docker",
+        "GitHub Actions",
+        "reproducible build",
+        "lint",
+        "unit test",
+        "race test"
+      ],
+      "evidence": [
+        "go.mod",
+        "Dockerfile",
+        ".github/workflows/ci.yml",
+        "Makefile",
+        "tools/contactplan.py"
+      ],
+      "boundary": "Container execution still requires a working Docker daemon."
+    },
+    {
+      "id": "p0-language-allocation",
+      "phase": 0,
+      "level": "B",
+      "technologies": [
+        "Go control plane",
+        "Rust onboard runtime",
+        "Python orchestration",
+        "C data-plane edge",
+        "C++ vendor SDK boundary"
+      ],
+      "evidence": [
+        "go.mod",
+        "onboard/Cargo.toml",
+        "tools/contactplan.py",
+        "lab/dataplane/xdp_probe.bpf.c",
+        "onboard/README.md"
+      ],
+      "replacement": "Go replaces the old C++ ground-controller design; Rust covers the memory-safe onboard service. C/C++ remains only where a kernel, BSP or vendor SDK requires it.",
+      "boundary": "Vendor C/C++ SDK and BSP integration requires the selected flight or switching target."
+    },
+    {
+      "id": "p0-dependency-security",
+      "phase": 0,
+      "level": "B",
+      "technologies": [
+        "dependency scanning",
+        "Go vulnerability database",
+        "govulncheck",
+        "dependency update automation"
+      ],
+      "evidence": [
+        "tools/dependency_security.py",
+        "reports/dependency-security.json",
+        ".github/workflows/ci.yml",
+        ".github/dependabot.yml",
+        "go.mod",
+        "go.sum",
+        "onboard/Cargo.lock"
+      ],
+      "boundary": "The pinned local/CI gate queries the official Go vulnerability database and rejects reachable findings; Dependabot delivery still requires repository settings and network access."
+    },
+    {
+      "id": "p0-packet-debug",
+      "phase": 0,
+      "level": "B",
+      "technologies": [
+        "tcpdump",
+        "Wireshark-compatible PCAP",
+        "ICMP",
+        "packet debugging"
+      ],
+      "evidence": [
+        "lab/linux-networking/run.sh",
+        "ntn/experiment.py"
+      ],
+      "boundary": "Runtime packet evidence requires root/network-namespace privileges."
+    },
+    {
+      "id": "p0-base-observability",
+      "phase": 0,
+      "level": "B",
+      "technologies": [
+        "Prometheus",
+        "Grafana"
+      ],
+      "evidence": [
+        "deploy/observability/prometheus.yml",
+        "deploy/observability/grafana/dashboards/starfabric.json"
+      ],
+      "boundary": "Backends are exercised only when the Compose or Kubernetes stack is running."
+    },
+    {
+      "id": "p1-linux-forwarding",
+      "phase": 1,
+      "level": "B",
+      "technologies": [
+        "Ethernet",
+        "veth",
+        "ARP",
+        "IPv6 ND",
+        "IPv4",
+        "IPv6",
+        "RIB",
+        "FIB",
+        "MTU",
+        "VRF",
+        "network namespace",
+        "Linux tc",
+        "source NAT",
+        "TCP",
+        "UDP"
+      ],
+      "evidence": [
+        "lab/linux-networking/README.md",
+        "lab/linux-networking/run.sh",
+        "lab/linux-networking/probe.py"
+      ],
+      "boundary": "This is a privileged software data plane, not flight hardware."
+    },
+    {
+      "id": "p1-frr-routing",
+      "phase": 1,
+      "level": "B",
+      "technologies": [
+        "FRRouting",
+        "zebra",
+        "OSPFv2",
+        "OSPFv3",
+        "IS-IS",
+        "BGP",
+        "BFD",
+        "LFA",
+        "policy",
+        "route-map",
+        "ECMP"
+      ],
+      "evidence": [
+        "lab/containerlab/phase1-frr-otg/run-closed-loop.sh",
+        "lab/containerlab/phase1-frr-otg/assert_closed_loop.py",
+        "scenarios/frr-phase1-controller.json",
+        "lab/containerlab/protocol-matrix/topology.clab.yml",
+        "lab/containerlab/protocol-matrix/closed_loop.py",
+        "reports/protocol-matrix-closed-loop.json"
+      ],
+      "replacement": "Mature FRR daemons replace custom routing-protocol implementations.",
+      "boundary": "The controller/FRR/OTG loop and the dual-stack protocol failure loop have passed on one host; production NOS and hardware line rate remain external. Unified OSPF/5G evidence is checked separately by p6-unified-system and reports/platform-runtime.json."
+    },
+    {
+      "id": "p1-segment-routing",
+      "phase": 1,
+      "level": "B",
+      "technologies": [
+        "MPLS",
+        "LDP",
+        "SR-MPLS",
+        "SRv6",
+        "SR Policy",
+        "SR-TE",
+        "FRR pathd"
+      ],
+      "evidence": [
+        "lab/containerlab/protocol-matrix/topology.clab.yml",
+        "lab/containerlab/protocol-matrix/configs/sat-a.conf",
+        "lab/containerlab/protocol-matrix/closed_loop.py",
+        "lab/containerlab/protocol-matrix/run-closed-loop.sh",
+        "reports/protocol-matrix-closed-loop.json",
+        "lab/containerlab/advanced-protocols/control.clab.yml",
+        "lab/containerlab/advanced-protocols/control_loop.py",
+        "reports/advanced-control-closed-loop.json"
+      ],
+      "boundary": "Linux MPLS/LDP/SR-MPLS and Linux SRv6 SRH/End forwarding have passed on this host. The PCEP PCC session and negative NO-PATH response are real; positive production-PCE computation and vendor interoperability remain external gates. The expanded platform adds bounded positive PCEP SR-ERO/LFIB and same-session MPLS/SRv6 business gates under p6-unified-system; the standalone report retains its original scope."
+    },
+    {
+      "id": "p1-ethernet-switching",
+      "phase": 1,
+      "level": "B",
+      "technologies": [
+        "Ethernet switching",
+        "MAC learning",
+        "FDB",
+        "STP loop prevention",
+        "RSTP acceptance"
+      ],
+      "evidence": [
+        "lab/linux-networking/l2_loop_prevention.sh",
+        "lab/linux-networking/README.md"
+      ],
+      "boundary": "Linux bridge STP is the portable baseline; production RSTP convergence requires an RSTP-capable NOS or mstpd target and packet evidence."
+    },
+    {
+      "id": "p1-lab-and-traffic",
+      "phase": 1,
+      "level": "B",
+      "technologies": [
+        "containerlab",
+        "Open Traffic Generator",
+        "Ixia-c",
+        "continuous traffic",
+        "PCAP",
+        "automated convergence assertion"
+      ],
+      "evidence": [
+        "lab/containerlab/phase1-frr-otg/run-closed-loop.sh",
+        "lab/containerlab/phase1-frr-otg/otg.yaml",
+        "lab/containerlab/phase1-frr-otg/assert_metrics.py",
+        "lab/containerlab/phase1-frr-otg/assert_closed_loop.py"
+      ],
+      "replacement": "API-driven OTG replaces iperf-only and sleep/parse test loops.",
+      "boundary": "Software traffic generation does not prove hardware line rate."
+    },
+    {
+      "id": "p2-openconfig",
+      "phase": 2,
+      "level": "A",
+      "technologies": [
+        "YANG",
+        "OpenConfig",
+        "gNMI Capabilities",
+        "gNMI Get",
+        "gNMI Set",
+        "gNMI Subscribe",
+        "JSON-IETF",
+        "streaming telemetry"
+      ],
+      "evidence": [
+        "internal/adapter/openconfig/client.go",
+        "internal/adapter/openconfig/client_test.go"
+      ],
+      "replacement": "OpenConfig models and gNMI replace a custom device-management protocol.",
+      "boundary": "Target interoperability is a B-level external test."
+    },
+    {
+      "id": "p2-gribi",
+      "phase": 2,
+      "level": "A",
+      "technologies": [
+        "gRIBI",
+        "next hop",
+        "next-hop group",
+        "IPv4 AFT",
+        "IPv6 AFT",
+        "FIB ACK",
+        "Persist",
+        "All-Primary",
+        "actual-state Get",
+        "make-before-break"
+      ],
+      "evidence": [
+        "internal/adapter/openconfig/gribi.go",
+        "internal/adapter/openconfig/client_test.go"
+      ],
+      "replacement": "gRIBI is the primary open route-programming API; direct Netlink is reserved for embedded targets.",
+      "boundary": "Device transaction semantics require a target conformance run."
+    },
+    {
+      "id": "p2-gnoi-health",
+      "phase": 2,
+      "level": "A",
+      "technologies": [
+        "gNOI Ping",
+        "gNOI Time",
+        "health"
+      ],
+      "evidence": [
+        "internal/adapter/openconfig/client.go",
+        "internal/adapter/openconfig/client_test.go"
+      ],
+      "boundary": "Target interoperability and authorization still require a device conformance run."
+    },
+    {
+      "id": "p2-gnoi-maintenance",
+      "phase": 2,
+      "level": "B",
+      "technologies": [
+        "gNOI diagnostics",
+        "gNOI certificate operations",
+        "gNOI software operations",
+        "gNOI packet capture",
+        "gNOI reboot"
+      ],
+      "evidence": [
+        "internal/adapter/openconfig/client.go",
+        "cmd/sf-openconfig-emulator/main.go",
+        "cmd/sf-openconfig-probe/main.go",
+        "reports/openconfig-closed-loop.json",
+        "docs/runbooks/gnoi-maintenance.md"
+      ],
+      "boundary": "All software RPC state machines are exercised locally. Disruptive operations still require an approved workflow and target-specific hardware/NOS conformance; automatic reconciliation never invokes them."
+    },
+    {
+      "id": "p2-contract-first-api",
+      "phase": 2,
+      "level": "B",
+      "technologies": [
+        "Protobuf",
+        "gRPC contract",
+        "OpenAPI",
+        "schema versioning",
+        "generated upstream clients"
+      ],
+      "evidence": [
+        "api/proto/starfabric/v1/topology.proto",
+        "api/proto/starfabric/v1/control.proto",
+        "gen/starfabric/v1/control_grpc.pb.go",
+        "internal/api/grpc.go",
+        "internal/api/grpc_test.go",
+        "api/openapi.yaml",
+        "reports/api-contract.json"
+      ],
+      "boundary": "REST and generated-client gRPC endpoints share one application state machine; deployment transport/authentication policy is selected by controller flags."
+    },
+    {
+      "id": "p2-multivendor-validation",
+      "phase": 2,
+      "level": "B",
+      "technologies": [
+        "KNE",
+        "Ondatra",
+        "virtual DUT",
+        "ATE",
+        "SONiC target",
+        "multi-vendor test lifecycle"
+      ],
+      "evidence": [
+        "lab/kne/starfabric.textproto",
+        "tests/ondatra/starfabric_test.go",
+        "lab/sonic/testbed.textproto"
+      ],
+      "boundary": "A Kubernetes KNE deployment and target images/devices are external."
+    },
+    {
+      "id": "p2-source-of-truth",
+      "phase": 2,
+      "level": "B",
+      "technologies": [
+        "NetBox",
+        "Nautobot-compatible REST shape",
+        "inventory",
+        "IPAM",
+        "cable topology",
+        "shared-risk metadata"
+      ],
+      "evidence": [
+        "cmd/sf-inventory/main.go",
+        "internal/inventory/netbox.go",
+        "internal/inventory/netbox_test.go"
+      ],
+      "replacement": "An external source of truth replaces a custom inventory database and UI.",
+      "boundary": "High-rate operational telemetry never writes back to inventory."
+    },
+    {
+      "id": "p2-static-validation",
+      "phase": 2,
+      "level": "B",
+      "technologies": [
+        "Batfish",
+        "parse validation",
+        "reference validation",
+        "loop analysis",
+        "reachability analysis",
+        "pre-change gate"
+      ],
+      "evidence": [
+        "lab/batfish/validate.py",
+        "lab/batfish/prepare_snapshot.sh"
+      ],
+      "boundary": "Static validation complements actual FIB and traffic tests."
+    },
+    {
+      "id": "p2-advanced-control-protocols",
+      "phase": 2,
+      "level": "B",
+      "technologies": [
+        "BGP-LS RFC 9552",
+        "PCEP",
+        "stateful PCE",
+        "BGP EVPN",
+        "VXLAN"
+      ],
+      "evidence": [
+        "lab/containerlab/advanced-protocols/run-closed-loop.sh",
+        "lab/containerlab/advanced-protocols/control.clab.yml",
+        "lab/containerlab/advanced-protocols/control_loop.py",
+        "lab/containerlab/advanced-protocols/pcep_server.py",
+        "lab/containerlab/advanced-protocols/evpn.clab.yml",
+        "lab/containerlab/advanced-protocols/evpn_loop.py",
+        "reports/advanced-protocols-closed-loop.json"
+      ],
+      "boundary": "BGP-LS collection/fault recovery, a real PCEP negative computation exchange, and EVPN Type-2 to Linux VXLAN/FDB forwarding have passed on one host. Production PCE algorithms, vendor NOS interoperability and hardware line rate remain external. The expanded platform separately requires positive PCEP paths derived from the committed plan and live BGP-LS graph, plus same-session EVPN/GTP-U packets, in reports/platform-runtime.json."
+    },
+    {
+      "id": "p3-orbit-input",
+      "phase": 3,
+      "level": "B",
+      "technologies": [
+        "TLE",
+        "SGP4",
+        "CCSDS OEM",
+        "precomputed ephemeris",
+        "ground visibility",
+        "inter-satellite visibility",
+        "range",
+        "propagation delay",
+        "Doppler",
+        "contact window"
+      ],
+      "evidence": [
+        "tools/tle_to_oem.py",
+        "tools/ephemeris_contacts.py",
+        "tools/contactplan.py",
+        "lab/orbit-closed-loop/compile_replay.py",
+        "lab/orbit-closed-loop/run-closed-loop.sh",
+        "reports/orbit-network-closed-loop.json"
+      ],
+      "replacement": "TLE/SGP4 is normalized to mission-interchange OEM before topology compilation.",
+      "boundary": "The TLE-to-FRR-FIB-to-Ixia-packet replay has passed on one host; mission navigation truth, detailed link budget and RF remain external inputs."
+    },
+    {
+      "id": "p3-time-varying-control",
+      "phase": 3,
+      "level": "A",
+      "technologies": [
+        "versioned topology",
+        "time-varying link",
+        "valid-until",
+        "predictive topology",
+        "future snapshot",
+        "shadow validation",
+        "stale route rejection"
+      ],
+      "evidence": [
+        "internal/topology/store.go",
+        "internal/predictive/engine.go",
+        "internal/predictive/engine_test.go"
+      ],
+      "boundary": "Prediction here is deterministic contact-plan scheduling, not a learned model."
+    },
+    {
+      "id": "p3-routing-te",
+      "phase": 3,
+      "level": "A",
+      "technologies": [
+        "Dijkstra",
+        "K candidates",
+        "ECMP",
+        "deterministic policy plugin",
+        "latency constraint",
+        "capacity constraint",
+        "loss constraint",
+        "reliability constraint",
+        "priority",
+        "bandwidth reservation",
+        "gateway selection"
+      ],
+      "evidence": [
+        "internal/policy/path.go",
+        "internal/planner/planner.go",
+        "internal/planner/planner_test.go"
+      ],
+      "boundary": "This is deterministic sequential admission, not a claim of globally optimal multi-commodity flow."
+    },
+    {
+      "id": "p3-resilience",
+      "phase": 3,
+      "level": "A",
+      "technologies": [
+        "link-disjoint backup",
+        "node-disjoint backup",
+        "SRLG-disjoint backup",
+        "gateway diversity",
+        "make-before-break"
+      ],
+      "evidence": [
+        "internal/policy/path.go",
+        "internal/policy/path_test.go",
+        "internal/adapter/openconfig/gribi.go"
+      ],
+      "boundary": "Risk groups must be supplied by mission inventory or contact inputs."
+    },
+    {
+      "id": "p3-oisl",
+      "phase": 3,
+      "level": "A",
+      "technologies": [
+        "optical inter-satellite link",
+        "search",
+        "acquisition",
+        "locked",
+        "degraded",
+        "failure",
+        "PAT-to-network-state mapping"
+      ],
+      "evidence": [
+        "internal/ois/runtime.go",
+        "internal/ois/runtime_test.go"
+      ],
+      "boundary": "Optomechanics, terminal firmware and pointing/acquisition/tracking are HIL gates."
+    },
+    {
+      "id": "p4-reconciliation",
+      "phase": 4,
+      "level": "A",
+      "technologies": [
+        "desired state",
+        "actual state",
+        "idempotency",
+        "versioning",
+        "timeout",
+        "bounded retry",
+        "exponential backoff",
+        "partial failure",
+        "prepare",
+        "batch canary",
+        "rollback",
+        "restart recovery"
+      ],
+      "evidence": [
+        "internal/reconcile/reconciler.go",
+        "internal/reconcile/reconciler_test.go",
+        "internal/app/app.go"
+      ],
+      "boundary": "Cross-device atomicity is compensating rollback, not a distributed transaction claim."
+    },
+    {
+      "id": "p4-distributed-control",
+      "phase": 4,
+      "level": "A",
+      "technologies": [
+        "distributed systems",
+        "rendezvous sharding",
+        "regional failure domain",
+        "leader election",
+        "Kubernetes Lease fencing",
+        "HA failover"
+      ],
+      "evidence": [
+        "internal/sharding/rendezvous.go",
+        "internal/leadership/kubernetes.go",
+        "deploy/helm/starfabric/values-ha.yaml"
+      ],
+      "boundary": "Regional state replication requires a transactional external state service."
+    },
+    {
+      "id": "p4-chaos-scale",
+      "phase": 4,
+      "level": "A",
+      "technologies": [
+        "fault injection",
+        "controller crash",
+        "node failure",
+        "link flap",
+        "delayed telemetry",
+        "out-of-order telemetry",
+        "route partial failure",
+        "observability failure",
+        "1000-satellite scale smoke"
+      ],
+      "evidence": [
+        "tests/chaos/chaos_test.go",
+        "tests/scale/scale_test.go",
+        "scenarios/leo-resilient.json"
+      ],
+      "boundary": "A 24-hour soak and larger packet testbed remain release gates."
+    },
+    {
+      "id": "p4-observability",
+      "phase": 4,
+      "level": "A",
+      "technologies": [
+        "structured logs",
+        "correlation ID",
+        "OpenTelemetry",
+        "Prometheus",
+        "Grafana",
+        "Loki",
+        "Tempo",
+        "alerts",
+        "metrics",
+        "traces"
+      ],
+      "evidence": [
+        "internal/observability/log.go",
+        "internal/observability/metrics.go",
+        "internal/observability/otel.go",
+        "deploy/observability/otel-collector.yaml"
+      ],
+      "replacement": "Standard telemetry backends replace a custom logging/metrics/dashboard stack.",
+      "boundary": "Retention and alert routing are environment-specific."
+    },
+    {
+      "id": "p5-5g-core-ran",
+      "phase": 5,
+      "level": "B",
+      "technologies": [
+        "5G SA",
+        "srsRAN Project",
+        "Open5GS",
+        "UE emulator",
+        "NGAP",
+        "N2",
+        "GTP-U",
+        "N3",
+        "PFCP",
+        "AMF",
+        "SMF",
+        "UPF",
+        "PDU session"
+      ],
+      "evidence": [
+        "ntn/single-pc/run.sh",
+        "ntn/single-pc/verify.py",
+        "ntn/single-pc/versions.env",
+        "ntn/srsran/gnb_transport.yml",
+        "ntn/open5gs/amf.yaml",
+        "ntn/open5gs/smf.yaml",
+        "ntn/open5gs/upf.yaml",
+        "ntn/experiment.py",
+        "lab/srsran/validate.py",
+        "lab/srsran/geo_ntn_testmode.yml",
+        "reports/srsran-rel17-ntn.json"
+      ],
+      "replacement": "Mature RAN and core implementations replace custom 3GPP stacks.",
+      "boundary": "Open5GS/UERANSIM proves N2/PFCP/PDU/GTP-U. The pinned srsRAN 25.10 dummy-RU/test-UE process also runs and produces scheduler metrics and MAC PCAP. A real software NTN UE decoding SIB19 through the IQ channel, integrated with the same transport, remains a separate acceptance gate; no commercial UE or OTA conformance is claimed."
+    },
+    {
+      "id": "p5-ntn-radio-effects",
+      "phase": 5,
+      "level": "B",
+      "technologies": [
+        "5G NTN",
+        "Release 17 NTN",
+        "GEO",
+        "MEO",
+        "LEO",
+        "band 256",
+        "SIB19",
+        "common timing advance",
+        "extended timers",
+        "HARQ disabled",
+        "ephemeris",
+        "variable delay",
+        "Doppler compensation",
+        "channel emulator"
+      ],
+      "evidence": [
+        "ntn/single-pc/geo-ntn-r17.yaml",
+        "ntn/channel_emulator.py",
+        "ntn/single-pc/validate_r17_channel.py",
+        "reports/ntn-r17-channel.json",
+        "tools/ephemeris_contacts.py",
+        "ntn/experiments/03-latency-variation.json",
+        "ntn/single-pc/ntn-transport.json"
+      ],
+      "boundary": "The live ZeroMQ complex-IQ gate proves software delay, delay rate, Doppler, Doppler rate and path-loss processing plus the Rel-17 GEO configuration semantics. Commercial UE and over-the-air conformance require physical/vendor equipment and are not claimed."
+    },
+    {
+      "id": "p5-mobility-continuity",
+      "phase": 5,
+      "level": "B",
+      "technologies": [
+        "moving cell",
+        "satellite gateway switch",
+        "transport interruption",
+        "control-plane recovery",
+        "user-plane recovery",
+        "TCP behavior",
+        "UDP behavior",
+        "QUIC acceptance"
+      ],
+      "evidence": [
+        "ntn/experiments/01-gateway-switch.json",
+        "ntn/experiments/02-interruption-recovery.json",
+        "ntn/experiment.py",
+        "lab/linux-networking/README.md"
+      ],
+      "boundary": "QUIC needs an external HTTP/3 or mission endpoint; continuity must be proven with its packet/application evidence."
+    },
+    {
+      "id": "p5-qos-slicing",
+      "phase": 5,
+      "level": "B",
+      "technologies": [
+        "DSCP",
+        "5QI",
+        "QoS flow",
+        "S-NSSAI",
+        "network slicing",
+        "application QoS",
+        "transport TE class"
+      ],
+      "evidence": [
+        "ntn/experiments/04-qos-classes.json",
+        "ntn/srsran/gnb_transport.yml",
+        "ntn/open5gs/amf.yaml"
+      ],
+      "boundary": "RAN, core and transport must use one consistent class/slice mapping."
+    },
+    {
+      "id": "p5-oran",
+      "phase": 5,
+      "level": "B",
+      "technologies": [
+        "O-RAN E2",
+        "E2AP",
+        "E2SM-KPM",
+        "E2SM-RC",
+        "Near-RT RIC",
+        "O-RAN O1 boundary"
+      ],
+      "evidence": [
+        "ntn/srsran/oran_e2.yml",
+        "ntn/README.md"
+      ],
+      "boundary": "A supplied O-RAN SC/FlexRIC testbed proves E2; O1/SMO and RU/DU/CU conformance remain deployment gates."
+    },
+    {
+      "id": "p6-cloud-native",
+      "phase": 6,
+      "level": "B",
+      "technologies": [
+        "Kubernetes",
+        "Helm",
+        "GitOps",
+        "Argo CD",
+        "Cilium",
+        "Hubble",
+        "eBPF networking",
+        "OpenTelemetry Collector",
+        "RBAC",
+        "rollout",
+        "rollback",
+        "health probe",
+        "PDB",
+        "anti-affinity"
+      ],
+      "evidence": [
+        "deploy/helm/starfabric/Chart.yaml",
+        "deploy/gitops/application.yaml",
+        "deploy/cilium/values.yaml",
+        "deploy/observability/otel-collector.yaml",
+        "lab/cloud/runtime.py",
+        "lab/cloud/README.md"
+      ],
+      "boundary": "Real single-host kind/Cilium/Hubble/Helm/Lease runtime acceptance is executable via make test-cloud-runtime. It uses memory devices and shared hostPath SIL storage. GitOps/Argo CD and HA rolling upgrades remain separate mandatory gates; failed runtime reports do not establish closure. The expanded p6-unified-system gate uses Kubernetes/Helm/Lease with the real FRR adapter and Cilium/Hubble on that controller; its report is reports/platform-runtime.json, not the standalone cloud report."
+    },
+    {
+      "id": "p6-security-operations",
+      "phase": 6,
+      "level": "B",
+      "technologies": [
+        "TLS 1.3",
+        "mTLS",
+        "certificate",
+        "secret",
+        "bearer authorization",
+        "audit log",
+        "backup",
+        "restore",
+        "upgrade",
+        "downgrade",
+        "incident runbook",
+        "SLO"
+      ],
+      "evidence": [
+        "internal/adapter/openconfig/transport.go",
+        "lab/security/validate.py",
+        "reports/security-operations.json",
+        "deploy/helm/starfabric/templates/deployment.yaml",
+        "docs/runbooks/controller-recovery.md",
+        "docs/production-readiness.md"
+      ],
+      "boundary": "Live single-PC tests cover TLS/mTLS/auth/audit/backup/restore and distinct-artifact v1-to-v2-to-v1 state compatibility. Certificate issuance, enterprise identity, off-host backups and production orchestrator rollout remain external controls."
+    },
+    {
+      "id": "p6-onboard-runtime",
+      "phase": 6,
+      "level": "A",
+      "technologies": [
+        "Rust",
+        "Embedded Linux",
+        "systemd",
+        "watchdog",
+        "local fallback routing",
+        "disconnected operation",
+        "state persistence",
+        "fault injection",
+        "deterministic behavior"
+      ],
+      "evidence": [
+        "onboard/src/main.rs",
+        "onboard/src/routing.rs",
+        "onboard/src/state.rs",
+        "onboard/packaging/systemd/starfabric-node.service"
+      ],
+      "boundary": "The generic runtime is not flight-qualified software."
+    },
+    {
+      "id": "p6-onboard-build-update",
+      "phase": 6,
+      "level": "B",
+      "technologies": [
+        "ARM64 cross compilation",
+        "QEMU",
+        "KVM",
+        "device emulation",
+        "Yocto",
+        "Buildroot",
+        "OTA update",
+        "Ed25519",
+        "SHA-256",
+        "A/B slot",
+        "rollback image",
+        "secure boot boundary"
+      ],
+      "evidence": [
+        "onboard/qemu/run-arm64-sil.sh",
+        "onboard/packaging/yocto/starfabric-node_0.1.0.bb",
+        "onboard/packaging/buildroot/starfabric-node.mk",
+        "onboard/src/update.rs"
+      ],
+      "boundary": "Kernel, rootfs, BSP, bootloader and root of trust must be provided and verified on target hardware."
+    },
+    {
+      "id": "p6-programmable-onboard",
+      "phase": 6,
+      "level": "B",
+      "technologies": [
+        "SONiC",
+        "SAI",
+        "switch SDK",
+        "P4_16",
+        "P4Runtime 1.4.1",
+        "BMv2",
+        "programmable ASIC",
+        "FPGA",
+        "in-band telemetry"
+      ],
+      "evidence": [
+        "lab/sonic/README.md",
+        "lab/p4/starfabric.p4",
+        "lab/p4/program.py",
+        "lab/p4/README.md"
+      ],
+      "boundary": "Vendor NOS/SDK, ASIC/FPGA mapping and HIL resource tests are target-specific."
+    },
+    {
+      "id": "p6-fast-dataplane",
+      "phase": 6,
+      "level": "B",
+      "technologies": [
+        "eBPF",
+        "XDP",
+        "AF_XDP",
+        "DPDK",
+        "NUMA",
+        "hugepage",
+        "packet processing"
+      ],
+      "evidence": [
+        "lab/dataplane/xdp_probe.bpf.c",
+        "lab/dataplane/README.md"
+      ],
+      "boundary": "Acceleration is enabled only after profiling and requires a pinned kernel/NIC/driver testbed."
+    },
+    {
+      "id": "p6-hardware-hil",
+      "phase": 6,
+      "level": "C",
+      "technologies": [
+        "SIL",
+        "HIL",
+        "modem",
+        "optical terminal",
+        "PAT",
+        "flight BSP",
+        "hardware interface integration"
+      ],
+      "evidence": [
+        "onboard/README.md",
+        "docs/production-readiness.md"
+      ],
+      "boundary": "These items cannot be completed without mission hardware, interfaces and acceptance evidence."
+    },
+    {
+      "id": "p6-rf-phy-antenna-hil",
+      "phase": 6,
+      "level": "C",
+      "technologies": [
+        "RF",
+        "PHY",
+        "modem",
+        "DSP",
+        "FPGA",
+        "phased-array calibration",
+        "wideband beamforming",
+        "hybrid beamforming",
+        "RF/baseband co-design",
+        "beam handover"
+      ],
+      "evidence": [
+        "docs/hil/rf-phy-acceptance.md",
+        "tools/ephemeris_contacts.py",
+        "api/proto/starfabric/v1/topology.proto"
+      ],
+      "replacement": "The network controller consumes a normalized, versioned service envelope instead of reimplementing vendor real-time RF/PHY processing.",
+      "boundary": "Antenna, RF, DSP, FPGA, modem and chamber/range evidence require mission hardware and a qualified HIL environment."
+    },
+    {
+      "id": "p4-document-performance",
+      "phase": 4,
+      "level": "B",
+      "technologies": [
+        "24 satellite forwarding nodes",
+        "4 gateways",
+        "100 continuous business flows",
+        "1 topology update per second",
+        "path computation P95 < 200 ms",
+        "topology-to-FIB P95 < 2 s",
+        "24-hour stability run",
+        "P50/P95/P99 end-to-end latency",
+        "fault loss and detection latency",
+        "route churn and link utilization",
+        "controller CPU and memory",
+        "restart recovery time",
+        "desired/actual FIB divergence duration",
+        "baseline versus centralized policy comparison"
+      ],
+      "evidence": [
+        "docs/single-pc-acceptance.md",
+        "tests/scale/scale_test.go",
+        "lab/containerlab/phase1-frr-otg/assert_closed_loop.py"
+      ],
+      "boundary": "The document budgets are release acceptance requirements. A four-router packet loop and a 1000-node planner smoke test do not prove 24 live satellite nodes, 100 concurrent flows, a 24-hour soak, or every requested report metric."
+    },
+    {
+      "id": "p6-unified-system",
+      "phase": 6,
+      "level": "B",
+      "technologies": [
+        "shared scenario and run identity",
+        "orbit-to-transport-to-5G user-plane integration",
+        "ground-controller-to-onboard autonomy integration",
+        "common fault/recovery timeline",
+        "single-host lifecycle and evidence archive",
+        "NOC backend correlation runtime acceptance",
+        "same-session OSPF/MPLS/SRv6/PCEP/BGP-LS/EVPN transport profiles",
+        "Kubernetes/Helm/Cilium/Hubble/Lease controlling actual FRR"
+      ],
+      "evidence": [
+        "tools/single_pc.py",
+        "docs/single-pc-suite.json",
+        "docs/single-pc-acceptance.md",
+        "lab/unified/run.py",
+        "lab/unified/README.md",
+        "lab/unified/noc.py",
+        "lab/platform/run.py",
+        "lab/platform/protocols.py",
+        "lab/platform/cloud.py",
+        "lab/platform/pce.py",
+        "lab/platform/packets.py",
+        "lab/platform/README.md",
+        "docs/independent-closures.md",
+        "lab/platform/fabric.py",
+        "lab/platform/constellation_runtime.py",
+        "lab/platform/render.py",
+        "lab/platform/wire.py",
+        "lab/platform/capture.py",
+        "lab/platform/test_fabric.py",
+        "docs/platform-scale.md",
+        "tools/physical_constellation.py",
+        "lab/platform/physics_runtime.py",
+        "lab/platform/channel.py",
+        "lab/platform/validate_physics_packets.py",
+        "docs/physical-constellation.md"
+      ],
+      "boundary": "Default physical mode uses per-satellite propagation, geographic gateways, sampled terminal-limited contacts and actual directional packet shaping. Initial protocol checks hold an epoch snapshot; the same FRR/5G network then replays physical samples on a 1:1 clock. Mission link-budget calibration, independent IQ/RF gates, single-host limits and separate scale/soak requirements remain. Historical logical reports do not prove the new mode."
+    }
+  ]
+}

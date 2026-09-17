@@ -1,0 +1,6 @@
+zebra=yes
+bgpd=yes
+isisd=yes
+pathd=no
+staticd=yes
+vtysh_enable=yes

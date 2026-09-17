@@ -1,0 +1,164 @@
+syntax = "proto3";
+
+package starfabric.v1;
+
+option go_package = "github.com/starfabric/starfabric/gen/starfabric/v1;starfabricv1";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "starfabric/v1/topology.proto";
+
+message RouteIntent {
+  string id = 1;
+  string source = 2;
+  string destination = 3;
+  string destination_prefix = 4;
+  string policy = 5;
+  int64 max_latency_us = 6;
+  int64 min_capacity_bps = 7;
+  int64 max_loss_ppm = 8;
+  int64 required_reliability_ppm = 9;
+  uint32 redundancy = 10;
+  string traffic_class = 11;
+  int32 priority = 12;
+  map<string, string> labels = 13;
+  int64 demand_bps = 14;
+  repeated string gateway_candidates = 15;
+}
+
+message Path {
+  repeated string nodes = 1;
+  repeated string links = 2;
+  int64 latency_us = 3;
+  int64 capacity_bps = 4;
+  int64 loss_ppm = 5;
+  int64 cost = 6;
+  repeated string risk_groups = 7;
+}
+
+message RouteOperation {
+  string device = 1;
+  string prefix = 2;
+  string next_hop = 3;
+  string next_hop_node = 4;
+  int32 metric = 5;
+  string intent_id = 6;
+  string path_role = 7;
+}
+
+message IntentPaths {
+  string intent_id = 1;
+  repeated Path paths = 2;
+}
+
+message RoutePlan {
+  string id = 1;
+  uint64 topology_version = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp expires_at = 4;
+  string policy = 5;
+  repeated RouteIntent intents = 6;
+  repeated IntentPaths paths = 7;
+  repeated RouteOperation routes = 8;
+  repeated string preconditions = 9;
+  string rollback_plan_id = 10;
+}
+
+message ReconcileStatus {
+  string phase = 1;
+  string plan_id = 2;
+  uint64 topology_version = 3;
+  google.protobuf.Timestamp started_at = 4;
+  google.protobuf.Timestamp finished_at = 5;
+  repeated string prepared_devices = 6;
+  repeated string committed_devices = 7;
+  repeated string failed_devices = 8;
+  string error = 9;
+  string rollback_reason = 10;
+  repeated string deferred_devices = 11;
+}
+
+message IntentList { repeated RouteIntent intents = 1; }
+
+message DeviceState {
+  string device = 1;
+  bool healthy = 2;
+  string applied_plan_id = 3;
+  repeated RouteOperation routes = 4;
+  google.protobuf.Timestamp observed_at = 5;
+  string message = 6;
+}
+
+message DeviceList { repeated DeviceState devices = 1; }
+
+message StatusResponse {
+  ReconcileStatus reconcile = 1;
+  RoutePlan committed_plan = 2;
+}
+
+message DeviceFaultRequest {
+  string device = 1;
+  string mode = 2;
+}
+
+message DeviceFaultResponse {
+  string device = 1;
+  string mode = 2;
+}
+
+message ContactWindow {
+  Link link = 1;
+  google.protobuf.Timestamp start = 2;
+  google.protobuf.Timestamp end = 3;
+}
+
+message PredictiveRequest {
+  repeated ContactWindow windows = 1;
+  int64 horizon_seconds = 2;
+  int64 lead_seconds = 3;
+}
+
+message Activation {
+  google.protobuf.Timestamp topology_at = 1;
+  google.protobuf.Timestamp activate_at = 2;
+  TopologySnapshot topology = 3;
+  RoutePlan plan = 4;
+  bool shadow_validated = 5;
+  repeated string changed_prefixes = 6;
+}
+
+message ForecastResponse { repeated Activation activations = 1; }
+
+message PredictiveSchedule {
+  string id = 1;
+  string state = 2;
+  uint64 base_topology_version = 3;
+  uint64 expected_topology_version = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  uint32 next_activation = 7;
+  repeated Activation activations = 8;
+  string error = 9;
+}
+
+message PredictiveScheduleRequest { string id = 1; }
+message PredictiveScheduleList { repeated PredictiveSchedule schedules = 1; }
+
+message ApplyEventResponse { TopologySnapshot topology = 1; }
+message ReconcileResponse { RoutePlan plan = 1; ReconcileStatus status = 2; }
+
+service StarFabricControl {
+  rpc GetTopology(google.protobuf.Empty) returns (TopologySnapshot);
+  rpc ApplyTopologyEvent(TopologyEvent) returns (ApplyEventResponse);
+  rpc GetIntents(google.protobuf.Empty) returns (IntentList);
+  rpc PutIntents(IntentList) returns (IntentList);
+  rpc PreviewPlan(google.protobuf.Empty) returns (RoutePlan);
+  rpc Reconcile(google.protobuf.Empty) returns (ReconcileResponse);
+  rpc GetStatus(google.protobuf.Empty) returns (StatusResponse);
+  rpc GetDevices(google.protobuf.Empty) returns (DeviceList);
+  rpc SetDeviceFault(DeviceFaultRequest) returns (DeviceFaultResponse);
+  rpc Forecast(PredictiveRequest) returns (ForecastResponse);
+  rpc CreatePredictiveSchedule(PredictiveRequest) returns (PredictiveSchedule);
+  rpc GetPredictiveSchedule(PredictiveScheduleRequest) returns (PredictiveSchedule);
+  rpc ListPredictiveSchedules(google.protobuf.Empty) returns (PredictiveScheduleList);
+}

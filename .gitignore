@@ -1,0 +1,20 @@
+# containerlab runtime artifacts
+**/clab-*/
+
+# packet captures and generated reports
+*.pcap
+*.pcapng
+*.log
+reports/
+**/artifacts/
+
+# local build artifacts
+bin/
+coverage.out
+__pycache__/
+*.pyc
+.cache/
+.ruff_cache/
+data/
+data-*/
+onboard/target/

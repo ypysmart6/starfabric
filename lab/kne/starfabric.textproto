@@ -1,0 +1,31 @@
+# KNE Topology. OPENCONFIG nodes are Lemming reference DUTs; KEYSIGHT is OTG.
+name: "starfabric"
+nodes: {
+  name: "dut"
+  vendor: OPENCONFIG
+  model: "LEMMING"
+}
+nodes: {
+  name: "peer"
+  vendor: OPENCONFIG
+  model: "LEMMING"
+}
+nodes: {
+  name: "ate"
+  vendor: KEYSIGHT
+  services: {
+    key: 443
+    value: { name: "https" inside: 443 }
+  }
+  services: {
+    key: 40051
+    value: { name: "grpc" inside: 40051 }
+  }
+  services: {
+    key: 50051
+    value: { name: "gnmi" inside: 50051 }
+  }
+}
+links: { a_node: "dut" a_int: "eth1" z_node: "ate" z_int: "eth1" }
+links: { a_node: "peer" a_int: "eth1" z_node: "ate" z_int: "eth2" }
+links: { a_node: "dut" a_int: "eth2" z_node: "peer" z_int: "eth2" }

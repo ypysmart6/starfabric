@@ -1,0 +1,887 @@
+{
+  "schema_version": 1,
+  "roadmap_manifest": "docs/coverage-manifest.json",
+  "policy": "Every non-AI technology that can be exercised on one computer must have a successful runtime/contract gate. Only components whose truth requires physical RF, optical, modem, FPGA/ASIC, flight BSP, secure-root or other mission hardware may be hardware_excluded.",
+  "entries": [
+    {
+      "id": "p0-toolchain",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/core-quality.json",
+          "checks": [
+            "go_sources_formatted",
+            "go_vet",
+            "go_unit_tests",
+            "go_race_tests",
+            "reproducible_go_build"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p0-language-allocation",
+      "status": "closed",
+      "hardware_excluded": [
+        "C++ vendor SDK boundary"
+      ],
+      "gates": [
+        {
+          "report": "reports/core-quality.json",
+          "checks": [
+            "go_unit_tests"
+          ]
+        },
+        {
+          "report": "reports/onboard-runtime.json",
+          "checks": [
+            "restart_state_recovered"
+          ]
+        },
+        {
+          "report": "reports/xdp-runtime.json",
+          "checks": [
+            "compiled_elf_bpf"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p0-dependency-security",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/core-quality.json",
+          "checks": [
+            "go_modules_verified",
+            "forbidden_ai_dependencies_absent",
+            "locked_go_dependencies",
+            "locked_rust_dependencies"
+          ]
+        },
+        {
+          "report": "reports/dependency-security.json",
+          "checks": [
+            "go_toolchain_patched",
+            "dependency_inventory",
+            "dependency_update_automation",
+            "official_go_vulnerability_database",
+            "govulncheck_pinned",
+            "govulncheck_reachable_vulnerabilities_zero",
+            "ci_vulnerability_gate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p0-packet-debug",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/linux-networking.json",
+          "checks": [
+            "pcap_packet_evidence_bytes",
+            "mtu_icmp_tcp_udp"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p0-base-observability",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/observability-closed-loop.json",
+          "checks": [
+            "prometheus_scraped_controller",
+            "grafana_noc_and_datasources_provisioned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p1-linux-forwarding",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/linux-networking.json",
+          "checks": [
+            "ethernet_arp_nd",
+            "ipv4_ipv6_forwarding",
+            "vrf_rib_fib",
+            "tc_netem_and_source_nat",
+            "mtu_icmp_tcp_udp"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p1-frr-routing",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "lab/containerlab/phase1-frr-otg/artifacts/closed-loop/summary.json"
+        },
+        {
+          "report": "reports/protocol-matrix-closed-loop.json",
+          "checks": [
+            "all_protocol_daemons_and_configs",
+            "dual_stack_primary_fib",
+            "dual_stack_convergence_under_3000ms"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p1-segment-routing",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/protocol-matrix-closed-loop.json",
+          "checks": [
+            "sr_mpls_prefix_sid_16004",
+            "initial_sr_mpls_packets"
+          ]
+        },
+        {
+          "report": "reports/advanced-control-closed-loop.json",
+          "checks": [
+            "srv6_primary_srh_packet",
+            "pcep_real_pcreq_pcrep_objects"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p1-ethernet-switching",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/linux-networking.json",
+          "checks": [
+            "bridge_mac_learning",
+            "stp_loop_blocked"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p1-lab-and-traffic",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "lab/containerlab/phase1-frr-otg/artifacts/closed-loop/summary.json"
+        },
+        {
+          "report": "reports/linux-networking.json",
+          "checks": [
+            "pcap_packet_evidence_bytes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2-openconfig",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/openconfig-closed-loop.json",
+          "checks": [
+            "gnmi_capabilities_get_set_subscribe"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2-gribi",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/openconfig-closed-loop.json",
+          "checks": [
+            "all_targets_fib_verified",
+            "fib_survives_controller_restart"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2-gnoi-health",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/openconfig-closed-loop.json",
+          "checks": [
+            "gnoi_ping_and_time"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2-gnoi-maintenance",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/openconfig-closed-loop.json",
+          "checks": [
+            "gnoi_scheduled_reboot_cancelled",
+            "gnoi_diagnostics_certificate_pcap_software"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2-contract-first-api",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/api-contract.json",
+          "checks": [
+            "documented_http_operations",
+            "protobuf_descriptor_bytes",
+            "route_sets_equal",
+            "generated_go_messages",
+            "generated_grpc_client_server",
+            "grpc_generated_client_all_rpcs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2-multivendor-validation",
+      "status": "partial",
+      "missing": [
+        "KNE",
+        "Ondatra",
+        "virtual DUT",
+        "ATE",
+        "SONiC target",
+        "multi-vendor test lifecycle"
+      ],
+      "gates": [
+        {
+          "report": "reports/core-quality.json",
+          "checks": [
+            "ondatra_test_binary_compiles"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2-source-of-truth",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/inventory-closed-loop.json",
+          "checks": [
+            "live_rest_process",
+            "pagination",
+            "device_ipam_mapping",
+            "cable_bidirectional_topology",
+            "shared_risk_metadata"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2-static-validation",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/batfish.json",
+          "checks": [
+            "all_configurations_parsed",
+            "no_forwarding_loops",
+            "modeled_udp_reachability"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p2-advanced-control-protocols",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/advanced-control-closed-loop.json",
+          "checks": [
+            "bgpls_real_ebgp_collection",
+            "pcep_open_keepalive_session_up"
+          ]
+        },
+        {
+          "report": "reports/evpn-vxlan-closed-loop.json",
+          "checks": [
+            "evpn_type2_both_host_macs",
+            "vxlan_primary_udp_4789_packet"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p3-orbit-input",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/orbit-network-closed-loop.json",
+          "checks": [
+            "two_ccsds_oem_files",
+            "sat_ground_visibility_windows_compiled",
+            "inter_satellite_visibility_windows_compiled",
+            "doppler_carried_into_topology",
+            "range_carried_into_topology"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p3-time-varying-control",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/orbit-network-closed-loop.json",
+          "checks": [
+            "primary_contact_ends_with_backup_available",
+            "live_frr_otg_closed_loop"
+          ]
+        },
+        {
+          "report": "reports/core-quality.json",
+          "checks": [
+            "go_unit_tests"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p3-routing-te",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/latest.json"
+        },
+        {
+          "report": "reports/reliability-scale.json",
+          "checks": [
+            "TestPlannerThousandSatelliteSmoke"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p3-resilience",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/reliability-scale.json",
+          "checks": [
+            "TestNodeFailureReroutesAndRecoveryRestoresPreferredPath"
+          ]
+        },
+        {
+          "report": "reports/openconfig-closed-loop.json",
+          "checks": [
+            "backup_path_selected",
+            "edge_fib_switched"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p3-oisl",
+      "status": "closed",
+      "hardware_excluded": [],
+      "gates": [
+        {
+          "report": "reports/core-quality.json",
+          "checks": [
+            "go_unit_tests"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p4-reconciliation",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/reliability-scale.json",
+          "checks": [
+            "TestPartialCommitRollsBackEveryDevice",
+            "TestTrafficVerificationFailureRollsBack",
+            "TestUnresponsiveDeviceHonorsDeadline",
+            "TestControllerRestartRecoversTopologyAndCommittedPlan"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p4-distributed-control",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/ha-failover.json",
+          "checks": [
+            "kubernetes_lease_rest",
+            "single_writer_fencing",
+            "lease_expiry_takeover",
+            "durable_state_reloaded"
+          ]
+        },
+        {
+          "report": "reports/reliability-scale.json",
+          "checks": [
+            "TestStableAndFailureDomainDiverseAssignment"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p4-chaos-scale",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/reliability-scale.json",
+          "checks": [
+            "TestDelayedAndOutOfOrderTelemetryCannotOverwriteNewState",
+            "TestLinkFlapConvergesToLatestSequence",
+            "TestObservabilityFailureDoesNotStopControl",
+            "TestPlannerThousandSatelliteSmoke"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p4-observability",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/observability-closed-loop.json",
+          "checks": [
+            "instrumented_control_transaction",
+            "loki_received_structured_logs",
+            "prometheus_scraped_controller",
+            "tempo_received_api_traces"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p5-5g-core-ran",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/5g-sa-baseline.json",
+          "checks": [
+            "n2_ng_setup",
+            "pfcp_associated",
+            "ue_registered",
+            "pdu_session_established",
+            "gtpu_uplink",
+            "gtpu_downlink"
+          ]
+        },
+        {
+          "report": "reports/srsran-rel17-ntn.json",
+          "checks": [
+            "official_source_commit_pinned",
+            "srsran_project_25_10_binary",
+            "real_gnb_process_sustained",
+            "release_17_ntn_config_accepted",
+            "test_ue_scheduler_metrics",
+            "mac_pcap_written"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p5-ntn-radio-effects",
+      "status": "partial",
+      "missing": [
+        "Release 17 NTN"
+      ],
+      "gates": [
+        {
+          "report": "reports/5g-ntn-transport.json",
+          "paths": [
+            "gtpu_capture_verified",
+            "controller_closed_loop"
+          ]
+        },
+        {
+          "report": "reports/orbit-network-closed-loop.json",
+          "checks": [
+            "doppler_carried_into_topology"
+          ]
+        },
+        {
+          "report": "reports/ntn-r17-channel.json",
+          "checks": [
+            "release_17_ntn_profile",
+            "band_256_arfcn",
+            "sib19_scheduled",
+            "ephemeris_broadcast_fields",
+            "common_timing_advance_matches_rtt",
+            "extended_ntn_timers",
+            "harq_retransmissions_disabled",
+            "preamble_format_1_configuration",
+            "profile_delay_matches_ephemeris",
+            "live_zmq_complex_sample_channel",
+            "channel_delay_applied",
+            "doppler_frequency_injected",
+            "doppler_precompensation",
+            "path_loss_applied"
+          ]
+        },
+        {
+          "report": "reports/srsran-rel17-ntn.json",
+          "checks": [
+            "release_17_ntn_config_accepted",
+            "mac_pcap_written"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p5-mobility-continuity",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/5g-ntn-transport.json",
+          "paths": [
+            "gtpu_capture_verified",
+            "controller_closed_loop"
+          ]
+        },
+        {
+          "report": "reports/linux-networking.json",
+          "checks": [
+            "quic_tls13_stream",
+            "quic_pcap_packets",
+            "mtu_icmp_tcp_udp"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p5-qos-slicing",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/qos-slicing.json",
+          "checks": [
+            "dscp_on_wire_pcap",
+            "five_qi_policy_mapping",
+            "snssai_policy_mapping",
+            "linux_tc_ef_class",
+            "linux_tc_af31_class",
+            "open5gs_slice_support",
+            "srsran_slice_support"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p5-oran",
+      "status": "partial",
+      "missing": [
+        "O-RAN E2",
+        "E2AP",
+        "E2SM-KPM",
+        "E2SM-RC",
+        "Near-RT RIC",
+        "O-RAN O1 boundary"
+      ],
+      "gates": []
+    },
+    {
+      "id": "p6-cloud-native",
+      "status": "partial",
+      "missing": [
+        "GitOps",
+        "Argo CD",
+        "rollout"
+      ],
+      "gates": [
+        {
+          "report": "reports/cloud-native.json",
+          "checks": [
+            "helm_lint",
+            "kubeconform_default_valid",
+            "kubeconform_ha_valid",
+            "compose_observability_services"
+          ]
+        },
+        {
+          "report": "reports/observability-closed-loop.json",
+          "checks": [
+            "all_six_services_ready"
+          ]
+        },
+        {
+          "report": "reports/cloud-runtime.json",
+          "checks": [
+            "kubernetes_nodes_ready",
+            "cilium_daemonset_ready",
+            "hubble_relay_ready",
+            "helm_runtime_deploy",
+            "scenario_change_restarts_pod",
+            "single_replica_upgrade_and_rollback",
+            "real_lease_single_writer",
+            "follower_mutations_rejected",
+            "rbac_least_privilege",
+            "pdb_blocks_leader_eviction",
+            "anti_affinity_three_nodes",
+            "durable_state_after_leader_deletion",
+            "health_probes_runtime",
+            "cilium_policy_denies_and_recovers",
+            "hubble_forwarded_packets",
+            "hubble_dropped_packets",
+            "owned_cluster_cleaned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p6-security-operations",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/security-operations.json",
+          "checks": [
+            "tls_1_3_negotiated",
+            "client_certificate_required",
+            "untrusted_client_rejected",
+            "mtls_and_bearer_authorized",
+            "audit_log_correlated",
+            "backup_bitwise_verified",
+            "restored_event_idempotency",
+            "upgrade_distinct_artifact_started",
+            "upgrade_preserved_v1_state",
+            "upgrade_v2_mutation_committed",
+            "downgrade_distinct_artifact_started",
+            "downgrade_reads_v2_state",
+            "downgrade_preserves_v2_idempotency"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p6-onboard-runtime",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/onboard-runtime.json",
+          "checks": [
+            "disconnect_fallback_activated",
+            "reconnect_withdraws_fallback",
+            "restart_state_recovered",
+            "fault_health_propagation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p6-onboard-build-update",
+      "status": "partial",
+      "missing": [
+        "KVM",
+        "Yocto",
+        "Buildroot"
+      ],
+      "hardware_excluded": [
+        "secure boot boundary"
+      ],
+      "gates": [
+        {
+          "report": "reports/qemu-arm64-sil.json",
+          "checks": [
+            "arm64_cross_compilation",
+            "qemu_system_tcg_boot",
+            "qemu_user_executed_rust_tests",
+            "virtio_network_device"
+          ]
+        },
+        {
+          "report": "reports/onboard-runtime.json",
+          "checks": [
+            "ed25519_sha256_stage_confirm",
+            "ab_rollback"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p6-programmable-onboard",
+      "status": "partial",
+      "missing": [
+        "SONiC",
+        "SAI",
+        "switch SDK",
+        "in-band telemetry"
+      ],
+      "hardware_excluded": [
+        "programmable ASIC",
+        "FPGA"
+      ],
+      "gates": [
+        {
+          "report": "reports/p4-closed-loop.json",
+          "checks": [
+            "p4runtime_readback",
+            "service_meter_programmed",
+            "ipv4_forwarded",
+            "ipv6_forwarded"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p6-fast-dataplane",
+      "status": "partial",
+      "missing": [
+        "AF_XDP",
+        "DPDK",
+        "NUMA",
+        "hugepage"
+      ],
+      "gates": [
+        {
+          "report": "reports/xdp-runtime.json",
+          "checks": [
+            "kernel_verifier_accepted",
+            "xdp_attached",
+            "packets_counted"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p6-hardware-hil",
+      "status": "closed",
+      "hardware_excluded": [
+        "HIL",
+        "modem",
+        "optical terminal",
+        "PAT",
+        "flight BSP",
+        "hardware interface integration"
+      ],
+      "gates": [
+        {
+          "report": "reports/qemu-arm64-sil.json",
+          "checks": [
+            "qemu_system_tcg_boot",
+            "arm64_linux_userspace_reached"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p6-rf-phy-antenna-hil",
+      "status": "hardware-excluded",
+      "hardware_excluded": [
+        "RF",
+        "PHY",
+        "modem",
+        "DSP",
+        "FPGA",
+        "phased-array calibration",
+        "wideband beamforming",
+        "hybrid beamforming",
+        "RF/baseband co-design",
+        "beam handover"
+      ],
+      "reason": "Truth requires antennas/RF front ends, qualified modem/baseband/FPGA targets and chamber or range evidence; a software approximation cannot establish these properties.",
+      "gates": []
+    },
+    {
+      "id": "p4-document-performance",
+      "status": "partial",
+      "missing": [
+        "100 continuous business flows",
+        "1 topology update per second",
+        "path computation P95 < 200 ms",
+        "topology-to-FIB P95 < 2 s",
+        "24-hour stability run",
+        "P50/P95/P99 end-to-end latency",
+        "fault loss and detection latency",
+        "route churn and link utilization",
+        "controller CPU and memory",
+        "restart recovery time",
+        "desired/actual FIB divergence duration",
+        "baseline versus centralized policy comparison"
+      ],
+      "gates": []
+    },
+    {
+      "id": "p6-unified-system",
+      "status": "closed",
+      "gates": [
+        {
+          "report": "reports/platform-runtime.json",
+          "checks": [
+            "real_frr_isis_network",
+            "gtpu_endpoints_routed_over_satellite_graph",
+            "missing_ground_heartbeat_triggers_autonomy",
+            "onboard_installs_real_kernel_routes",
+            "gtpu_survives_ground_route_withdrawal",
+            "ground_reconnect_withdraws_fallback",
+            "continuous_gtpu_business_across_faults",
+            "shared_scenario_and_fault_timeline",
+            "owned_resources_cleaned",
+            "noc_scrapes_same_controller_topology",
+            "noc_correlates_plan_fault_recovery_logs",
+            "noc_receives_actual_controller_trace",
+            "noc_observes_ground_outage_alert",
+            "noc_grafana_backends_connected",
+            "ospf_same_gtpu_business_and_fault_recovery",
+            "ldp_same_gtpu_business_and_fault_recovery",
+            "sr-mpls_same_gtpu_business_and_fault_recovery",
+            "pcep_same_gtpu_business_and_fault_recovery",
+            "srv6_same_gtpu_business_and_fault_recovery",
+            "evpn_same_gtpu_business_and_fault_recovery",
+            "bgpls_live_contact_withdrawal_and_restoration",
+            "kubernetes_controls_same_frr_constellation",
+            "helm_deploys_real_frr_adapter",
+            "lease_failover_preserves_real_frr_and_5g",
+            "lease_followers_reject_real_frr_mutations",
+            "cilium_policy_on_same_controller",
+            "hubble_same_controller_forwarded",
+            "hubble_same_controller_policy_dropped",
+            "same_pdu_session_across_all_protocols_and_cloud_faults",
+            "satellite_bidirectional_gtpu_capture",
+            "all_configured_nodes_deployed",
+            "all_configured_links_have_live_ospf_neighbors",
+            "every_configured_node_passes_real_packet_probe",
+            "configured_gateway_intents_carry_real_packets",
+            "onboard_runtime_on_every_configured_satellite",
+            "sr_lfib_matches_current_constellation_paths",
+            "per_satellite_orbits_drive_contacts",
+            "geographic_gateway_visibility",
+            "computed_physical_parameters_in_kernel",
+            "physical_replay_on_same_frr_and_5g"
+          ],
+          "paths": [
+            "full_protocol_integration",
+            "source_unchanged"
+          ]
+        }
+      ]
+    }
+  ],
+  "ai_excluded": [
+    "reinforcement learning",
+    "GNN",
+    "AI-based routing",
+    "AI coding-agent workflow",
+    "Networks for AI"
+  ],
+  "non_satellite_excluded": [
+    "RDMA",
+    "RoCEv2",
+    "InfiniBand",
+    "PFC",
+    "ECN for AI fabrics",
+    "DPU"
+  ]
+}

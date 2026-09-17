@@ -1,0 +1,7 @@
+{
+  "event_id": "phase1-r2-r1-down-1",
+  "subject": "r2-r1",
+  "sequence": 1,
+  "type": "link_down",
+  "link": {"id": "r2-r1"}
+}

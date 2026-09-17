@@ -1,0 +1,13 @@
+{
+  "id": "ntn-interruption-recovery",
+  "duration_s": 25,
+  "sample_interval_ms": 200,
+  "ue_namespace": "ue1",
+  "n3_interface": "n3-sat",
+  "flows": [{"name": "session", "destination": "10.45.0.1", "dscp": 0}],
+  "actions": [
+    {"at_s": 5, "type": "netem", "delay_ms": 0, "loss_percent": 100},
+    {"at_s": 8, "type": "clear_netem"}
+  ],
+  "assertions": {"max_loss_percent": 20, "max_outage_ms": 5000}
+}
