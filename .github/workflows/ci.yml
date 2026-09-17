@@ -39,5 +39,5 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@1.89.0
+      - uses: dtolnay/rust-toolchain@1.120.0
       - run: cargo test --locked --manifest-path onboard/Cargo.toml
