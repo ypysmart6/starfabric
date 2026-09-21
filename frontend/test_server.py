@@ -131,6 +131,26 @@ class DashboardTests(unittest.TestCase):
                 self.assertEqual(json.load(response)['phase'],'stopping')
             stop.assert_called_once_with()
 
+    def test_launch_selection_reaches_service_and_invalid_combinations_do_not_start(self):
+        from unittest.mock import patch
+        from lab.live.launch import DEFAULT
+        with urlopen(self.origin+'/api/runtime/options') as response:
+            self.assertIn('evpn-srv6',json.load(response)['carriers'])
+        headers={'Content-Type':'application/json','Origin':self.origin}
+        def post(config):
+            return urlopen(Request(self.origin+'/api/runtime/start',data=json.dumps({'configuration':config}).encode(),headers=headers))
+        with patch.object(self.dashboard.service,'start',return_value={'active':True}) as start:
+            with post(DEFAULT) as response: self.assertEqual(response.status,202)
+            start.assert_called_once_with(DEFAULT)
+        for changes in ({'igp':'ospf','carriers':['pcep']},{'satellites':1000},{'algorithm':[]}):
+            with patch.object(self.dashboard.service,'start') as start:
+                with self.assertRaises(HTTPError) as error: post({**DEFAULT,**changes})
+                self.assertEqual(error.exception.code,400)
+                start.assert_not_called()
+        with patch.object(self.dashboard.service,'start',side_effect=RuntimeError('already active')):
+            with self.assertRaises(HTTPError) as error: post(DEFAULT)
+            self.assertEqual(error.exception.code,409)
+
     def test_empty_live_workspace_is_pending_not_historical(self):
         with tempfile.TemporaryDirectory() as folder:
             result=Dashboard(folder).live_snapshot()

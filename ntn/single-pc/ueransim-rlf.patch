@@ -1,0 +1,182 @@
+--- a/src/gnb/nts.hpp
++++ b/src/gnb/nts.hpp
+@@ -37,6 +37,7 @@
+     enum PR
+     {
+         SIGNAL_DETECTED,
++        SIGNAL_LOST,
+         UPLINK_RRC,
+     } present;
+ 
+--- a/src/gnb/rls/task.cpp
++++ b/src/gnb/rls/task.cpp
+@@ -54,6 +54,9 @@
+         }
+         case NmGnbRlsToRls::SIGNAL_LOST: {
+             m_logger->debug("UE[%d] signal lost", w.ueId);
++            auto m = std::make_unique<NmGnbRlsToRrc>(NmGnbRlsToRrc::SIGNAL_LOST);
++            m->ueId = w.ueId;
++            m_base->rrcTask->push(std::move(m));
+             break;
+         }
+         case NmGnbRlsToRls::UPLINK_DATA: {
+--- a/src/gnb/rrc/connection.cpp
++++ b/src/gnb/rrc/connection.cpp
+@@ -41,20 +41,31 @@
+ 
+ void GnbRrcTask::receiveRrcSetupRequest(int ueId, const ASN_RRC_RRCSetupRequest &msg)
+ {
+-    auto *ue = tryFindUe(ueId);
+-    if (ue)
+-    {
+-        // TODO: handle this more properly
+-        m_logger->warn("Discarding RRC Setup Request, UE context already exists");
+-        return;
+-    }
+-
+     if (msg.rrcSetupRequest.ue_Identity.present == ASN_RRC_InitialUE_Identity_PR_NOTHING)
+     {
+         m_logger->err("Bad constructed RRC message ignored");
+         return;
+     }
+ 
++    // A UE can lose downlink while the gNB still receives its heartbeats.
++    // Keep its new Setup Request until AMF confirms release of the old AN
++    // context. Reusing the ID early races the asynchronous NGAP release.
++    if (m_releasing.count(ueId))
++    {
++        m_pendingSetup[ueId] = asn::UniqueCopy(msg, asn_DEF_ASN_RRC_RRCSetupRequest);
++        return;
++    }
++    auto *ue = tryFindUe(ueId);
++    if (ue && ue->setupComplete)
++    {
++        m_logger->info("Releasing stale access context before RRC Setup for UE[%d]", ueId);
++        m_pendingSetup[ueId] = asn::UniqueCopy(msg, asn_DEF_ASN_RRC_RRCSetupRequest);
++        handleRadioLinkFailure(ueId);
++        return;
++    }
++    // A retransmission before Setup Complete has no NGAP context to release.
++    delete ue;
++    m_ueCtx.erase(ueId);
+     ue = createUe(ueId);
+ 
+     if (msg.rrcSetupRequest.ue_Identity.present == ASN_RRC_InitialUE_Identity_PR_ng_5G_S_TMSI_Part1)
+@@ -123,6 +134,7 @@
+         }
+     }
+ 
++    ue->setupComplete = true;
+     auto w = std::make_unique<NmGnbRrcToNgap>(NmGnbRrcToNgap::INITIAL_NAS_DELIVERY);
+     w->ueId = ueId;
+     w->pdu = asn::GetOctetString(setupComplete->dedicatedNAS_Message);
+--- a/src/gnb/rrc/handler.cpp
++++ b/src/gnb/rrc/handler.cpp
+@@ -76,6 +76,19 @@
+ void GnbRrcTask::releaseConnection(int ueId)
+ {
+     m_logger->info("Releasing RRC connection for UE[%d]", ueId);
++    if (m_releasing.erase(ueId))
++    {
++        // The UE is already disconnected. Do not send an RRC Release into
++        // its new setup attempt; resume only after NGAP release completion.
++        auto pending = m_pendingSetup.find(ueId);
++        if (pending != m_pendingSetup.end())
++        {
++            auto request = std::move(pending->second);
++            m_pendingSetup.erase(pending);
++            receiveRrcSetupRequest(ueId, *request);
++        }
++        return;
++    }
+ 
+     // Send RRC Release message
+     auto *pdu = asn::New<ASN_RRC_DL_DCCH_Message>();
+@@ -91,17 +104,23 @@
+     asn::Free(asn_DEF_ASN_RRC_DL_DCCH_Message, pdu);
+ 
+     // Delete UE RRC context
++    delete tryFindUe(ueId);
+     m_ueCtx.erase(ueId);
+ }
+ 
+ void GnbRrcTask::handleRadioLinkFailure(int ueId)
+ {
+-    // Notify NGAP task
+-    auto w = std::make_unique<NmGnbRrcToNgap>(NmGnbRrcToNgap::RADIO_LINK_FAILURE);
+-    w->ueId = ueId;
+-    m_base->ngapTask->push(std::move(w));
+-
+-    // Delete UE RRC context
++    auto *ue = tryFindUe(ueId);
++    if (!ue)
++        return;
++    if (ue->setupComplete)
++    {
++        m_releasing.insert(ueId);
++        auto w = std::make_unique<NmGnbRrcToNgap>(NmGnbRrcToNgap::RADIO_LINK_FAILURE);
++        w->ueId = ueId;
++        m_base->ngapTask->push(std::move(w));
++    }
++    delete ue;
+     m_ueCtx.erase(ueId);
+ }
+ 
+--- a/src/gnb/rrc/sap.cpp
++++ b/src/gnb/rrc/sap.cpp
+@@ -23,6 +23,11 @@
+         triggerSysInfoBroadcast();
+         break;
+     }
++    case NmGnbRlsToRrc::SIGNAL_LOST: {
++        if (m_ueCtx.count(msg.ueId))
++            handleRadioLinkFailure(msg.ueId);
++        break;
++    }
+     case NmGnbRlsToRrc::UPLINK_RRC: {
+         handleUplinkRrc(msg.ueId, msg.rrcChannel, msg.data);
+         break;
+--- a/src/gnb/rrc/task.cpp
++++ b/src/gnb/rrc/task.cpp
+@@ -34,7 +34,11 @@
+ 
+ void GnbRrcTask::onQuit()
+ {
+-    // todo
++    for (auto &entry : m_ueCtx)
++        delete entry.second;
++    m_ueCtx.clear();
++    m_pendingSetup.clear();
++    m_releasing.clear();
+ }
+ 
+ void GnbRrcTask::onLoop()
+--- a/src/gnb/rrc/task.hpp
++++ b/src/gnb/rrc/task.hpp
+@@ -11,6 +11,7 @@
+ #include <memory>
+ #include <thread>
+ #include <unordered_map>
++#include <unordered_set>
+ #include <vector>
+ 
+ #include <gnb/nts.hpp>
+@@ -46,6 +47,8 @@
+     std::unique_ptr<Logger> m_logger;
+ 
+     std::unordered_map<int, RrcUeContext *> m_ueCtx;
++    std::unordered_set<int> m_releasing;
++    std::unordered_map<int, asn::Unique<ASN_RRC_RRCSetupRequest>> m_pendingSetup;
+     int m_tidCounter;
+ 
+     bool m_isBarred = true;
+--- a/src/gnb/types.hpp
++++ b/src/gnb/types.hpp
+@@ -148,6 +148,7 @@
+     int64_t initialId = -1; // 39-bit value, or -1
+     bool isInitialIdSTmsi{}; // TMSI-part-1 or a random value
+     int64_t establishmentCause{};
++    bool setupComplete{};
+     std::optional<GutiMobileIdentity> sTmsi{};
+ 
+     explicit RrcUeContext(const int ueId) : ueId(ueId)

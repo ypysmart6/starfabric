@@ -60,6 +60,7 @@ spec:
             - --reconcile-interval={{ .Values.reconcileInterval }}
             - --plan-ttl={{ .Values.controllerTuning.planTTL }}
             - --operation-timeout={{ .Values.controllerTuning.operationTimeout }}
+            - --device-batch-size={{ .Values.controllerTuning.deviceBatchSize | default 4 }}
             - --http-write-timeout={{ .Values.controllerTuning.httpWriteTimeout }}
             {{- if eq .Values.adapter.kind "frr" }}
             - --frr-agent-endpoint={{ .Values.adapter.frrAgentEndpoint }}

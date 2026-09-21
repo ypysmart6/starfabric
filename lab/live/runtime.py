@@ -72,6 +72,9 @@ class LiveRuntime(entry.Platform):
 
     def __init__(self, constellation, physical, step, workloads_path=None):
         super().__init__(None)
+        from lab.live.launch import validate
+        launch_path = os.environ.get('SF_LIVE_LAUNCH_CONFIG')
+        self.launch_config = validate(json.loads(Path(launch_path).read_text())) if launch_path else None
         self.progress = Progress(LIVE/'progress.json', os.environ.get('SF_LIVE_SESSION', self.identifier), resume=True)
         if self.progress.value['stages'][0]['state'] == 'running':
             self.progress.finish('starting_5g')
@@ -117,6 +120,7 @@ class LiveRuntime(entry.Platform):
     def publish_status(self):
         with self.status_lock:
             status = {'mode': 'live', 'run_id': self.identifier, 'pid': os.getpid(),
+                'launch_config': self.launch_config,
                 'phase': self.phase, 'started_at': self.started_at, 'updated_at': now(),
                 'error': self.last_error, 'endpoint': self.endpoint,
                 'step_seconds': self.step, 'artifacts': str(self.art.relative_to(ROOT)),
@@ -164,6 +168,9 @@ class LiveRuntime(entry.Platform):
         seed['timeline'] = []
         seed['physical_model'] = {'config': config, 'satellite_orbits': self.orbit_clock.orbits.elements,
             'reference_frame': 'TEME', 'frames': [frame], 'boundary': 'Real-time software-in-loop; modeled orbits and packet impairments; no live space telemetry.'}
+        if self.launch_config:
+            seed['network_profile'] = self.launch_config
+            save(self.art/'launch-config.json', self.launch_config)
         self.fabric = LiveFabric(seed, self.identifier)
         self.scenario = self.fabric.scenario
         if self.workloads_path:
@@ -171,6 +178,9 @@ class LiveRuntime(entry.Platform):
             if workloads.flows:
                 self.workloads = workloads
                 self.workloads.bind()
+        if self.launch_config:
+            for intent in self.scenario['intents']:
+                intent['policy'] = self.launch_config['algorithm']
         self.progress.context(satellites=len(self.fabric.satellites), gateways=len(self.fabric.gateways),
                               routers=len(self.fabric.nodes), streams=len(self.workloads.flows) if self.workloads else 0)
         self.initial_frame = frame
@@ -219,18 +229,35 @@ class LiveRuntime(entry.Platform):
                 self.stop_heartbeat.wait(3)
         self.heartbeat_thread = threading.Thread(target=heartbeat, daemon=True)
         self.heartbeat_thread.start()
-        wait_for('120 live onboard heartbeats', lambda: all(s['connected'] for s in
+        wait_for('all configured live onboard heartbeats', lambda: all(s['connected'] for s in
             self.parallel(f.satellites, lambda n: self.onboard_request(n, '/v1/status'),16).values()), 90)
         self.checks['onboard_runtime_on_every_configured_satellite'] = len(f.satellites)
 
     def route_n3(self):
-        self.initial_pdu = self.pdu_identity()
+        if self.workloads and self.workloads.n3_evpn:
+            def ready():
+                self.workloads.read_evpn_ribs()
+                self.workloads.update_n3(self.current_plan)
+                return all(v['status']=='ready' for v in self.workloads.n3_states.values())
+            wait_for('EVPN/SRv6 N3 routes',ready,90)
+        if self.pdu_identity() != self.initial_pdu:
+            raise RuntimeError('5G PDU identity changed during platform startup')
+        # Radio release / Service Request recovery is asynchronous. Allow the
+        # existing PDU to recover during startup, without restarting the UE or
+        # including this baseline warmup in satellite traffic acceptance.
+        wait_for('existing 5G PDU connectivity before satellite N3',lambda:
+            command('docker','exec','nr_ue','ping','-n','-I','uesimtun0',
+                    '-c','1','-W','1','192.168.100.1',check=False).returncode==0,60)
+        if self.pdu_identity() != self.initial_pdu:
+            raise RuntimeError('5G PDU identity changed during radio recovery')
+        self.host_budget.stop_radio_keepalive()
         save(self.art/'pdu-identity-initial.json', self.initial_pdu)
         for endpoint, dest, via, source in [('nr_gnb',UPF,'10.230.0.1',GNB),('upf',GNB,'10.230.0.5',UPF)]:
             self.exec(endpoint, 'ip', 'route', 'add', dest+'/32', 'via', via, 'src', source)
             self.routes_added.append((endpoint,dest,via))
         # PID belongs to this run and is used for an exact, graceful stop.
         probe = 'echo $$ > /tmp/starfabric-live-ping.pid; exec ping -n -D -O -I uesimtun0 -i 1 -W 1 192.168.100.1'
+        if self.workloads: probe += ' -p '+self.workloads.token
         self.continuous = subprocess.Popen(['docker','exec','nr_ue','sh','-c',probe], stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True, bufsize=1)
         def read():
@@ -239,6 +266,7 @@ class LiveRuntime(entry.Platform):
                 self.ping_counters.consume(line)
         self.ping_thread = threading.Thread(target=read, daemon=True)
         self.ping_thread.start()
+        wait_for('UE packets over satellite N3',lambda:self.ping_counters.snapshot()[0].get('received',0)>0,60)
         self.checks['gtpu_endpoints_routed_over_satellite_graph'] = True
 
     def provision(self, frame, tick):
@@ -246,40 +274,48 @@ class LiveRuntime(entry.Platform):
         pairs = f.register(frame, tick)
         if not pairs:
             return
-        jobs = f.wiring(self.pids, pairs)
-        save(self.art/'live-wiring.json', jobs)
-        command('docker','run','--rm','--privileged','--pid=host','--network=none',
-            '--cpuset-cpus',self.fabric_cpus, '-v',f'{self.art}:/evidence:ro',
-            '-v',f'{ROOT}/lab/platform/wire.py:/wire.py:ro','--entrypoint','python3',TOOLS,
-            '/wire.py','/evidence/live-wiring.json',timeout=180)
+        from namespace_jobs import get_worker
+        worker = get_worker(self)
+        groups = [f.wiring(self.pids, {pair}) for pair in sorted(pairs)]
+        save(self.art/'live-wiring.json', [job for group in groups for job in group])
+        save(self.art/'live-wiring-groups.json', groups)
+        worker.run('wire', 'live-wiring-groups.json', workers=8)
         commands = {}
         for a, b in pairs:
             for left, right in ((a,b),(b,a)):
                 commands.setdefault(left, []).extend(f.interface_commands(left,right))
-        def configure_contact(node):
-            for attempt in range(3):
-                try:
-                    self.configure(node, *commands[node])
-                    return
-                except (RuntimeError, subprocess.TimeoutExpired) as error:
-                    if attempt == 2:
-                        raise
-                    self.event('live_contact_configuration_retry', node=node, error=str(error)[-500:])
-                    if self.stop_event.wait(5):
-                        raise InterruptedError('stopped during contact configuration')
-        self.parallel(list(commands), configure_contact, 8)
+        save(self.art/'live-contact-configure.json', commands)
+        for attempt in range(3):
+            try:
+                worker.run('configure', 'live-contact-configure.json', workers=8)
+                break
+            except (RuntimeError, subprocess.TimeoutExpired) as error:
+                if attempt == 2:
+                    raise
+                self.event('live_contact_configuration_retry', nodes=list(commands), error=str(error)[-500:])
+                if self.stop_event.wait(5):
+                    raise InterruptedError('stopped during contact configuration')
         self.event('live_contacts_created', pairs=[list(p) for p in sorted(pairs)])
 
     def retire(self, tick):
         f = self.fabric
         pairs = f.expired(tick)
+        jobs, configurations = [], {}
         for a, b in pairs:
             interface = f.interface(a,b)
-            self.exec(self.router(a),'ip','link','del',interface)
+            jobs.append({'pid':self.pids[a],'args':['ip','link','del',interface]})
             for node in (a,b):
-                self.configure(node,'mpls ldp','address-family ipv4','no interface '+interface,
-                    'exit-address-family','exit','no interface '+interface)
+                commands = ['mpls ldp','address-family ipv4','no interface '+interface,
+                    'exit-address-family','exit'] if f.enabled('ldp') else []
+                configurations.setdefault(node,[]).extend([*commands,'no interface '+interface])
         if pairs:
+            from namespace_jobs import get_worker
+            worker = get_worker(self)
+            save(self.art/'live-retire.json',jobs)
+            save(self.art/'live-retire-groups.json',[[job] for job in jobs])
+            worker.run('wire', 'live-retire-groups.json', workers=8, timeout=120)
+            save(self.art/'live-retire-configure.json',configurations)
+            worker.run('configure', 'live-retire-configure.json', workers=8, timeout=120)
             f.forget(pairs)
             self.event('live_contacts_retired', pairs=[list(p) for p in pairs])
 
@@ -304,7 +340,7 @@ class LiveRuntime(entry.Platform):
             'onboard': self.onboard_states(), 'traffic': traffic, 'pings': pings,
             'workloads': self.workloads.snapshot() if self.workloads else {'enabled': False},
             'workload_error': self.workload_error,
-            'configuration': {'constellation': self.constellation_config,
+            'configuration': {'launch': self.launch_config, 'constellation': self.constellation_config,
                               'physical': self.orbit_clock.config},
             'checks': self.checks, 'pdu': self.initial_pdu, 'controller_status': self.last_controller_status,
             'deployed_counts': {'frr_nodes': len(self.fabric.nodes), 'onboard_satellites': len(self.fabric.satellites), 'kubernetes_nodes': 3},
@@ -400,6 +436,9 @@ class LiveRuntime(entry.Platform):
 
     def run_forever(self, duration=0):
         self.stage('preparing_host', self.host_budget.prepare)
+        self.initial_pdu = self.pdu_identity()
+        save(self.art/'pdu-identity-before-fleet.json', self.initial_pdu)
+        self.host_budget.start_radio_keepalive()
         self.fabric_cpus = self.host_budget.data_cpu_set
         self.stage('computing_initial_orbits', self.compile_live)
         self.stage('checking_resources', self.check_resources)
@@ -463,11 +502,19 @@ class LiveRuntime(entry.Platform):
         if self.ping_thread:
             self.ping_thread.join(timeout=5)
 
+    def capture_5g_state(self):
+        for node in ('nr_ue','nr_gnb','amf','smf','upf'):
+            log=command('docker','logs',node,check=False)
+            (self.art/(node+'-final.log')).write_text(log.stdout+log.stderr)
+        final=self.pdu_identity()
+        save(self.art/'pdu-identity-final.json',final)
+        self.checks['same_pdu_session_across_runtime'] = final == self.initial_pdu
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--constellation', type=Path, default=Path(os.environ.get('SF_LIVE_CONSTELLATION', str(ROOT/'scenarios/constellations/leo-120-global.config.json'))))
-    parser.add_argument('--physical', type=Path, default=ROOT/'scenarios/constellations/physical-defaults.json')
+    parser.add_argument('--physical', type=Path, default=Path(os.environ.get('SF_LIVE_PHYSICAL', str(ROOT/'scenarios/constellations/physical-defaults.json'))))
     parser.add_argument('--step', type=float, default=float(os.environ.get('SF_LIVE_STEP','10')))
     parser.add_argument('--duration', type=float, default=float(os.environ.get('SF_LIVE_DURATION','0')), help='0 runs until stopped; positive value is an integration-test window')
     parser.add_argument('--workloads', type=Path, default=Path(os.environ.get('SF_LIVE_WORKLOADS', str(ROOT/'scenarios/constellations/live-workloads.json'))))
@@ -492,7 +539,7 @@ def main():
         runtime.phase = 'stopping'
         runtime.publish_status()
         errors = []
-        for cleanup in ((runtime.workloads.close if runtime.workloads else lambda: None),
+        for cleanup in (runtime.capture_5g_state, (runtime.workloads.close if runtime.workloads else lambda: None),
                         runtime.stop_probe, runtime.protocols.cleanup, runtime.cleanup,
                         runtime.noc.cleanup, runtime.cloud.cleanup, runtime.host_budget.cleanup):
             try:

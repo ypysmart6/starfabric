@@ -32,8 +32,10 @@ func NewAgent(endpoint, token string, insecure bool) (*Agent, error) {
 	if strings.TrimSpace(token) == "" {
 		return nil, errors.New("FRR agent token is empty")
 	}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.MaxIdleConnsPerHost = 32
 	return &Agent{endpoint: strings.TrimRight(endpoint, "/"), token: token,
-		client: &http.Client{Timeout: 30 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
+		client: &http.Client{Transport: transport, Timeout: 30 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
 }
 
 type agentRunner struct {

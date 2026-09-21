@@ -31,7 +31,7 @@ class OrbitClock:
         if self.last_offset is None:
             warmup = max(self.config['step_seconds'], self.config['links']['acquisition_seconds'])
             start = offset - warmup
-            self.contacts.frame(self.orbits.states(start), start)
+            self.contact_frame(start)
         else:
             # Keep acquisition and terminal-selection history on the model's
             # sampling clock even if device programming skipped wall-clock
@@ -39,11 +39,21 @@ class OrbitClock:
             # these internal samples never claim packets traversed old frames.
             cursor = self.last_offset + self.config['step_seconds']
             while cursor < offset - 1e-8:
-                self.contacts.frame(self.orbits.states(cursor), cursor)
+                self.contact_frame(cursor)
                 cursor += self.config['step_seconds']
-        frame = self.contacts.frame(self.orbits.states(offset), offset)
+        frame = self.contact_frame(offset)
         self.last_offset = offset
         return frame
+
+    def contact_frame(self, offset):
+        # Forecast only terminal allocation, never packet delivery or a future
+        # link's availability. Current geometry and acquisition still gate it.
+        lead=max(30,3*self.config['step_seconds'])
+        future=None
+        try: future=self.orbits.states(offset+lead)
+        except ValueError:
+            if self.config['orbit']['source']!='oem': raise
+        return self.contacts.frame(self.orbits.states(offset),offset,future)
 
 
 def pair_index(a, b, ids):
@@ -79,8 +89,14 @@ class LiveFabric(Fabric):
         # Coalesce fleet-wide contact changes before SPF. The small fault
         # fixture's 50 ms hold time creates repeated full-fleet recalculation
         # on a shared host with 144 routing namespaces.
-        return super().config(node).replace('timers throttle spf 0 50 500',
-            'timers throttle spf 2000 5000 15000').replace('spf-interval 1\n', 'spf-interval 5\n')
+        config = super().config(node).replace('timers throttle spf 0 50 500',
+            'timers throttle spf 2000 5000 15000')
+        # A selected IS-IS/SRv6 fabric runs only the required daemons. Its
+        # locator repair must not inherit the 5s throttle of the all-protocol
+        # stress fixture, which consumed half of every 10s contact interval.
+        if self.network_profile and self.enabled('isis'):
+            return config
+        return config.replace('spf-interval 1\n', 'spf-interval 5\n')
 
     def bgp_config(self, node):
         lines = super().bgp_config(node)
@@ -146,6 +162,12 @@ class LiveFabric(Fabric):
         self.scenario['topology']['links'] = list(self.directed.values())
 
     def interface_commands(self, a, b):
+        if self.network_profile is not None:
+            lines = self.selected_interface(a, b)
+            if self.enabled('ldp'):
+                lines += ['mpls ldp', 'address-family ipv4', 'interface '+self.interface(a,b),
+                          'exit', 'exit-address-family', 'exit']
+            return lines
         link = self.links[tuple(sorted((a, b)))]
         interface = link['interface']
         return ['interface '+interface, 'ip router isis SF', 'isis network point-to-point',

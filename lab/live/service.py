@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from lab.live.storage import atomic, rotating
 from lab.live.progress import Progress, monitor, stamp
+from lab.live.launch import materialize, validate
 
 
 def read(path):
@@ -57,19 +58,28 @@ class Service:
             status['startup'] = progress
         if diagnostics.get('session') == owner.get('session') and diagnostics.get('session'):
             status['diagnostics'] = diagnostics
-        return {**status, 'active': alive, 'supervisor_pid': owner.get('pid'),
+        return {**status, 'launch_config': owner.get('launch_config'), 'active': alive, 'supervisor_pid': owner.get('pid'),
                 'phase': status.get('phase','stopped')}
 
-    def start(self):
+    def start(self, configuration=None):
+        if configuration is not None:
+            configuration = validate(configuration)
         self.directory.mkdir(parents=True, exist_ok=True)
         lock = (self.directory/'service.lock').open('a+')
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             lock.close()
+            if configuration is not None:
+                raise RuntimeError('平台正在运行或启动；请先停止，再更换启动配置')
             return self.status()
         env = dict(os.environ, SF_LIVE_LOCK_FD=str(lock.fileno()), SF_5G_KEEP='0')
         try:
+            if configuration is not None:
+                paths = materialize(configuration, self.root)
+                env.update(SF_LIVE_LAUNCH_CONFIG=paths['launch'], SF_LIVE_CONSTELLATION=paths['constellation'],
+                           SF_LIVE_PHYSICAL=paths['physical'], SF_LIVE_WORKLOADS=paths['workloads'],
+                           SF_LIVE_STEP=str(configuration['step_seconds']))
             # The child inherits the lock; a second UI or CLI cannot start a
             # second constellation sharing the same 5G endpoints.
             subprocess.Popen([sys.executable, str(self.root/'lab/live/service.py'), 'supervise'],
@@ -86,6 +96,10 @@ class Service:
     def stop(self):
         status = self.status()
         if status['active']:
+            if status.get('phase') in ('stopping','stopped','failed'):
+                # The wrapper still owns 5G teardown after runtime exits.
+                # Another signal at this point can interrupt its EXIT trap.
+                return {**status,'phase':'stopping'}
             os.kill(status['supervisor_pid'], signal.SIGTERM)
             return {**status, 'phase':'stopping'}
         return status
@@ -100,7 +114,9 @@ def supervise():
     if not inherited:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     session = str(time.time_ns())
-    atomic(directory/'owner.json', {'pid':os.getpid(),'identity':identity(os.getpid()),'session':session})
+    launch_path = os.environ.get('SF_LIVE_LAUNCH_CONFIG')
+    atomic(directory/'owner.json', {'pid':os.getpid(),'identity':identity(os.getpid()),'session':session,
+           'launch_config': read(Path(launch_path)) if launch_path else None})
     atomic(directory/'status.json', {'phase':'starting_5g','session':session,'started_at':stamp(),'updated_at':stamp()})
     (directory/'snapshot.json').unlink(missing_ok=True)
     (directory/'diagnostics.json').unlink(missing_ok=True)
@@ -155,8 +171,11 @@ def supervise():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=('start','stop','status','supervise'))
+    parser.add_argument('--config', type=Path, help='validated live launch JSON (start only)')
     args = parser.parse_args()
     if args.action == 'supervise':
         supervise()
     else:
-        print(json.dumps(getattr(Service(),args.action)(), ensure_ascii=False, indent=2))
+        configuration = json.loads(args.config.read_text()) if args.config else None
+        result = Service().start(configuration) if args.action == 'start' else getattr(Service(), args.action)()
+        print(json.dumps(result, ensure_ascii=False, indent=2))

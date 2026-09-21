@@ -80,6 +80,13 @@ def decode(data, protocol=0x6558, layers=(), labels=(), depth=0):
     if next_header in (4, 41):
         return decode(payload, 0x0800 if next_header == 4 else 0x86dd,
                       layers + (('ipip',) if protocol == 0x0800 else ()), labels, depth + 1)
+    if next_header == 143:
+        return decode(payload,0x6558,layers+('ethernet',),labels,depth+1)
+    if next_header in (1,58):
+        if len(payload)<8: return None
+        return {'source':source,'destination':target,'source_port':0,'destination_port':0,
+                'family':6 if next_header==58 else 4,'transport':'icmp','layers':list(layers),
+                'labels':list(labels),'payload':payload[8:]}
     if next_header == 17:
         if len(payload) < 8:
             return None
@@ -112,6 +119,8 @@ def matches(carrier, packet):
         if carrier in ('sr-mpls', 'pcep'):
             return any(16000 <= label < 24000 for label in packet['labels'])
         return any(15 < label < 16000 for label in packet['labels'])
+    if carrier == 'evpn-srv6':
+        return 'srh' in layers and 'vxlan' not in layers and 'mpls' not in layers
     if carrier == 'srv6':
         return 'srh' in layers
     if carrier == 'evpn':
@@ -124,7 +133,7 @@ def capture(config):
     flows = {f['number']: f for f in config['flows']}
     original = os.open('/proc/self/ns/net', os.O_RDONLY)
     libc = ctypes.CDLL(None, use_errno=True)
-    sockets, observations, errors = {}, {}, {}
+    sockets, observations, errors, services = {}, {}, {}, {}
     def enter(fd):
         if libc.setns(fd, 0x40000000):
             raise OSError(ctypes.get_errno(), 'setns failed')
@@ -173,16 +182,27 @@ def capture(config):
                         continue
                     packet = decode(raw)
                     identity = identify(packet['payload'], token) if packet else None
-                    if not identity or identity[0] not in flows:
-                        continue
-                    flow = flows[identity[0]]
-                    endpoints = (packet['source'], packet['destination'])
-                    forward = endpoints == (flow['source_address'], flow['destination_address'])
-                    reverse = endpoints == (flow['destination_address'], flow['source_address'])
-                    if not (forward or reverse) or not matches(flow['carrier'], packet):
-                        continue
-                    entry = observations.setdefault(flow['id'], {'forward': 0, 'reverse': 0, 'nodes': {}, 'layers': packet['layers'], 'labels': packet['labels']})
-                    entry['forward' if forward else 'reverse'] += 1
+                    if not packet: continue
+                    endpoints = (packet['source'],packet['destination'])
+                    if identity and identity[0] in flows:
+                        flow = flows[identity[0]]
+                        forward = endpoints == (flow['source_address'], flow['destination_address'])
+                        reverse = endpoints == (flow['destination_address'], flow['source_address'])
+                        if not (forward or reverse) or not matches(flow['carrier'], packet): continue
+                        entry = observations.setdefault(flow['id'], {'forward':0,'reverse':0,'nodes':{},'layers':packet['layers'],'labels':packet['labels']})
+                        entry['forward' if forward else 'reverse'] += 1
+                    elif 'srh' in packet['layers'] and 'ethernet' in packet['layers'] and packet['transport']=='icmp':
+                        key='l2:'+':'.join(endpoints)
+                        entry=services.setdefault(key,{'packets':0,'nodes':{},'layers':packet['layers'],'family':packet['family']})
+                        entry['packets']+=1
+                    elif 'srh' in packet['layers'] and set(endpoints)=={'172.22.0.8','172.22.0.23'} and packet['destination_port']==2152:
+                        key='n3:'+packet['source']
+                        entry=services.setdefault(key,{'packets':0,'nodes':{},'layers':packet['layers'],'teids':[]})
+                        entry['packets']+=1
+                        if len(packet['payload'])>=8:
+                            teid=int.from_bytes(packet['payload'][4:8],'big')
+                            if teid not in entry['teids']: entry['teids'].append(teid)
+                    else: continue
                     node = sockets[sock]
                     entry['nodes'][node] = entry['nodes'].get(node, 0) + 1
                     if written < 2 * 1024 * 1024:
@@ -192,7 +212,7 @@ def capture(config):
                         written += 16 + len(raw)
         result = {'run_id': config['run_id'], 'token': config['token'], 'plan_id': config.get('plan_id'), 'started_at': started,
                   'signatures': config.get('signatures', {}),
-                  'finished_at': time.time(), 'flows': observations, 'errors': errors,
+                  'finished_at': time.time(), 'flows': observations, 'services':services, 'errors': errors,
                   'scope': 'same-packet encapsulation on satellite ingress; observations are not unique delivery counts'}
         destination = Path(config['output'])
         temporary = destination.with_suffix('.tmp')

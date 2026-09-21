@@ -4,8 +4,10 @@ import ipaddress
 import unittest
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from frr_agent import validate
+from frr_executor import execute
 from pce import ero, objects, pcc_sid_depth
 from packets import gtpu_packets, proof
 
@@ -56,6 +58,14 @@ class Contracts(unittest.TestCase):
                               ("ping", ["-f", "127.0.0.1"]), ("ping", ["-n", "-c", "1", "-W", "1", "example.com"])):
             with self.assertRaises(ValueError):
                 validate(program, args)
+
+    def test_executor_refuses_reused_pid_and_unowned_node_before_execution(self):
+        nodes={'sat-1':{'pid':123,'identity':'old-process'}}
+        request={'node':'sat-1','program':'vtysh','args':['-c','show version']}
+        with patch('frr_executor.identity',return_value='new-process'), patch('frr_executor.subprocess.run') as run:
+            with self.assertRaisesRegex(ValueError,'identity changed'): execute(nodes,request,1)
+            with self.assertRaisesRegex(ValueError,'not owned'): execute(nodes,dict(request,node='nr_ue'),1)
+            run.assert_not_called()
 
     def test_sr_ero_wire_format(self):
         raw = ero([16002, 16004])

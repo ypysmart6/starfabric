@@ -15,6 +15,7 @@ def ip(base, offset):
 class Fabric:
     def __init__(self, scenario, identifier):
         self.scenario = copy.deepcopy(scenario)
+        self.network_profile = self.scenario.pop('network_profile', None)
         self.nodes = {n['id']: n for n in self.scenario['topology']['nodes']}
         self.satellites = sorted(n for n,v in self.nodes.items() if v['kind']=='satellite')
         self.gateways = sorted(n for n,v in self.nodes.items() if v['kind']=='gateway')
@@ -46,6 +47,11 @@ class Fabric:
             if self.physical_model:
                 node['labels'].update({'next_hop:'+peer:self.hop(name,peer) for peer in self.adjacency[name]})
         # Keep every configured gateway intent and bind each to a real /32 sink.
+        # Configured live launches bind their actual workload catalog below.
+        # The generator's probe-only intents would otherwise reserve capacity
+        # and require backup paths for traffic that is never started.
+        if self.network_profile is not None:
+            self.scenario['intents'] = []
         self.service_addresses={}
         for i,intent in enumerate(self.scenario['intents']):
             address=ip('10.240.0.0',i+1)
@@ -112,12 +118,85 @@ class Fabric:
         return [(self.pair[0],self.pair[1],'172.22.0.8','n3-forward'),
                 (self.pair[1],self.pair[0],'172.22.0.23','n3-reverse')]
 
+    def enabled(self, protocol):
+        if self.network_profile is None:
+            return protocol != 'evpn-srv6'
+        carriers = self.network_profile['carriers']
+        if protocol in ('isis', 'ospf'):
+            return self.network_profile['igp'] == protocol
+        if protocol == 'mpls':
+            return bool(set(carriers) & {'ldp', 'sr-mpls', 'pcep'})
+        if protocol in ('bgpls', 'sr-mpls'):
+            return bool(set(carriers) & {'sr-mpls', 'pcep'})
+        if protocol == 'srv6':
+            return bool(set(carriers) & {'srv6', 'evpn-srv6'})
+        return protocol in carriers
+
+    def daemons(self, node):
+        result = ['zebra', 'staticd']
+        if self.enabled('isis'): result += ['isisd']
+        if self.enabled('ospf'): result += ['ospfd', 'ospf6d']
+        if self.enabled('ldp'): result += ['ldpd']
+        if node in self.gateways and (self.enabled('bgpls') or self.enabled('evpn')): result += ['bgpd']
+        return result
+
+    def selected_interface(self, node, peer):
+        link = self.adjacency[node][peer]
+        lines = ['interface '+link['interface']]
+        if self.enabled('isis'):
+            lines += ['ip router isis SF', 'ipv6 router isis SF', 'isis network point-to-point',
+                      'isis hello-interval 5', 'isis hello-multiplier 3', f"isis metric level-2 {link['cost']}"]
+        if self.enabled('ospf'):
+            lines += ['ip ospf area 0.0.0.0','ip ospf network point-to-point','ip ospf hello-interval 5',
+                      'ip ospf dead-interval 15',f"ip ospf cost {link['cost']}", 'ipv6 ospf6 area 0.0.0.0',
+                      'ipv6 ospf6 network point-to-point','ipv6 ospf6 hello-interval 5',
+                      'ipv6 ospf6 dead-interval 15', f"ipv6 ospf6 cost {link['cost']}"]
+        if self.enabled('bgpls'):
+            lines += ['link-params', 'max-bw '+frr_bandwidth({'capacity_bps':self.port_capacity(node,peer)}), 'exit-link-params']
+        return lines + ['exit']
+
+    def selected_config(self, node):
+        lines = ['frr defaults traditional', 'hostname '+node, 'service integrated-vtysh-config', 'log stdout warnings',
+                 'interface lo', f'ip address {self.loopback(node)}/32']
+        if self.enabled('isis'): lines += ['ip router isis SF', 'isis passive']
+        if self.enabled('ospf'): lines += ['ip ospf area 0.0.0.0', 'ip ospf passive']
+        lines += ['exit', 'interface sr0', f'ipv6 address {self.locator(node)}ffff/64']
+        lines += ['ipv6 router isis SF', 'isis passive'] if self.enabled('isis') else ['ipv6 ospf6 area 0.0.0.0', 'ipv6 ospf6 passive']
+        lines += ['exit']
+        if self.enabled('isis'):
+            lines += ['router isis SF', f'net 49.0001.{self.system_id(node)}.00', 'is-type level-2-only',
+                      'metric-style wide', 'topology ipv6-unicast', 'lsp-gen-interval 1', 'spf-interval 1']
+            if self.enabled('sr-mpls'):
+                lines += ['segment-routing on', 'segment-routing global-block 16000 23999',
+                          f'segment-routing prefix {self.loopback(node)}/32 index {self.ordinal[node]}',
+                          'mpls-te on', f'mpls-te router-address {self.loopback(node)}']
+                if node == self.pair[0]: lines += ['mpls-te export']
+            lines += ['exit']
+        if self.enabled('ospf'):
+            for daemon in ('ospf', 'ospf6'):
+                lines += ['router '+daemon, f'{daemon} router-id {self.loopback(node)}', 'timers throttle spf 0 50 500', 'exit']
+        for peer in self.adjacency[node]: lines += self.selected_interface(node, peer)
+        if self.enabled('ldp'):
+            lines += ['access-list SF-LDP-TRANSPORT permit 10.255.0.0/16', 'mpls ldp', f'router-id {self.loopback(node)}',
+                      'address-family ipv4', 'label local allocate for SF-LDP-TRANSPORT',
+                      'label local advertise for SF-LDP-TRANSPORT', f'discovery transport-address {self.loopback(node)}']
+            for link in self.adjacency[node].values(): lines += ['interface '+link['interface'], 'exit']
+            lines += ['exit-address-family', 'exit']
+        if node in self.gateways: lines += self.bgp_config(node)
+        if node == self.pair[0]: lines += ['ip route 172.22.0.23/32 10.230.0.2']
+        if node == self.pair[1]: lines += ['ip route 172.22.0.8/32 10.230.0.6']
+        return '\n'.join(lines)+'\n'
+
     def bgp_config(self,node):
+        families = []
+        if self.enabled('bgpls'): families.append('link-state link-state')
+        if self.enabled('evpn'): families.append('l2vpn evpn')
+        if not families: return []
         peers=[n for n in self.gateways if n!=node]
         lines=['router bgp 65000',f'bgp router-id {self.loopback(node)}']
         for peer in peers:
             lines += [f'neighbor {self.loopback(peer)} remote-as 65000',f'neighbor {self.loopback(peer)} update-source lo']
-        for family in ['link-state link-state','l2vpn evpn']:
+        for family in families:
             lines += ['address-family '+family]
             lines += [f'neighbor {self.loopback(p)} activate' for p in peers]
             if family=='l2vpn evpn': lines += ['advertise-all-vni','advertise-svi-ip']
@@ -125,6 +204,8 @@ class Fabric:
         return lines+['exit']
 
     def config(self,node):
+        if self.network_profile is not None:
+            return self.selected_config(node)
         lines=['frr defaults traditional','hostname '+node,'service integrated-vtysh-config','log stdout warnings',
                'interface lo',f'ip address {self.loopback(node)}/32','ip router isis SF','isis passive',
                'ip ospf area 0.0.0.0','ip ospf passive','exit',
@@ -173,18 +254,21 @@ class Fabric:
                 if 'capacity_bps' in direction:
                     add(node,*qdisc_command(interface,direction,self.queue_limit))
                 add(node,'ip','link','set',interface,'up' if self.active(node,b if node==a else a) else 'down')
-                add(node,'sysctl','-qw',f'net.mpls.conf.{interface}.input=1',f'net.ipv6.conf.{interface}.seg6_enabled=1')
+                if self.enabled('mpls'): add(node,'sysctl','-qw',f'net.mpls.conf.{interface}.input=1')
+                if self.enabled('srv6'): add(node,'sysctl','-qw',f'net.ipv6.conf.{interface}.seg6_enabled=1')
         if pairs is not None:
             return jobs
         for node in self.nodes:
             add(node,'ip','link','set','lo','up')
             add(node,'ip','link','add','sr0','type','dummy'); add(node,'ip','link','set','sr0','up')
-            add(node,'ip','-6','route','replace',self.locator(node)+'1/128','encap','seg6local','action','End','dev','sr0')
+            if self.enabled('srv6'):
+                add(node,'ip','-6','route','replace',self.locator(node)+'1/128','encap','seg6local','action','End','dev','sr0')
             add(node,'ip','route','add','blackhole','172.22.0.0/16','metric','42799')
         for node in self.gateways:
             # Service sinks must not be advertised by the loopback's IGP.
             # Their reachability is owned by the controller's intent routes.
             add(node,'ip','link','add','svc0','type','dummy'); add(node,'ip','link','set','svc0','up')
+            if not self.enabled('evpn'): continue
             add(node,'ip','link','add','br100','type','bridge'); add(node,'ip','link','set','br100','up')
             add(node,'ip','address','add',self.svi(node)+'/16','dev','br100')
             add(node,'ip','link','add','vni100','type','vxlan','id','100','local',self.loopback(node),'dstport','4789','nolearning')
@@ -200,9 +284,13 @@ class Fabric:
                 add(owner,'ip','address','add',ip('10.230.0.0',base+offset)+'/30','dev',iface)
                 add(owner,'sysctl','-qw',f'net.ipv4.conf.{iface}.rp_filter=0')
                 add(owner,'ip','link','set',iface,'up')
-            add(node,'ip','-6','route','replace',self.locator(node)+'4/128','encap','seg6local','action','End.DX4',
-                'nh4',ip('10.230.0.0',base+2),'dev',interface)
-            add(node,'ip','tunnel','add','sf-ospf','mode','ipip','local',self.loopback(node),'remote',self.loopback(peer))
-            add(node,'ip','link','set','sf-ospf','up')
+            if self.network_profile is None or self.enabled('srv6'):
+                add(node,'ip','-6','route','replace',self.locator(node)+'4/128','encap','seg6local','action','End.DX4',
+                    'nh4',ip('10.230.0.0',base+2),'dev',interface)
+            if self.network_profile is None:
+                add(node,'ip','tunnel','add','sf-ospf','mode','ipip','local',self.loopback(node),'remote',self.loopback(peer))
+                add(node,'ip','link','set','sf-ospf','up')
             add(node,'ip','rule','add','pref','100','to',destination+'/32','lookup','300')
+            if self.network_profile and 'evpn-srv6' in self.network_profile['carriers']:
+                add(node,'ip','route','replace','blackhole','default','table','300','metric','32760')
         return jobs

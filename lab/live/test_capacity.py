@@ -1,10 +1,15 @@
 import copy
 import unittest
+from unittest.mock import patch
 
-from lab.live.capacity import verified
+from lab.live.capacity import main, verified
 
 
 class CapacityEvidenceTests(unittest.TestCase):
+    def test_cli_propagates_failed_measurement(self):
+        with patch('lab.live.capacity.monitor', return_value={'result':'failed'}):
+            self.assertEqual(main(['--run-id','owned','--streams','24','--output','unused']),1)
+
     def test_startup_capture_does_not_certify_a_later_transition(self):
         flow = {'fresh':True, 'evidence_fresh':True, 'metrics':{'goodput_bps':1000},
                 'evidence_at':100, 'evidence':{'forward':2,'reverse':2},

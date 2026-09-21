@@ -55,7 +55,8 @@ class Cloud:
                        # A bounded gateway probe fan-out needs a fleet-wide
                        # verification window. Individual FRR subprocesses
                        # remain limited by the execution agent's 20s budget.
-                       "controllerTuning": {"planTTL": "10m", "operationTimeout": "60s" if getattr(r,'live_mode',False) else f"{getattr(r, 'frr_operation_timeout', 8)+2}s", "httpWriteTimeout": "300s"},
+                       "controllerTuning": {"planTTL": "10m", "operationTimeout": "60s" if getattr(r,'live_mode',False) else f"{getattr(r, 'frr_operation_timeout', 8)+2}s", "httpWriteTimeout": "300s",
+                                            "deviceBatchSize":32 if getattr(r,'live_mode',False) else 4},
                        "adapter": {"kind": "frr", "frrAgentEndpoint": self.agent.endpoint,
                                    "frrAgentSecret": "platform-frr-agent", "frrAgentInsecure": True},
                        "observability": {"otlpEndpoint": f"{self.gateway}:{r.noc.port('otlp')}", "otlpInsecure": True}})
@@ -69,6 +70,7 @@ class Cloud:
     def start(self):
         c, r = self.cluster, self.runtime
         if not self.installed:
+            self.agent.start_executor()
             with c.operation('controller-install', '安装 3 副本地面控制器', 'Helm / starfabric / ha', 900):
                 helm(["install", "ha", str(ROOT / "deploy/helm/starfabric"), "-n", "starfabric", "-f", str(self.values)], c.kubeconfig)
             self.installed = True

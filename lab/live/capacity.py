@@ -203,7 +203,7 @@ def monitor(run_id, streams, window, warmup, outage, output, stop_after=False):
     return report
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run-id',required=True)
     parser.add_argument('--streams',type=int,required=True)
@@ -212,11 +212,12 @@ def main():
     parser.add_argument('--outage',type=int,default=60)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--stop-after',action='store_true')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.streams < 1 or args.window < 60 or args.warmup < 60 or args.outage < 5:
         parser.error('invalid trial bounds')
-    monitor(args.run_id,args.streams,args.window,args.warmup,args.outage,args.output,args.stop_after)
+    result = monitor(args.run_id,args.streams,args.window,args.warmup,args.outage,args.output,args.stop_after)
+    return 0 if result['result'] == 'passed' else 1
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

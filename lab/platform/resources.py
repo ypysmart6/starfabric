@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import os
+import subprocess
 
 from run import command, save, TOOLS
 
@@ -12,15 +13,18 @@ class HostBudget:
         self.changed = {}
         self.radio = []
         self.affinity = None
+        self.keepalive = None
+        self.keepalive_log = None
 
     def prepare(self):
         self.affinity = sorted(os.sched_getaffinity(0))
         if len(self.affinity) < 2:
             raise RuntimeError('live constellation and software radio require at least two available CPUs')
-        self.radio_cpu = str(self.affinity[0])
-        self.data_cpu_set = ','.join(map(str,self.affinity[1:]))
+        reserved = 2 if len(self.affinity) >= 4 else 1
+        self.radio_cpu = ','.join(map(str,self.affinity[:reserved]))
+        self.data_cpu_set = ','.join(map(str,self.affinity[reserved:]))
         # UERANSIM RLS timers must not be starved while hundreds of FRR/Rust
-        # processes start. Reserve one CPU for the owned radio pair and keep
+        # processes start. Reserve CPUs for the owned radio pair and keep
         # the driver, its children, cloud and constellation on the remainder.
         for name in ['nr_gnb','nr_ue']:
             info=json.loads(command('docker','inspect',name).stdout)[0]
@@ -30,7 +34,7 @@ class HostBudget:
             self.radio.append(record)
             self.save_radio()
             command('docker','update','--cpuset-cpus',self.radio_cpu,'--cpu-shares','8192',name)
-        os.sched_setaffinity(0,self.affinity[1:])
+        os.sched_setaffinity(0,self.affinity[reserved:])
         for name, required in (("max_user_instances", 4096), ("max_user_watches", 524288)):
             path = Path("/proc/sys/fs/inotify") / name
             old = int(path.read_text())
@@ -40,6 +44,23 @@ class HostBudget:
             save(self.artifacts / "host-budget.json", self.changed)
             command("docker", "run", "--rm", "--privileged", "--network=none", "--entrypoint", "sysctl", TOOLS,
                     "-w", f"fs.inotify.{name}={required}")
+
+    def start_radio_keepalive(self):
+        # This baseline traffic is never counted as satellite packet evidence.
+        self.keepalive_log = (self.artifacts/'5g-startup-keepalive.log').open('w')
+        self.keepalive = subprocess.Popen(['docker','exec','nr_ue','sh','-c',
+            'echo $$ > /tmp/starfabric-startup-ping.pid; exec ping -n -D -I uesimtun0 -i 1 -W 1 192.168.100.1'],
+            stdout=self.keepalive_log,stderr=subprocess.STDOUT)
+
+    def stop_radio_keepalive(self):
+        if self.keepalive and self.keepalive.poll() is None:
+            command('docker','exec','nr_ue','sh','-c',
+                    'kill -INT "$(cat /tmp/starfabric-startup-ping.pid)"',check=False)
+            try: self.keepalive.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                self.keepalive.terminate()
+                self.keepalive.wait(timeout=5)
+        if self.keepalive_log: self.keepalive_log.close()
 
     def save_radio(self):
         save(self.artifacts/'radio-cpu-budget.json',{'available_cpus':self.affinity,'radio_cpu':self.radio_cpu,
@@ -52,6 +73,7 @@ class HostBudget:
             command(*args,*names)
 
     def cleanup(self):
+        self.stop_radio_keepalive()
         for record in self.radio:
             result=command('docker','inspect',record['name'],check=False)
             if result.returncode:

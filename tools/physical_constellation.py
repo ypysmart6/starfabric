@@ -179,7 +179,72 @@ class Contacts:
         self.planes = {n["id"]: n.get("labels", {}).get("logical_plane") for n in nodes}
         self.selected = {}
 
-    def frame(self, states, offset):
+    def feeder_pairs(self, candidates, expiring=(), offset=None):
+        """Max-min terminal allocation, preserving feasible existing contacts.
+
+        A distance-first global greedy allocation can give a nearby site three
+        terminals while starving its neighbour. Allocate one round per site;
+        augmenting paths move an allocation when this frees a scarce satellite
+        terminal for a site with fewer alternatives. Physical budgets are kept.
+        """
+        from collections import defaultdict
+        choices = defaultdict(list)
+        for kind,sat,gw,*_ in candidates:
+            if kind == 'feeder': choices[gw].append(sat)
+        assigned = {gw:set() for gw in choices}
+        owners = defaultdict(set)
+        limit = self.config['links']['feeder_terminals_per_satellite']
+        expiring=set(expiring)
+        def locked(sat,gw):
+            since=self.selected.get((sat,gw))
+            return since is not None and (offset is None or offset-since >= self.config['links'].get('acquisition_seconds',0))
+        # Keep still-visible established assignments. Rebuilding an equally
+        # sized matching from scratch can replace two locked uplinks at once,
+        # leaving only one usable uplink during physical acquisition.
+        for gw in sorted(choices):
+            for sat in choices[gw]:
+                if (sat,gw) in self.selected and len(assigned[gw]) < self.config['links']['gateway_terminals'] and len(owners[sat]) < limit:
+                    owners[sat].add(gw); assigned[gw].add(sat)
+        def allocate(gw, visited):
+            for sat in choices[gw]:
+                if sat in assigned[gw] or sat in visited: continue
+                visited.add(sat)
+                if len(owners[sat]) < limit:
+                    owners[sat].add(gw); assigned[gw].add(sat); return True
+                for other in sorted(owners[sat],key=lambda n:(-len(choices[n]),n)):
+                    if ((sat,other) in self.selected and
+                        sum(locked(s,other) for s in assigned[other]) <= 2):
+                        continue
+                    owners[sat].remove(other); assigned[other].remove(sat)
+                    if allocate(other,visited):
+                        owners[sat].add(gw); assigned[gw].add(sat); return True
+                    owners[sat].add(other); assigned[other].add(sat)
+            return False
+        for count in range(self.config['links']['gateway_terminals']):
+            for gw in sorted(choices,key=lambda n:(len(choices[n]),n)):
+                if len(assigned[gw]) <= count:
+                    if allocate(gw,set()): continue
+                    # If all satellite terminals are occupied, a site with
+                    # three links yields one to a site lacking its second.
+                    for sat in choices[gw]:
+                        if sat in assigned[gw]: continue
+                        donor=next((n for n in sorted(owners[sat]) if len(assigned[n])>max(2,count+1)),None)
+                        if donor:
+                            owners[sat].remove(donor); assigned[donor].remove(sat)
+                            owners[sat].add(gw); assigned[gw].add(sat); break
+        # Use the third terminal to acquire a successor before a predicted
+        # departure. Replace at most one locked contact per site per sample;
+        # the two remaining locked links retain the primary/backup service.
+        for gw in sorted(choices):
+            if sum(locked(s,gw) for s in assigned[gw]) < 3: continue
+            old=next((s for s in choices[gw] if s in assigned[gw] and (s,gw) in expiring),None)
+            if old is None: continue
+            assigned[gw].remove(old); owners[old].remove(gw)
+            if not allocate(gw,{s for s in choices[gw] if (s,gw) in expiring}):
+                assigned[gw].add(old); owners[old].add(gw)
+        return {(sat,gw) for gw,sats in assigned.items() for sat in sats}
+
+    def frame(self, states, offset, future_states=None):
         policy = self.config["links"]
         candidates = []
         ids = sorted(states)
@@ -202,8 +267,19 @@ class Contacts:
                 if distance <= policy["max_feeder_range_km"] and elevation_deg(state.position, pos, up) >= policy["minimum_elevation_deg"]:
                     candidates.append(("feeder", name, station["id"], distance, delay, doppler, 0))
         candidates.sort(key=lambda v: (v[0], v[6], (v[1], v[2]) not in self.selected, v[3], v[1], v[2]))
+        expiring=set()
+        if future_states:
+            for station in self.config['ground_stations']:
+                for sat,gw in self.selected:
+                    if gw != station['id']: continue
+                    state=future_states[sat]; pos,_,up=ground_teme(station,state.at)
+                    distance=math.dist(state.position,pos)
+                    if distance > policy['max_feeder_range_km'] or elevation_deg(state.position,pos,up)<policy['minimum_elevation_deg']:
+                        expiring.add((sat,gw))
+        feeders = self.feeder_pairs(candidates,expiring,offset)
         counts, chosen, links = Counter(), {}, []
         for kind, a, b, distance, delay, doppler, preference in candidates:
+            if kind == 'feeder' and (a,b) not in feeders: continue
             keys = ((kind, a), (kind, b))
             limits = (policy["isl_terminals_per_satellite"],) * 2 if kind == "isl" else (policy["feeder_terminals_per_satellite"], policy["gateway_terminals"])
             if any(counts[key] >= limit for key, limit in zip(keys, limits)):

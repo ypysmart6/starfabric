@@ -59,8 +59,7 @@ class ConstellationRuntime(Runtime):
         def create(node):
             directory=self.art/'routers'/node; directory.mkdir(parents=True)
             (directory/'frr.conf').write_text(f.config(node))
-            daemons='zebra=yes\nstaticd=yes\nisisd=yes\nospfd=yes\nospf6d=yes\nldpd=yes\nvtysh_enable=yes\n'
-            if node in f.gateways: daemons+='bgpd=yes\n'
+            daemons=''.join(name+'=yes\n' for name in f.daemons(node))+'vtysh_enable=yes\n'
             (directory/'daemons').write_text(daemons)
             name=self.router(node)
             command('docker','run','-d','--name',name,'--label','starfabric.run='+self.identifier,'--network=none',
@@ -69,12 +68,16 @@ class ConstellationRuntime(Runtime):
                     '--cap-add=NET_ADMIN','--cap-add=NET_RAW','--cap-add=SYS_ADMIN',
                     '--sysctl','net.ipv4.ip_forward=1','--sysctl','net.ipv4.conf.all.rp_filter=0',
                     '--sysctl','net.ipv4.conf.default.rp_filter=0',
-                    '--sysctl','net.ipv6.conf.all.forwarding=1','--sysctl','net.ipv6.conf.all.seg6_enabled=1',
-                    '--sysctl','net.ipv6.conf.default.seg6_enabled=1','--sysctl','net.mpls.platform_labels=32768',
-                    '--sysctl','net.mpls.conf.lo.input=1','-v',f'{directory}/daemons:/etc/frr/daemons:ro',
+                    '--sysctl','net.ipv6.conf.all.forwarding=1',
+                    *(['--sysctl','net.ipv6.conf.all.seg6_enabled=1','--sysctl','net.ipv6.conf.default.seg6_enabled=1'] if f.enabled('srv6') else []),
+                    *(['--sysctl','net.mpls.platform_labels=32768','--sysctl','net.mpls.conf.lo.input=1'] if f.enabled('mpls') else []),
+                    '-v',f'{directory}/daemons:/etc/frr/daemons:ro',
                     '-v',f'{directory}/frr.conf:/etc/frr/frr.conf:ro','-v',f'{self.frr_config_dir}/vtysh.conf:/etc/frr/vtysh.conf:ro',FRR)
             with self.resource_lock: self.containers.append(name)
-            wait_for(node+' FRR startup',lambda:'isisd' in self.vty(node,'show daemons'),90)
+            def daemons_ready():
+                running = self.vty(node, 'show daemons')
+                return all(d in running for d in f.daemons(node))
+            wait_for(node+' FRR startup',daemons_ready,90)
             return json.loads(command('docker','inspect',name).stdout)[0]['State']['Pid']
         with self.operation('frr-create', '创建 FRR 容器并等待路由进程', '8 路并行创建；每节点路由进程就绪检查最长 90 秒'):
             self.pids=self.parallel(list(f.nodes),create,8)
@@ -91,18 +94,21 @@ class ConstellationRuntime(Runtime):
         (self.art/'wiring.log').write_text(result.stdout+result.stderr)
         self.interfaces={(a,b):v['interface'] for a,neighbors in f.adjacency.items() for b,v in neighbors.items()}
         def ready(node):
+            query = 'show ip ospf neighbor' if f.enabled('ospf') else 'show isis neighbor'
+            marker = 'Full' if f.enabled('ospf') else 'Up'
             def neighbors_ready():
-                raw=self.vty(node,'show ip ospf neighbor')
-                return sum('Full' in line for line in raw.splitlines())==sum(f.active(node,p) for p in f.adjacency[node])
-            wait_for(node+' all OSPF neighbors',neighbors_ready,180)
+                raw=self.vty(node,query)
+                return sum(marker in line.split() or (marker == 'Full' and 'Full' in line) for line in raw.splitlines())==sum(f.active(node,p) for p in f.adjacency[node])
+            wait_for(node+' all IGP neighbors',neighbors_ready,180)
             return {'pid':self.pids[node],'container':self.router(node),'daemons':self.vty(node,'show daemons'),
-                    'ospf_neighbors':self.vty(node,'show ip ospf neighbor'),'isis_neighbors':self.vty(node,'show isis neighbor'),
+                    'igp_neighbors':self.vty(node,query),
                     'running_config':self.vty(node,'show running-config')}
-        with self.operation('frr-neighbors', '等待全部 OSPF 邻居 Full', '逐节点检查实际邻居数量；每节点最长 180 秒'):
+        with self.operation('frr-neighbors', '等待全部所选 IGP 邻居就绪', '逐节点检查实际邻居数量；每节点最长 180 秒'):
             save(self.art/'fleet-inventory.json',self.parallel(list(f.nodes),ready))
-        self.checks['real_frr_isis_network']=True
+        if f.enabled('isis'): self.checks['real_frr_isis_network']=True
+        if f.enabled('ospf'): self.checks['all_configured_links_have_live_ospf_neighbors']=True
         self.checks['all_configured_nodes_deployed']=True
-        self.checks['all_configured_links_have_live_ospf_neighbors']=True
+        self.checks['all_configured_links_have_live_igp_neighbors']=True
 
     def fleet_probe(self,phase):
         f=self.fabric

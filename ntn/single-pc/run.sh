@@ -127,6 +127,10 @@ for image in "$OPEN5GS_IMAGE" "$UERANSIM_IMAGE" "$MONGO_IMAGE"; do
   if ! docker image inspect "$image" >/dev/null 2>&1; then docker pull "$image"; fi
 done
 
+live_progress "准备带无线重连修复的 gNB 镜像"
+SF_UERANSIM_GNB_IMAGE=$(python3 "$lab_dir/build_ueransim.py")
+export SF_UERANSIM_GNB_IMAGE
+
 started=1
 live_progress "启动 MongoDB 与用户配置服务"
 # UDR and PCF exit if Mongo is still recovering. Compose's depends_on only

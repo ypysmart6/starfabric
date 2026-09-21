@@ -17,6 +17,16 @@ class Protocols:
         return plan,plan['paths'][intent][0]['nodes']
     def setup(self):
         a,b=self.f.pair
+        if self.f.network_profile is not None:
+            family = 'isis' if self.f.enabled('isis') else 'ospf6'
+            wait_for('IGP remote IPv6 locator', lambda: family in self.r.vty(a, f'show ipv6 route {self.f.locator(b)}/64 json'), 180)
+            if self.f.enabled('bgpls'):
+                wait_for('BGP-LS active physical links', lambda: len(self.edges()) == len(self.f.active_pairs())*2, 180)
+            if self.f.enabled('evpn'):
+                wait_for('EVPN VXLAN gateway SVIs', lambda: not any(self.r.parallel(self.f.gateways, self.evpn_missing, 8).values()), 180)
+            self.snapshot('protocol-initial')
+            self.r.event('selected_protocols_configured', profile=self.f.network_profile)
+            return
         wait_for('OSPFv3 remote SID locator',lambda:'ospf6' in self.r.vty(a,f'show ipv6 route {self.f.locator(b)}/64 json'),180)
         wait_for('BGP-LS active physical links',lambda:len(self.edges())==len(self.f.active_pairs())*2,180)
         missing={}
@@ -43,6 +53,7 @@ class Protocols:
         valid='\n'.join(line for line in table.splitlines() if line.lstrip().startswith('*'))
         return [peer for peer in self.f.gateways if peer!=node and '[32]:['+self.f.svi(peer)+']' not in valid]
     def edges(self):
+        if not self.f.enabled('bgpls'): return set()
         source,collector=self.f.pair
         rib=json.loads(self.r.vty(collector,'show bgp link-state link-state json'));edges=set()
         for paths in rib.get('routes',{}).values():
@@ -70,9 +81,17 @@ class Protocols:
     def snapshot(self,phase):
         queries=[('ospfv2','show ip ospf neighbor'),('ospfv3','show ipv6 ospf6 neighbor'),('ipv4-rib','show ip route json'),
                  ('ipv6-rib','show ipv6 route json'),('ldp','show mpls ldp neighbor'),('lfib','show mpls table json')]
+        if self.f.network_profile is not None:
+            queries = [('ipv4-rib','show ip route json'),('ipv6-rib','show ipv6 route json')]
+            if self.f.enabled('isis'): queries += [('isis','show isis neighbor')]
+            if self.f.enabled('ospf'): queries += [('ospfv2','show ip ospf neighbor'),('ospfv3','show ipv6 ospf6 neighbor')]
+            if self.f.enabled('ldp'): queries += [('ldp','show mpls ldp neighbor')]
+            if self.f.enabled('mpls'): queries += [('lfib','show mpls table json')]
         def node_state(node):
             values={name:self.r.vty(node,query) for name,query in queries}
-            if node in self.f.gateways:values.update(bgpls=self.r.vty(node,'show bgp link-state link-state json'),evpn=self.r.vty(node,'show bgp l2vpn evpn route type 2'))
+            if node in self.f.gateways:
+                if self.f.enabled('bgpls'): values['bgpls']=self.r.vty(node,'show bgp link-state link-state json')
+                if self.f.enabled('evpn'): values['evpn']=self.r.vty(node,'show bgp l2vpn evpn route type 2')
             return values
         # Whole-fleet initial evidence; selected service routers on each fault.
         nodes=list(self.f.nodes) if phase=='protocol-initial' else sorted(set(self.path('n3-forward')[1]+self.path('n3-reverse')[1]))

@@ -1,3 +1,4 @@
+import {launchOptions, launchForm, submitLaunch} from './launch.js';
 import {
   Globe
 } from './globe.js';
@@ -134,7 +135,7 @@ const filteredRegions = new Set(['node-table','node-count','cap-list','cap-count
 
 const pages = {
   overview: ['任务总览', 'MISSION OVERVIEW', '一屏掌握星座、业务与运行状态'],
-  orbit: ['星座与轨道', 'CONSTELLATION & ORBITS', '120 颗卫星的逐帧物理状态与实际链路'],
+  orbit: ['星座与轨道', 'CONSTELLATION & ORBITS', '所选星座的物理状态与实际链路'],
   routing: ['路由与策略', 'ROUTING & PATHS', '从业务意图，追踪到每一跳的主备路由'],
   business: ['全球业务', 'GLOBAL WORKLOADS', '全球网关业务分布、多协议承载与 5G 基线会话'],
   autonomy: ['星上自治', 'ONBOARD AUTONOMY', '每星运行时、心跳超时、备用路由与恢复状态'],
@@ -143,7 +144,7 @@ const pages = {
   capabilities: ['完整功能图谱', 'CAPABILITY ATLAS', '覆盖清单中的全部技术、独立证据与待完成能力'],
   evidence: ['实验与证据', 'RUNS & EVIDENCE', '保留运行来源，让每一个结论可以回溯'],
   learning: ['文件与学习', 'EXPLORE THE SYSTEM', '沿着系统流程，理解每一个文件的作用'],
-  configuration: ['星座配置', 'CONSTELLATION CONFIGURATION', '编辑实验输入，检查参数并导出配置副本'],
+  configuration: ['启动配置', 'LAUNCH CONFIGURATION', '选择协议、算法与规模后启动平台'],
   live: ['实时控制器', 'LIVE CONTROLLER', '连接正在运行的控制器，读取最新拓扑和路由状态']
 };
 const checkNames = {
@@ -303,9 +304,9 @@ function checkList(keys) {
 
 function renderShell(incremental=false) {
   const nav = (ids) => ids.map(id =>
-    `<a class="nav-link ${state.page===id?'active':''}" href="#${id}" ${state.page===id?'aria-current="page"':''}>${icon(id)}<span>${pages[id][0]}</span>${id==='orbit'?'<span class="nav-count">120</span>':''}</a>`
+    `<a class="nav-link ${state.page===id?'active':''}" href="#${id}" ${state.page===id?'aria-current="page"':''}>${icon(id)}<span>${pages[id][0]}</span>${id==='orbit'?`<span class="nav-count">${data.runtime?.launch_config?.satellites ?? data.nodes?.filter(n=>n.kind==='satellite').length ?? '—'}</span>`:''}</a>`
     ).join('');
-  writeHTML(document.querySelector('#sidebar'), `<a class="brand" href="#overview">${icon('orbit',35)}<div><div class="brand-name">StarFabric<span style="color:#7eaeaa">.</span></div><p>SATELLITE OPERATIONS</p></div></a><div class="mission-pill">${icon('globe',14)}<strong>LEO · 120 星任务</strong><span>⌄</span></div><div class="nav-label">MISSION CONTROL</div><nav class="nav-group" aria-label="任务控制">${nav(['overview','orbit','routing','business','autonomy','protocols','cloud'])}</nav><div class="nav-label">WORKSPACE</div><nav class="nav-group" aria-label="工作空间">${nav(['capabilities','evidence','configuration','learning'])}</nav><div class="sidebar-bottom"><a class="nav-link ${state.page==='live'?'active':''}" href="#live" style="padding:6px 0 16px">${icon('live',16)}实时控制器 ${icon('arrow',13)}</a><div class="archive-note"><strong>${icon('clock',12)} ${state.mode==='live'?'持续实时 · 后台常驻':'历史运行 · 可交互回放'}</strong>${state.mode==='live'?'轨道与实际网络持续更新':'物理模型与验收记录'}<br>${state.mode==='live'?'关闭浏览器不会停止运行':check(data.run.checks?.owned_resources_cleaned)?'报告确认平台资源已清理':'资源清理状态以本轮报告为准'}</div><div class="flex"><div class="avatar">SF</div><div><div style="font-size:20px;color:#c6d2df">本地任务工作空间</div><div style="font-size:16px;margin-top:4px">STARFABRIC / 2.0</div></div></div></div>`, incremental);
+  writeHTML(document.querySelector('#sidebar'), `<a class="brand" href="#overview">${icon('orbit',35)}<div><div class="brand-name">StarFabric<span style="color:#7eaeaa">.</span></div><p>SATELLITE OPERATIONS</p></div></a><div class="mission-pill">${icon('globe',14)}<strong>LEO · 星座任务</strong><span>⌄</span></div><div class="nav-label">MISSION CONTROL</div><nav class="nav-group" aria-label="任务控制">${nav(['overview','orbit','routing','business','autonomy','protocols','cloud'])}</nav><div class="nav-label">WORKSPACE</div><nav class="nav-group" aria-label="工作空间">${nav(['capabilities','evidence','configuration','learning'])}</nav><div class="sidebar-bottom"><a class="nav-link ${state.page==='live'?'active':''}" href="#live" style="padding:6px 0 16px">${icon('live',16)}实时控制器 ${icon('arrow',13)}</a><div class="archive-note"><strong>${icon('clock',12)} ${state.mode==='live'?'持续实时 · 后台常驻':'历史运行 · 可交互回放'}</strong>${state.mode==='live'?'轨道与实际网络持续更新':'物理模型与验收记录'}<br>${state.mode==='live'?'关闭浏览器不会停止运行':check(data.run.checks?.owned_resources_cleaned)?'报告确认平台资源已清理':'资源清理状态以本轮报告为准'}</div><div class="flex"><div class="avatar">SF</div><div><div style="font-size:20px;color:#c6d2df">本地任务工作空间</div><div style="font-size:16px;margin-top:4px">STARFABRIC / 2.0</div></div></div></div>`, incremental);
   writeHTML(document.querySelector('#topbar'), `<div class="flex"><button class="icon-btn menu-button" data-action="menu" aria-label="打开导航">${icon('menu')}</button><div class="breadcrumb"><span>工作空间</span>${icon('chevron',11)}<span>LEO 星座</span>${icon('chevron',11)}<strong>${pages[state.page][0]}</strong></div></div><div class="top-actions"><div class="tab-segment mode-switch" aria-label="数据模式"><button data-action="mode-live" class="${state.mode==='live'?'active':''}">实时</button><button data-action="mode-history" class="${state.mode==='history'?'active':''}">历史</button></div><form class="search-box" id="global-search-form">${icon('search',14)}<input id="global-search" placeholder="搜索卫星、功能或文件" aria-label="搜索卫星、功能或文件"><kbd>⌘ K</kbd></form><div class="top-status">${badge(state.mode==='live'?'实时模式':'历史回放',state.mode==='live'?'green':'blue')}</div><div class="separator"></div><button class="icon-btn" data-action="help" aria-label="学习手册">${icon('help',17)}</button><button class="icon-btn" data-action="events" aria-label="运行事件">${icon('bell',17)}</button><div class="avatar" style="background:#eef3f8;color:#6984a0;border-color:#d7e0eb">SF</div></div>`, incremental);
   writeHTML(document.querySelector('#footer'), `<span>© 2026 StarFabric · 动态星地网络控制与验证平台</span><span>${state.mode==='live'?'实时软件在环 · 按实际采样时间更新':'数据来源：本地物理模型与运行证据'} <span class="mono">v2.0</span></span>`, incremental);
 }
@@ -317,17 +318,18 @@ const runtimePhases = {
   creating_124_routers:'创建本轮全部 FRR 路由器', checking_protocol_neighbors:'等待实际协议邻居收敛',
   starting_observability:'启动可观测服务', starting_controller:'启动地面控制器',
   committing_initial_routes:'提交初始业务路由', starting_5g_business:'启动持续 5G 业务',
-  starting_120_onboard:'启动 120 个星上实例', running:'持续运行中', degraded:'运行中 · 控制路径降级'
+  starting_120_onboard:'启动本轮全部星上实例', running:'持续运行中', degraded:'运行中 · 控制路径降级'
 };
 const runtimeName = value => runtimePhases[value] || value || '等待启动';
 const uptime = () => Math.max(0,Math.floor((Date.now()-new Date(data.runtime.started_at).getTime())/1000));
 const durationLabel = seconds => `${Math.floor(seconds/3600)}h ${Math.floor(seconds%3600/60)}m ${Math.floor(seconds%60)}s`;
 
 function runtimeControls(runtime) {
-  return runtime.active ? button('停止运行','runtime-stop','','pause') : button('启动 120 星','runtime-start','primary','play');
+  return runtime.active ? button('停止运行','runtime-stop','','pause') : button('配置并启动','runtime-start','primary','play');
 }
 
 function renderPending(value, incremental=false) {
+  const preserveLaunch = incremental && Boolean(data?.runtime?.active) === Boolean(value.runtime.active);
   const scroll = scrollY;
   const oldLog = document.querySelector('#startup-log');
   const logScroll = oldLog && oldLog.scrollTop;
@@ -339,7 +341,7 @@ function renderPending(value, incremental=false) {
   data = {...value,pending:true,run:{checks:{}},nodes:[],sources:[]};
   renderShell(incremental);
   const r=value.runtime;
-  writeHTML(document.querySelector('#main'), `<div class="page-header"><div><div class="eyebrow">CONTINUOUS MISSION · STARTUP</div><h1>120 星持续实时运行</h1><p class="page-subtitle">启动过程自动刷新 · 所有完成状态来自后台实际检查点</p></div><div class="header-actions">${button('导出启动诊断','export-startup','','download')}${runtimeControls(r)}</div></div><div id="live-freshness" class="callout ${r.phase==='failed'?'amber':''}">${icon('info',16)}<span>${r.phase==='stopping'?'正在停止并清理本轮资源，当前命令结束后继续清理。':r.active?'后台正在部署，完成后自动进入实时态势。关闭网页后部署继续。':'服务当前未运行。启动后可在这里查看每个步骤及 Kubernetes 状态。'}${r.error?' '+esc(r.error):''}</span></div>${startupPanel(r)}<div class="section-gap">${button('查看历史记录','mode-history','','clock')}</div>`, incremental);
+  writeHTML(document.querySelector('#main'), `<div class="page-header"><div><div class="eyebrow">CONTINUOUS MISSION · STARTUP</div><h1>星座实时平台</h1><p class="page-subtitle">启动过程自动刷新 · 所有完成状态来自后台实际检查点</p></div><div class="header-actions">${button('导出启动诊断','export-startup','','download')}${runtimeControls(r)}</div></div><div id="live-freshness" class="callout ${r.phase==='failed'?'amber':''}">${icon('info',16)}<span>${r.phase==='stopping'?'正在停止并清理本轮资源，当前命令结束后继续清理。':r.active?'后台正在部署，完成后自动进入实时态势。关闭网页后部署继续。':'服务当前未运行。启动后可在这里查看每个步骤及 Kubernetes 状态。'}${r.error?' '+esc(r.error):''}</span></div>${state.page==='configuration' ? launchForm(r) : startupPanel(r)}<div class="section-gap">${button('查看历史记录','mode-history','','clock')}</div>`, incremental, preserveLaunch ? new Set(['launch-form']) : undefined);
   const log = document.querySelector('#startup-log');
   if (log) log.scrollTop = followLog ? log.scrollHeight : logScroll;
   const tasks = document.querySelector('.startup-task-list');
@@ -350,7 +352,7 @@ function renderPending(value, incremental=false) {
 
 function startupPanel(r, archived=false) {
   const p=r.startup, d=r.diagnostics || {};
-  if (!p) return card('等待启动记录',`<p class="feature-note">${r.active?'这轮启动尚未提供细分检查点。新启动的会话会记录各子步骤。':'点击“启动 120 星”后，将显示 5G、Kubernetes、FRR 和星上实例的部署进展。'}</p>`);
+  if (!p) return card('等待启动记录',`<p class="feature-note">${r.active?'这轮启动尚未提供细分检查点。新启动的会话会记录各子步骤。':'点击“配置并启动”后，将显示 5G、Kubernetes、FRR 和星上实例的部署进展。'}</p>`);
   const seconds = (start,end) => start ? Math.max(0,(new Date(end || Date.now())-new Date(start))/1000) : null;
   const age = value => value ? num(seconds(value),0)+' 秒前' : '尚未采集';
   const stage=(p.stages || []).find(s=>s.id===p.current_stage);
@@ -389,7 +391,7 @@ function startupPanel(r, archived=false) {
 function liveHeader() {
   const r=data.runtime;
   const stale=!r.fresh;
-  return `<div class="page-header"><div><div class="eyebrow">LIVE · ${pages[state.page][1]}</div><h1>${pages[state.page][0]}</h1><p class="page-subtitle">120 星持续实时系统 · ${esc(data.run.run_id)}</p></div><div class="header-actions">${badge(runtimeName(r.phase),r.fresh?'green':'amber')}${runtimeControls(r)}${button('导出当前记录','export','','download')}</div></div><div class="callout ${stale?'amber':''}" id="live-freshness">${icon('live',16)}${stale?'保留最后一次状态，请留意当前运行阶段。':'当前数据来自持续运行服务。'} 模型时间 ${date(frame().at)} · 网络应用 ${time(r.applied_at)} UTC${r.error?' · '+esc(r.error):''}</div>`;
+  return `<div class="page-header"><div><div class="eyebrow">LIVE · ${pages[state.page][1]}</div><h1>${pages[state.page][0]}</h1><p class="page-subtitle">${satelliteNodes().length} 星持续实时系统 · ${esc(data.run.run_id)}</p></div><div class="header-actions">${badge(runtimeName(r.phase),r.fresh?'green':'amber')}${runtimeControls(r)}${button('导出当前记录','export','','download')}</div></div><div class="callout ${stale?'amber':''}" id="live-freshness">${icon('live',16)}${stale?'保留最后一次状态，请留意当前运行阶段。':'当前数据来自持续运行服务。'} 模型时间 ${date(frame().at)} · 网络应用 ${time(r.applied_at)} UTC${r.error?' · '+esc(r.error):''}</div>`;
 }
 
 function liveOverview() {
@@ -398,7 +400,7 @@ function liveOverview() {
   const connected=states.filter(v=>v.connected).length;
   const primary=(plan()?.paths?.['n3-forward']?.[0]?.nodes||[]).filter(n=>n.startsWith('sat-')).slice(0,4);
   const stats=[
-    stat('已部署星上实例',data.run.deployed_counts.onboard_satellites,'/ 120',`<b>${connected}</b> 颗星最近状态为已连接`,'satellite'),
+    stat('已部署星上实例',data.run.deployed_counts.onboard_satellites,'/ '+satelliteNodes().length,`<b>${connected}</b> 颗星最近状态为已连接`,'satellite'),
     stat('当前活动链路',frame().active_pairs,'对',`${data.nodes.filter(n=>n.kind==='gateway').length} 座地面网关 · 当前模型接触`,'routing',data.frames.map(f=>f.active_pairs)),
     stat('实际路由更新',data.runtime.route_changes,'次',`已应用 ${data.runtime.sequence-100000} 次实时采样`,'live'),
     stat('观测业务送达率',tx?.transmitted?num(tx.received/tx.transmitted*100,2):'—','%',`${num(tx?.received)} / ${num(tx?.transmitted)} 个已观测报文`,'business')
@@ -411,7 +413,7 @@ function liveOverview() {
 function liveAutonomy() {
   const states=Object.values(data.onboard).map(v=>v.live).filter(Boolean);
   const active=states.filter(s=>s.fallback_active).length;
-  return `<div class="stats">${stat('逐星程序',data.run.deployed_counts.onboard_satellites,'/ 120','实际部署的 Rust 实例','autonomy')}${stat('已连接',states.filter(s=>s.connected).length,'颗','星上持久状态中的 connected','live')}${stat('自治接管',active,'颗','心跳超时后由本星实际路由表选择下一跳','routing')}${stat('状态记录',states.length,'份','随实时采样读取逐星最新状态','file')}</div>${card('120 星当前自治状态',`<div class="fleet-grid">${satelliteNodes().map(n=>{const s=data.onboard[n.id]?.live;return `<button class="fleet-tile ${!s?'empty':s.fallback_active?'amber':''}" data-node="${n.id}">${icon('satellite',16)}<b>${n.id.slice(4)}</b></button>`;}).join('')}</div><p class="feature-note">琥珀色表示自治接管。备用路径从本星内核路由表查询地面出口网关的下一跳；出口不可达时撤回对应旧备用路由。点击卫星查看实际已安装路由。</p>`)}<div class="section-gap">${card('运动中的自治流程','<div class="route-path"><span class="route-node">地面心跳中断</span><span>→</span><span class="route-node">查询本星 IGP 路由</span><span>→</span><span class="route-node">动态更新备用下一跳</span><span>→</span><span class="route-node">地面恢复后撤回备用路由</span></div>')}</div>`;
+  return `<div class="stats">${stat('逐星程序',data.run.deployed_counts.onboard_satellites,'/ '+satelliteNodes().length,'实际部署的 Rust 实例','autonomy')}${stat('已连接',states.filter(s=>s.connected).length,'颗','星上持久状态中的 connected','live')}${stat('自治接管',active,'颗','心跳超时后由本星实际路由表选择下一跳','routing')}${stat('状态记录',states.length,'份','随实时采样读取逐星最新状态','file')}</div>${card('本轮全部星上自治状态',`<div class="fleet-grid">${satelliteNodes().map(n=>{const s=data.onboard[n.id]?.live;return `<button class="fleet-tile ${!s?'empty':s.fallback_active?'amber':''}" data-node="${n.id}">${icon('satellite',16)}<b>${n.id.slice(4)}</b></button>`;}).join('')}</div><p class="feature-note">琥珀色表示自治接管。备用路径从本星内核路由表查询地面出口网关的下一跳；出口不可达时撤回对应旧备用路由。点击卫星查看实际已安装路由。</p>`)}<div class="section-gap">${card('运动中的自治流程','<div class="route-path"><span class="route-node">地面心跳中断</span><span>→</span><span class="route-node">查询本星 IGP 路由</span><span>→</span><span class="route-node">动态更新备用下一跳</span><span>→</span><span class="route-node">地面恢复后撤回备用路由</span></div>')}</div>`;
 }
 
 function liveEvidence() {
@@ -432,7 +434,7 @@ function header() {
 
 function orbitCard(big = false) {
   return `<section class="card orbit-card ${big?'orbit-page':''}">
-    <div class="card-head"><h2>${icon('orbit',16)} 120 星轨道态势 <span class="upper" style="margin-left:9px">EARTH & CONSTELLATION</span></h2>
+    <div class="card-head"><h2>${icon('orbit',16)} ${satelliteNodes().length} 星轨道态势 <span class="upper" style="margin-left:9px">EARTH & CONSTELLATION</span></h2>
       <div class="orbit-toolbar">
         <button class="active" data-action="toggle-orbits">${icon('orbit',11)}轨道</button>
         <button class="active" data-action="toggle-links">${icon('routing',11)}链路</button>
@@ -451,7 +453,7 @@ function orbitCard(big = false) {
       </button>
     </div>
     <div class="canvas-wrap">
-      <canvas id="orbit-canvas" aria-label="120 颗卫星以白色亮点展示，金色菱形为网关，金色圆环为主路；拖动旋转，滚轮或双指缩放至 6 倍；也可使用下方卫星表选择节点"></canvas>
+      <canvas id="orbit-canvas" aria-label="卫星以白色亮点展示，金色菱形为网关，金色圆环为主路；拖动旋转，滚轮或双指缩放至 6 倍；也可使用下方卫星表选择节点"></canvas>
       <div class="orbit-scale"><button data-action="zoom-in" aria-label="放大" title="放大 · 最高 6 倍">+</button><output id="globe-zoom" aria-label="当前缩放">1.0×</output><button data-action="zoom-out" aria-label="缩小" title="缩小 · 最低 0.5 倍">−</button></div>
     </div>
     <div class="orbit-footer">
@@ -473,7 +475,7 @@ function overview() {
   const routeNodes = (plan()?.paths?.['n3-forward']?.[0]?.nodes || []).filter(id => id.startsWith('sat-'));
   const selectedNodes = (routeNodes.length ? routeNodes : satelliteNodes().map(n => n.id)).slice(0,4);
   const statistics = [
-    stat('已部署星上实例', num(data.run.deployed_counts?.onboard_satellites ?? 0), '/ 120', '<b>12</b> 个轨道面 · 每面 10 星', 'satellite'),
+    stat('已部署星上实例', num(data.run.deployed_counts?.onboard_satellites ?? 0), '/ '+satelliteNodes().length, `<b>${data.configuration?.constellation?.planes ?? '—'}</b> 个轨道面 · 所选星座规模`, 'satellite'),
     stat('当前活动链路', '<span id="active-links">'+frame().active_pairs+'</span>', '对', '<b>4</b> 座地面网关 · 双向链路', 'routing', data.frames.map(f=>f.active_pairs)),
     stat('物理回放改路', num(data.replay.frames?.filter(f=>f.routes_reprogrammed).length ?? 0), '次', `${data.replay.frames?.length ?? 0} 帧记录 · 全时段 ${data.physics.duration_seconds} 秒`, 'live', data.replay.frames?.map(f=>f.apply_seconds)||[]),
     stat('持续业务送达率', tx ? num(tx.received/tx.transmitted*100,2) : '—', '%', tx ? `<b>${num(tx.received)}</b> / ${num(tx.transmitted)} 个报文` : '本轮尚无持续流量记录', 'business', deliveryBuckets())
@@ -538,7 +540,7 @@ function filterNodes() {
     return `<button class="link-button mono" data-node="${esc(id)}">${esc(id)}</button>`;
   }
 
-const workloadCarrierNames = {ospf:'OSPFv2',ospf6:'OSPFv3',native:'逐跳 IP',ldp:'LDP', 'sr-mpls':'SR-MPLS',pcep:'PCEP / SR-MPLS',srv6:'SRv6',evpn:'EVPN / VXLAN'};
+const workloadCarrierNames = {ospf:'OSPFv2',ospf6:'OSPFv3',native:'逐跳 IP',ldp:'LDP', 'sr-mpls':'SR-MPLS',pcep:'PCEP / SR-MPLS',srv6:'SRv6','evpn-srv6':'EVPN + SRv6',evpn:'EVPN / VXLAN'};
 const workloadControlNames = {distributed:'分布式',centralized:'集中控制',hybrid:'混合控制'};
 
 function workloadVerified(flow) {
@@ -598,22 +600,38 @@ function workloadPanel() {
   return `${workloadGeography(flows)}<section class="card section-gap"><div class="card-head"><div><h2>并行多业务承载</h2><p>${flows.length} 条真实业务流 · 分布式 ${modes.distributed||0} · 集中 ${modes.centralized||0} · 混合 ${modes.hybrid||0}</p></div><label>发包比例 <select id="workload-rate" aria-label="调整业务发包比例" ${data.runtime?.active?'':'disabled'}>${[.1,.25,.5,.75,1].map(v=>`<option value="${v}" ${v===rate?'selected':''}>${v*100}%</option>`).join('')}</select></label></div><div class="card-body"><p>当前已有 ${flows.filter(workloadVerified).length} / ${flows.length} 条业务同时具备新鲜收发计数和双向封装证据。有效速率按应用回包字节计算；TCP 超时也计入业务未完成比例。</p><p class="feature-note">这些是承载测试流；现有 5G UE / PDU 会话数不变。回包会产生反向流量。在线比例在配置上限的 10%–100% 内生效，控制器继续按上限预留；DSCP 与时延目标不代表已保证 QoS。</p>${data.workload_error?`<div class="callout amber">${esc(data.workload_error)}</div>`:''}</div>${filters}<div class="table-wrap"><table id="workload-table"><thead><tr><th>业务 / 端点</th><th>控制 / 承载</th><th>上限 / 生效目标</th><th>实测有效速率</th><th>RTT P95</th><th>未完成 / 抖动</th><th>验证状态</th></tr></thead><tbody>${rows}</tbody></table></div>${pager}<div class="card-body flex">${fileButton('scenarios/constellations/live-workloads.json','业务与速率配置 ↗')}${w.evidence_file?fileButton(w.evidence_file,'本轮业务 PCAP ↗'):''}</div></section>`;
 }
 
+function evpnServicesPanel() {
+  const service=data.workloads?.protocols?.['evpn-srv6'];
+  if (!service) return '';
+  const probes=data.workloads?.l2_probes||{}, now=Date.now()/1000;
+  const family=(probe,id)=>{
+    const v=probe?.families?.[id], good=probe?.fresh&&v?.last_reply&&now-v.last_reply<10;
+    return `${badge(good?'持续回包':'等待 / 失联',good?'green':'amber')}<span class="small muted"> ${num(v?.received??0)} / ${num(v?.transmitted??0)}</span>`;
+  };
+  const rows=Object.entries(service.l2||{}).flatMap(([node,entries])=>entries.map(s=>{
+    const p=probes[`${s.evi}:${node}`];
+    return `<tr><td class="mono">${esc(node)}</td><td>${s.evi}</td><td>${family(p,'4')}</td><td>${family(p,'6')}</td></tr>`;
+  })).join('');
+  const n3=Object.entries(service.n3||{}).map(([direction,v])=>`<p>${esc(direction)}：${badge(v.status==='ready'?'已安装 EVPN/SRv6 路由':'等待路由',v.status==='ready'?'green':'amber')} <span class="mono small">${esc(v.service_sid||v.error||'')}</span></p>`).join('');
+  return `<section class="card section-gap"><div class="card-head"><h2>EVPN/SRv6 二层站点与 5G N3</h2></div><div class="card-body">${n3}<p class="feature-note">下表是各站点向下一站发送的真实探测；三层路由安装、探测回包和稳定性验收分别记录。N3 回包见业务页面。</p></div><div class="table-wrap"><table><thead><tr><th>网关</th><th>EVI</th><th>IPv4 回包 / 发送</th><th>IPv6 回包 / 发送</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+}
+
 function liveProtocols() {
   const flows=data.workloads?.flows||[];
-  const descriptions={ospf:'OSPFv2 通告 IPv4 业务端点并独立计算路径。',ospf6:'OSPFv3 通告 IPv6 业务端点，同时维护 SRv6 Locator 可达性。',native:'控制器计算主备路径并逐跳写入 IPv4 静态路由。',ldp:'控制器选择入口下一跳，后续 MPLS 转发跟随 IGP 与 LDP。','sr-mpls':'入口按控制器路径施加 Prefix SID 栈，IS-IS 分发 SID。',pcep:'BGP-LS 校验链路，PCE 响应 PCReq，FRR 安装 BSID 与 SR 标签栈。',srv6:'入口施加 IPv6 段列表，出口解封装到业务地址。',evpn:'控制器编排入口选路，BGP EVPN 学习网关 MAC/IP，VXLAN 承载；底层路径由 IGP 决定。'};
-  const cards=Object.entries(workloadCarrierNames).map(([id,title])=>{
+  const descriptions={ospf:'OSPFv2 通告 IPv4 业务端点并独立计算路径。',ospf6:'OSPFv3 通告 IPv6 业务端点，同时维护 SRv6 Locator 可达性。',native:'控制器计算主备路径并逐跳写入 IPv4 静态路由。',ldp:'控制器选择入口下一跳，后续 MPLS 转发跟随 IGP 与 LDP。','sr-mpls':'入口按控制器路径施加 Prefix SID 栈，IS-IS 分发 SID。',pcep:'BGP-LS 校验链路，PCE 响应 PCReq，FRR 安装 BSID 与 SR 标签栈。',srv6:'入口施加 IPv6 段列表，出口解封装到业务地址。','evpn-srv6':'EVPN Type-2/3 提供二层 MAC 学习与广播复制，Type-5 提供三层及 N3 业务；SRv6 负责跨卫星承载。',evpn:'控制器编排入口选路，BGP EVPN 学习网关 MAC/IP，VXLAN 承载；底层路径由 IGP 决定。'};
+  const cards=Object.entries(workloadCarrierNames).filter(([id])=>!data.runtime?.launch_config || data.runtime.launch_config.carriers.includes(id)).map(([id,title])=>{
     const group=flows.filter(f=>f.carrier===id), ready=group.filter(f=>Object.values(f.directions||{}).length===2&&Object.values(f.directions).every(d=>d.status==='ready')).length, verified=group.filter(workloadVerified).length;
     return `<section class="card protocol-card"><div class="flex between"><span class="proto-icon">${icon('protocols',22)}</span><span class="mono muted small">${id.toUpperCase()}</span></div><h3>${title}</h3><p>${descriptions[id]}</p>${badge(group.length?`${verified} / ${group.length} 条实包验证`:'当前会话未编排业务',group.length&&verified===group.length?'green':'amber')}<p class="small muted">转发配置已读回 / 下发：${ready} / ${group.length}</p><div class="mini-divider"></div><span class="small muted">故障矩阵：本次持续运行未执行</span></section>`;
   }).join('');
   const bgp=data.workloads?.protocols?.bgpls, pce=data.workloads?.protocols?.pcep;
-  return `<div class="callout">${icon('info',16)}协议状态、真实业务承载和故障恢复分别验证。OSPF 路由进程与 sf-controller 同时运行；以下实包状态来自当前会话，启动检查仅代表当时的收敛结果。</div><div class="protocol-grid">${cards}</div><div class="two-col section-gap">${card('控制协议观测',`<p>BGP-LS：最近读到 ${bgp?.directed_links??'—'} 条有向链路。</p><p>PCEP：${pce?.running?'PCE 已启动':'当前无工作负载 PCE'}，保留 ${pce?.responses??0} 条正向路径响应记录。</p>${bgp?.error?`<p>${esc(bgp.error)}</p>`:''}<p class="feature-note">PCE 进程存在不等于业务通路已验证；BSID、回包与抓包结果共同决定上方状态。</p>`)}${card('配置与原始证据',`${fileButton('lab/live/workloads.py','并行业务编排 ↗')} ${fileButton('lab/platform/pce.py','PCEP 实现 ↗')} ${fileButton(artFile('protocol-initial-protocol-state.json'),'启动协议状态 ↗')}<p class="feature-note">独立小拓扑回归的故障结果不会写成此 120 星会话已经通过。新增业务也不替代同一 GTP-U 会话跨协议故障验收。</p>`)}</div>${workloadPanel()}`;
+  return `<div class="callout">${icon('info',16)}协议状态、真实业务承载和故障恢复分别验证。${data.runtime?.launch_config?.igp==='isis'?'IS-IS':'OSPF'} 路由进程与 sf-controller 同时运行；以下实包状态来自当前会话，启动检查仅代表当时的收敛结果。</div><div class="protocol-grid">${cards}</div><div class="two-col section-gap">${card('控制协议观测',`<p>BGP-LS：最近读到 ${bgp?.directed_links??'—'} 条有向链路。</p><p>EVPN + SRv6：已读取 ${Object.keys(data.workloads?.protocols?.['evpn-srv6']?.gateways||{}).length} 个网关的 Type-2/3/5 与 SID 状态。</p><p>PCEP：${pce?.running?'PCE 已启动':'当前无工作负载 PCE'}，保留 ${pce?.responses??0} 条正向路径响应记录。</p>${bgp?.error?`<p>${esc(bgp.error)}</p>`:''}<p class="feature-note">PCE 进程存在不等于业务通路已验证；BSID、回包与抓包结果共同决定上方状态。</p>`)}${card('配置与原始证据',`${fileButton('lab/live/workloads.py','并行业务编排 ↗')} ${fileButton('lab/platform/pce.py','PCEP 实现 ↗')} ${fileButton(artFile('protocol-initial-protocol-state.json'),'启动协议状态 ↗')}<p class="feature-note">独立小拓扑回归的故障结果不会写成本轮星座已经通过。新增业务也不替代同一 GTP-U 会话跨协议故障验收。</p>`)}</div>${evpnServicesPanel()}${workloadPanel()}`;
 }
 
 function businessPage() {
   const tx=traffic();
   const statistics = [stat('持续发送',num(tx?.transmitted),'pkts','整段持续流量统计','business'),stat('持续接收',num(tx?.received),'pkts',state.mode==='live'?'持续 UE 业务观测':'覆盖物理回放与自治恢复','check'),stat('实际丢包率',num(tx?.loss_percent,3),'%',state.mode==='live'?'按已观测 ICMP 序号统计':'本轮门限 < 5%','chart'),stat('PDU 会话',data.pdu.initial?.pdu_establishments??'—','次建立',check(data.run.checks?.same_pdu_session_across_runtime)?'<b>前后身份一致</b>':'本轮尚无同会话证明','link')].join('');
-  const flow = [['user','UE','uesimtun0'],['business','gNB','172.22.0.23'],['ground','gw-001','N3 入口'],['satellite','120 星网络','按需选择路径'],['ground','gw-002','N3 出口'],['cloud','UPF','172.22.0.8']].map(([ic,title,sub],i)=>`${i?'<div class="flow-arrow"><small>GTP-U</small></div>':''}<div class="flow-end ${i===3?'active':''}"><span class="flow-icon">${icon(ic,25)}</span><b>${title}</b><small class="mono">${sub}</small></div>`).join('');
-  const flowCard = card('5G 基线会话 · N3 用户面',`<div class="flow-wide">${flow}</div><div class="callout" style="margin:0">${icon('info',15)}120 颗卫星共用一套 gNB / UE 会话。报文通过选定的卫星路径转发，并不要求每颗卫星都承载这条流。</div>`);
+  const flow = [['user','UE','uesimtun0'],['business','gNB','172.22.0.23'],['ground','gw-001','N3 入口'],['satellite',satelliteNodes().length+' 星网络','按需选择路径'],['ground','gw-002','N3 出口'],['cloud','UPF','172.22.0.8']].map(([ic,title,sub],i)=>`${i?'<div class="flow-arrow"><small>GTP-U</small></div>':''}<div class="flow-end ${i===3?'active':''}"><span class="flow-icon">${icon(ic,25)}</span><b>${title}</b><small class="mono">${sub}</small></div>`).join('');
+  const flowCard = card('5G 基线会话 · N3 用户面',`<div class="flow-wide">${flow}</div><div class="callout" style="margin:0">${icon('info',15)}${satelliteNodes().length} 颗卫星共用一套 gNB / UE 会话。报文通过选定的卫星路径转发，并不要求每颗卫星都承载这条流。</div>`);
   const rtt = card('UE 实测往返时延',chart(data.pings.map(p=>p[2]),{unit:'ms',color:'#668fb8'})+`<div class="chart-caption"><span>${data.pings.length} 个有效 RTT 样本</span><span>ICMP 实测 / ms</span></div>`);
   const stageNames = {'cloud-controlled-initial':'初始云控','physical-final':'物理回放结束','onboard-autonomy':'星上自治','ground-recovered':'地面恢复'};
   const stages = (data.run.traffic||[]).filter(t=>t.phase!=='continuous_across_all_faults').map(t=>`<tr><td>${esc(stageNames[t.phase]||t.phase)}</td><td class="mono">${t.transmitted} / ${t.received}</td><td>${badge(t.transmitted===t.received?'通过':'存在丢包',t.transmitted===t.received?'green':'amber')}</td></tr>`).join('');
@@ -630,7 +648,7 @@ function autonomyPage() {
     mode = state.autonomyStage;
   const active = states.filter(s => s[mode]?.fallback_active).length,
     connected = states.filter(s => s[mode]?.connected).length;
-  return `<div class="stats">${stat('逐星运行时',num(data.run.deployed_counts?.onboard_satellites??0),'实例','共享对应 FRR 网络命名空间','autonomy')}${stat('当前查看阶段',mode==='autonomous'?'失联接管':'重连恢复','快照',mode==='autonomous'?'地面控制器副本缩至 0 后':'地面恢复并重新提交路由后','clock')}${stat('备用路由激活',active,'/ 120','所选快照中的 fallback_active','routing')}${stat('连接状态恢复',connected,'/ 120','所选快照中的 connected','live')}</div><section class="card"><div class="card-head"><div><h2>逐星自治状态</h2><p>每个格子对应一颗卫星 · 按本轮 Rust 状态记录展示</p></div><div class="tab-segment"><button data-stage="autonomous" class="${mode==='autonomous'?'active':''}">失联接管</button><button data-stage="final" class="${mode==='final'?'active':''}">最终恢复</button></div></div><div class="card-body"><div class="fleet-grid">${satelliteNodes().map(n=>{const s=data.onboard[n.id]?.[mode];return `<button class="fleet-tile ${!s?'empty':s.fallback_active?'amber':''}" data-node="${n.id}" aria-label="${n.id} ${s?.fallback_active?'备用路由激活':'查看状态'}">${icon('satellite',16)}<b>${n.id.slice(4)}</b></button>`;}).join('')}</div><p class="feature-note">琥珀色：备用路由激活；绿色：记录存在且备用路由已撤回；灰色：本轮缺少状态记录。上图是阶段快照，不是当前实时状态。</p></div></section><div class="two-col section-gap">${card('自治闭环验收',checkList(['onboard_runtime_on_every_configured_satellite','missing_ground_heartbeat_triggers_autonomy','onboard_installs_real_kernel_routes','gtpu_survives_ground_route_withdrawal','ground_reconnect_withdraws_fallback']))}${card('星上程序如何工作',`<div class="checklist">${[['心跳输入','管理通道发送递增 generation，拒绝过期心跳。','onboard/src/main.rs'],['失联接管','超时后安装预先计算的 N3 正反方向备用路由。','onboard/src/routing.rs'],['状态持久化','记录连接、备用路由和 generation，支持进程恢复。','onboard/src/state.rs'],['签名 A/B 更新','属于星上前置专项；本轮没有给 120 颗星逐星升级。','onboard/src/update.rs']].map(([t,s,p])=>`<div class="check-row"><span class="check-symbol">${icon('autonomy',15)}</span><div><strong>${t}</strong><p class="feature-note" style="margin:4px 0">${s}</p>${fileButton(p,p.split('/').at(-1)+' ↗')}</div></div>`).join('')}</div>`)}</div>`;
+  return `<div class="stats">${stat('逐星运行时',num(data.run.deployed_counts?.onboard_satellites??0),'实例','共享对应 FRR 网络命名空间','autonomy')}${stat('当前查看阶段',mode==='autonomous'?'失联接管':'重连恢复','快照',mode==='autonomous'?'地面控制器副本缩至 0 后':'地面恢复并重新提交路由后','clock')}${stat('备用路由激活',active,'/ '+satelliteNodes().length,'所选快照中的 fallback_active','routing')}${stat('连接状态恢复',connected,'/ '+satelliteNodes().length,'所选快照中的 connected','live')}</div><section class="card"><div class="card-head"><div><h2>逐星自治状态</h2><p>每个格子对应一颗卫星 · 按本轮 Rust 状态记录展示</p></div><div class="tab-segment"><button data-stage="autonomous" class="${mode==='autonomous'?'active':''}">失联接管</button><button data-stage="final" class="${mode==='final'?'active':''}">最终恢复</button></div></div><div class="card-body"><div class="fleet-grid">${satelliteNodes().map(n=>{const s=data.onboard[n.id]?.[mode];return `<button class="fleet-tile ${!s?'empty':s.fallback_active?'amber':''}" data-node="${n.id}" aria-label="${n.id} ${s?.fallback_active?'备用路由激活':'查看状态'}">${icon('satellite',16)}<b>${n.id.slice(4)}</b></button>`;}).join('')}</div><p class="feature-note">琥珀色：备用路由激活；绿色：记录存在且备用路由已撤回；灰色：本轮缺少状态记录。上图是阶段快照，不是当前实时状态。</p></div></section><div class="two-col section-gap">${card('自治闭环验收',checkList(['onboard_runtime_on_every_configured_satellite','missing_ground_heartbeat_triggers_autonomy','onboard_installs_real_kernel_routes','gtpu_survives_ground_route_withdrawal','ground_reconnect_withdraws_fallback']))}${card('星上程序如何工作',`<div class="checklist">${[['心跳输入','管理通道发送递增 generation，拒绝过期心跳。','onboard/src/main.rs'],['失联接管','超时后安装预先计算的 N3 正反方向备用路由。','onboard/src/routing.rs'],['状态持久化','记录连接、备用路由和 generation，支持进程恢复。','onboard/src/state.rs'],['签名 A/B 更新','属于星上前置专项；本轮没有给 120 颗星逐星升级。','onboard/src/update.rs']].map(([t,s,p])=>`<div class="check-row"><span class="check-symbol">${icon('autonomy',15)}</span><div><strong>${t}</strong><p class="feature-note" style="margin:4px 0">${s}</p>${fileButton(p,p.split('/').at(-1)+' ↗')}</div></div>`).join('')}</div>`)}</div>`;
 }
 
 function protocolsPage() {
@@ -755,6 +773,7 @@ function configValue(group, key) {
 }
 
 function configurationPage() {
+  if (state.mode === 'live') return launchForm(data.runtime);
   return `<div class="callout">${icon('configuration',16)}当前编辑的是输入副本。参数修改后可下载两份 JSON；需要重新运行物理生成器和验收，才能得到新的轨道、链路和实测结果。</div><section class="card"><div class="card-head"><div><h2>星座与物理参数</h2><p>源输入：leo-120.config.json + physical-defaults.json</p></div>${button('恢复原始配置','reset-config','','refresh')}</div><div class="card-body"><form id="config-form"><div class="form-grid">${configFields.map(([g,k,label,min,max,step,hint])=>`<div class="field"><label for="cfg-${g}-${k}">${label}</label><input id="cfg-${g}-${k}" data-config-group="${g}" data-config-key="${k}" type="number" min="${min}" max="${max}" step="${step}" value="${configValue(g,k)}" required><small>${hint}</small></div>`).join('')}</div><div class="field-error" id="config-error" role="alert"></div><div class="config-actions"><span class="small muted" id="config-summary"></span><div class="flex">${button('下载规模 JSON','download-constellation','','download')}${button('下载物理 JSON','download-physical','primary','download')}</div></div></form></div></section><div class="two-col section-gap">${card('完整规模配置',`<textarea id="constellation-editor" class="code-editor" spellcheck="false" aria-label="完整规模 JSON">${esc(JSON.stringify(state.config.constellation,null,2))}</textarea><div class="config-actions"><span class="small muted">高级编辑包含全部字段</span>${button('应用 JSON','apply-constellation')}</div>`)}${card('完整物理配置',`<textarea id="physical-editor" class="code-editor" spellcheck="false" aria-label="完整物理 JSON">${esc(JSON.stringify(state.config.physical,null,2))}</textarea><div class="config-actions"><span class="small muted">包括站点坐标、链路预算和轨道来源</span>${button('应用 JSON','apply-physical')}</div>`)}</div><div class="section-gap">${card('输入与输出的关系',`<div class="route-path"><span class="route-node">两份输入 JSON</span><span class="route-arrow">→</span><span class="route-node">seed.json</span><span class="route-arrow">→</span><span class="route-node">物理 scenario.json</span><span class="route-arrow">→</span><span class="route-node">部署 / 实验 / 报告</span></div><p class="feature-note">生成的 reports/.../scenario.json 不应作为长期维护输入。改变星数也可能改变覆盖、容量与主备路径可行性。</p>`)}</div>`;
 }
 
@@ -1033,6 +1052,7 @@ async function load(identifier) {
   const value = await response.json();
   if (!response.ok) throw new Error(value.error || '读取运行记录失败');
   if (generation !== loadGeneration) return;
+  if (mode === 'live') await launchOptions();
   if (value.pending) { renderPending(value); return; }
   data = value;
   state.run = data.run.run_id;
@@ -1135,14 +1155,30 @@ document.addEventListener('click', async e => {
     try { await load(); } catch(error) { toast(error.message); }
     return;
   }
-  if (action === 'runtime-start' || action === 'runtime-stop') {
+  if (action === 'runtime-start') {
+    const inline=document.querySelector('#main #launch-form');
+    if (inline) { inline.scrollIntoView({block:'start'}); inline.querySelector('select')?.focus(); return; }
+    try { await launchOptions(); openDrawer('配置并启动平台','仅在启动前选择；本轮运行期间配置固定',launchForm(data.runtime),true); }
+    catch(error) { toast(error.message); }
+    return;
+  }
+  if (action === 'launch-submit') {
+    el.disabled = true;
+    const form = el.closest('form');
+    try {
+      await submitLaunch(form);
+      closeDrawer(); await load(); toast('后台正在按所选配置启动平台。');
+    } catch(error) { form.querySelector('#launch-error').textContent=error.message; el.disabled=false; }
+    return;
+  }
+  if (action === 'runtime-stop') {
     el.disabled = true;
     try {
       const response = await fetch('/api/runtime/'+action.slice(8), {method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
       const value = await response.json();
       if (!response.ok) throw new Error(value.error);
       await load();
-      toast(action === 'runtime-start' ? '后台正在启动真实 120 星系统。' : '正在停止并清理本次运行资源。');
+      toast('正在停止并清理本次运行资源。');
     } catch(error) { toast(error.message); el.disabled=false; }
     return;
   }

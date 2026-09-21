@@ -25,6 +25,28 @@ def config(scenario):
 
 
 class PhysicalConstellationTests(unittest.TestCase):
+    def test_predictive_feeder_handover_keeps_two_locked_contacts_at_both_sites(self):
+        scheduler=Contacts([],{'links':{'feeder_terminals_per_satellite':1,'gateway_terminals':3,'acquisition_seconds':2}})
+        scheduler.selected={('s1','a'):0,('s2','a'):0,('s3','a'):0,('s4','b'):0,('s5','b'):0,('s6','b'):0}
+        pairs=[('s1','a'),('s2','a'),('s3','a'),('s4','a'),('s4','b'),('s5','b'),('s6','b'),('s7','b')]
+        chosen=scheduler.feeder_pairs([('feeder',a,b,1,1,0,0) for a,b in pairs],{('s1','a')},10)
+        self.assertNotIn(('s1','a'),chosen)
+        for site in ('a','b'):
+            self.assertEqual(sum(gw==site for sat,gw in chosen),3)
+            self.assertGreaterEqual(sum(gw==site and (sat,gw) in scheduler.selected for sat,gw in chosen),2)
+
+    def test_feeders_reallocate_shared_terminals_before_starving_a_gateway(self):
+        scheduler=Contacts([],{'links':{'feeder_terminals_per_satellite':1,'gateway_terminals':2}})
+        pairs=[('s1','a'),('s2','a'),('s1','b'),('s3','b')]
+        chosen=scheduler.feeder_pairs([('feeder',a,b,1,1,0,0) for a,b in pairs])
+        self.assertEqual(len(chosen),3)
+        self.assertEqual({b for a,b in chosen},{'a','b'})
+        self.assertEqual(len({a for a,b in chosen}),3)
+        # A scarce site can only use s1/s2; the flexible site must move.
+        pairs=[('s1','a'),('s2','a'),('s3','a'),('s4','a'),('s1','b'),('s2','b')]
+        chosen=scheduler.feeder_pairs([('feeder',a,b,1,1,0,0) for a,b in pairs])
+        self.assertEqual(Counter(b for a,b in chosen),{'a':2,'b':2})
+
     def test_every_360_satellite_has_distinct_propagated_states_and_valid_contacts(self):
         source=seed(360,18,8); cfg=config(source); cfg['duration_seconds']=20
         result=compile_scenario(source,cfg); model=result['physical_model']

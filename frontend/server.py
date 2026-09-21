@@ -74,6 +74,13 @@ class Dashboard:
         runtime['fresh'] = bool(runtime['active'] and runtime.get('phase')=='running' and age is not None and age < max(30,3*runtime['step_seconds']))
         deployment = read_json(art/'cloud/platform-controller-deployment.json')
         lease = read_json(art/'cloud/platform-lease.json')
+        workloads = observe_workloads(value.get('workloads', {'enabled':False}), art/'workloads')
+        workloads['l2_probes']={}
+        for path in (art/'workloads').glob('l2-metrics-*.json'):
+            probe=read_json(path)
+            if probe.get('run_id')==value['run_id']:
+                probe['fresh']=runtime['active'] and 0 <= time.time()-probe.get('observed_at',0)<10
+                workloads['l2_probes'][f"{probe.get('evi')}:{probe.get('node')}"]=probe
         return {'mode':'live', 'runtime':runtime, 'preview_only':False,
             'run':{'run_id':value['run_id'],'focus':'live','success':None,'generated_at':runtime.get('updated_at'),
                 'physical_model':True,'physical_runtime_integration':False,'full_protocol_integration':False,
@@ -87,7 +94,7 @@ class Dashboard:
             'intents':value['intents'], 'onboard':{n:{'live':s,'final':s,'autonomous':None,
                 'routes':s.get('fallback_routes',[]) if s else []} for n,s in value['onboard'].items()},
             'proofs':{}, 'evidence':evidence, 'pings':value['pings'], 'sources':self.source_files(),
-            'workloads':observe_workloads(value.get('workloads', {'enabled':False}), art/'workloads'), 'workload_error':value.get('workload_error'),
+            'workloads':workloads, 'workload_error':value.get('workload_error'),
             'capabilities':self.capability_catalog(), 'pdu':{'initial':value['pdu'],'final':{}},
             'cloud':{'deployment':{'replicas':deployment.get('spec',{}).get('replicas'),
                 'name':deployment.get('metadata',{}).get('name'),'status':deployment.get('status',{})}, 'lease':lease.get('spec',{})},
@@ -154,7 +161,8 @@ class Dashboard:
                 result.append({'path': relative, 'category': '学习资料', 'role': '完整流程、证据和学习指引'})
         for relative in ('lab/live/README.md','lab/live/model.py','lab/live/runtime.py','lab/live/service.py','lab/live/storage.py','lab/live/heartbeat.py',
                          'lab/live/workloads.py','lab/live/workload_model.py','lab/live/workload_traffic.py','lab/live/workload_capture.py',
-                         'lab/live/workload_snapshot.py',
+                         'lab/live/workload_snapshot.py', 'lab/live/launch.py', 'lab/live/evpn_speaker.py', 'lab/live/evpn_codec.py',
+                         'lab/live/evpn_l2.py','lab/live/l2_probe.py','lab/live/check_evpn_srv6.py','lab/live/check_evpn_system.py',
                          'lab/live/validate_workloads.py','scenarios/constellations/live-workloads.json',
                          'scenarios/constellations/leo-120-global.config.json'):
             if (self.root/relative).is_file() and not any(item['path'] == relative for item in result):
@@ -354,6 +362,9 @@ class Handler(BaseHTTPRequestHandler):
                     else self.server.dashboard.snapshot(query.get('run', [None])[0]))
             elif parsed.path == '/api/runtime':
                 self.json_response(self.server.dashboard.service.status())
+            elif parsed.path == '/api/runtime/options':
+                from lab.live.launch import options
+                self.json_response(options())
             elif parsed.path == '/api/live':
                 self.json_response(self.server.dashboard.live())
             elif parsed.path == '/api/file':
@@ -368,7 +379,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.json_response({'status': 'ok'})
             else:
                 static = {'/': 'index.html', '/index.html': 'index.html', '/app.js': 'app.js',
-                          '/globe.js': 'globe.js', '/earth-surface.js': 'earth-surface.js', '/solar.js': 'solar.js',
+                          '/globe.js': 'globe.js', '/launch.js': 'launch.js', '/earth-surface.js': 'earth-surface.js', '/solar.js': 'solar.js',
                           '/style.css': 'style.css', '/favicon.svg': 'favicon.svg',
                           '/assets/earth-day.png': 'assets/earth-day.png',
                           '/assets/earth-night.png': 'assets/earth-night.png'}
@@ -385,7 +396,7 @@ class Handler(BaseHTTPRequestHandler):
             self.json_response({'error': '读取数据失败，请检查本地报告和文件权限。'}, 500)
 
     def do_POST(self):
-        if self.path not in ('/api/runtime/start','/api/runtime/stop','/api/runtime/workload-rate'):
+        if self.path not in ('/api/runtime/start','/api/runtime/stop','/api/runtime/workload-rate','/api/runtime/validate'):
             self.json_response({'error':'该接口不接受写入请求。'},405)
             return
         origin = self.headers.get('Origin')
@@ -404,14 +415,33 @@ class Handler(BaseHTTPRequestHandler):
             except OSError:
                 self.json_response({'error':'无法保存业务速率，请检查本轮文件权限。'}, 500)
             return
-        if self.headers.get('Content-Length') not in ('0','2'):
-            self.json_response({'error':'运行入口使用本地配置；请求体应为 {}。'},400)
-            return
-        self.rfile.read(int(self.headers.get('Content-Length','0')))
         try:
+            length = int(self.headers.get('Content-Length', '0'))
+            if not 0 <= length <= 16384:
+                raise ValueError('启动请求不得超过 16 KiB')
+            body = json.loads(self.rfile.read(length)) if length else {}
+            if not isinstance(body, dict) or set(body) - {'configuration'}:
+                raise ValueError('请求仅接受 configuration 字段')
             action = self.path.rsplit('/',1)[-1]
-            self.json_response(getattr(self.server.dashboard.service,action)(),202)
-        except (OSError,ValueError) as error:
+            if action == 'validate':
+                from lab.live.launch import validate
+                self.json_response({'configuration': validate(body.get('configuration'))})
+            elif action == 'start':
+                if 'configuration' in body:
+                    from lab.live.launch import validate
+                    config = validate(body['configuration'])
+                    self.json_response(self.server.dashboard.service.start(config), 202)
+                else:
+                    self.json_response(self.server.dashboard.service.start(), 202)
+            elif body:
+                raise ValueError('停止请求不接受启动配置')
+            else:
+                self.json_response(self.server.dashboard.service.stop(), 202)
+        except (ValueError, UnicodeError) as error:
+            self.json_response({'error':str(error)},400)
+        except RuntimeError as error:
+            self.json_response({'error':str(error)},409)
+        except OSError as error:
             self.json_response({'error':str(error)},500)
 
 

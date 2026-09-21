@@ -23,7 +23,7 @@ STAGES = [
     ('committing_initial_routes', '提交初始路由'),
     ('starting_5g_business', '启动持续 5G 业务'),
     ('starting_workloads', '启动并行业务与协议承载'),
-    ('starting_120_onboard', '启动 120 个星上实例'),
+    ('starting_120_onboard', '启动本轮全部星上实例'),
 ]
 
 

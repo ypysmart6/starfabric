@@ -58,12 +58,18 @@ class PhysicalReplay:
         job_path = r.art / f'physical-jobs-{index}.json'
         result_path = r.art / f'physical-channels-{index}.json'
         save(job_path, [job for job in jobs.values() if job['commands']])
-        command('docker', 'run', '--rm', '--privileged', '--pid=host', '--network=none',
-                '--cpuset-cpus', r.fabric_cpus,
-                '-v', f'{r.art}:/evidence', '-v', f'{ROOT}/lab/platform/physics_jobs.py:/jobs.py:ro',
-                '--entrypoint', 'python3', TOOLS, '/jobs.py', '/evidence/' + job_path.name,
-                '/evidence/' + result_path.name, str(getattr(r,'channel_workers',16)),
-                timeout=getattr(r,'channel_update_timeout',180))
+        if getattr(r, 'live_mode', False):
+            from namespace_jobs import get_worker
+            records = get_worker(r).run('channels', job_path.name,
+                workers=getattr(r,'channel_workers',16), timeout=getattr(r,'channel_update_timeout',180))
+            save(result_path, records)
+        else:
+            command('docker', 'run', '--rm', '--privileged', '--pid=host', '--network=none',
+                    '--cpuset-cpus', r.fabric_cpus,
+                    '-v', f'{r.art}:/evidence', '-v', f'{ROOT}/lab/platform/physics_jobs.py:/jobs.py:ro',
+                    '--entrypoint', 'python3', TOOLS, '/jobs.py', '/evidence/' + job_path.name,
+                    '/evidence/' + result_path.name, str(getattr(r,'channel_workers',16)),
+                    timeout=getattr(r,'channel_update_timeout',180))
         f.set_links(links)
         records = json.loads(result_path.read_text())
         if readback:

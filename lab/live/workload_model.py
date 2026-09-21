@@ -11,9 +11,9 @@ import ipaddress
 import math
 import re
 
-CARRIERS = {'ospf', 'ospf6', 'native', 'ldp', 'sr-mpls', 'pcep', 'srv6', 'evpn'}
+CARRIERS = {'ospf', 'ospf6', 'native', 'ldp', 'sr-mpls', 'pcep', 'srv6', 'evpn', 'evpn-srv6'}
 CONTROLS = {'ospf': 'distributed', 'ospf6': 'distributed', 'native': 'centralized',
-            'ldp': 'hybrid', 'sr-mpls': 'hybrid', 'pcep': 'hybrid', 'srv6': 'hybrid', 'evpn': 'hybrid'}
+            'ldp': 'hybrid', 'sr-mpls': 'hybrid', 'pcep': 'hybrid', 'srv6': 'hybrid', 'evpn': 'hybrid', 'evpn-srv6': 'hybrid'}
 
 
 def catalog(config, gateways):

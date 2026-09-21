@@ -208,13 +208,23 @@ func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.Rec
 			return r.fail(fmt.Errorf("plan became invalid before commit batch: %w", err), prepared)
 		}
 		end := min(start+r.config.BatchSize, len(activeNames))
-		for _, name := range activeNames[start:end] {
-			device, _ := r.registry.Get(name)
-			if err = r.invoke(ctx, func(call context.Context) error { return device.Commit(call, plan.ID) }); err != nil {
+		// Devices in one canary batch are independent. Join every commit before
+		// verification or rollback, including successes alongside a failed peer.
+		batch := activeNames[start:end]
+		results := r.readDevices(batch, func(device adapter.DeviceAdapter) error {
+			return r.invoke(ctx, func(call context.Context) error { return device.Commit(call, plan.ID) })
+		})
+		var commitErrors []error
+		for index, name := range batch {
+			if results[index] != nil {
 				r.status.FailedDevices = append(r.status.FailedDevices, name)
-				return r.fail(fmt.Errorf("commit %s: %w", name, err), prepared)
+				commitErrors = append(commitErrors, fmt.Errorf("commit %s: %w", name, results[index]))
+			} else {
+				r.status.CommittedDevices = append(r.status.CommittedDevices, name)
 			}
-			r.status.CommittedDevices = append(r.status.CommittedDevices, name)
+		}
+		if len(commitErrors) > 0 {
+			return r.fail(errors.Join(commitErrors...), prepared)
 		}
 		// Verification after every batch is the canary safety gate.
 		if err = r.verify(ctx, plan.ID, activeNames[start:end], devicePlans); err != nil {
@@ -286,9 +296,8 @@ func (r *Reconciler) verify(ctx context.Context, planID string, names []string, 
 	return nil
 }
 
-// readDevices bounds simultaneous southbound reads by the configured canary
-// batch size (and a hard ceiling). Results remain in device order, and no read
-// is left running when a failure causes rollback.
+// readDevices bounds simultaneous independent device operations by the canary
+// batch size (and a hard ceiling). Every operation joins before rollback.
 func (r *Reconciler) readDevices(names []string, read func(adapter.DeviceAdapter) error) []error {
 	results := make([]error, len(names))
 	width := min(r.config.BatchSize, 32)

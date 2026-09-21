@@ -5,6 +5,16 @@ pins a community Docker integration at commit
 `7464234a9f79718df1836d24d688be745a5272d1`, immutable container digests,
 Open5GS `v2.8.0-48-gf87da61`, and UERANSIM `v3.2.6`.
 
+The gNB is rebuilt from UERANSIM commit
+`384636f4fcf46b8c86109790ff3e2cd242b53556` with `ueransim-rlf.patch`.
+The patch connects radio-loss notifications to RRC/NGAP cleanup and queues a
+new Setup Request until the old access context is released when only the UE
+detected the loss. The UE binary and PDU session are retained. Building the
+gNB requires network access on the first run; subsequent runs reuse the image
+keyed by the commit, patch and Dockerfile. Its exact patched source and license
+are included under `/usr/src/ueransim` in the image, and build provenance is
+saved in `reports/ueransim-gnb-build.json`.
+
 ```bash
 make test-5g
 ```
@@ -29,6 +39,20 @@ JSON evidence is written to `reports/5g-sa-baseline.json` and
 stopped after the run; the lab Mongo volume and pinned images remain for fast
 reruns. Set `SF_5G_KEEP=1` to leave the stack running, then use
 `ntn/single-pc/down.sh`.
+
+With an owned stack left running, test each radio direction independently:
+
+```bash
+python3 ntn/single-pc/check_radio_recovery.py --direction uplink --output reports/radio-uplink
+python3 ntn/single-pc/check_radio_recovery.py --direction downlink --output reports/radio-downlink
+```
+
+These checks drop received RLS packets for eight seconds, require recovery
+within sixty seconds, and compare the UE container, PDU establishment count
+and TUN addresses. The downlink check also requires evidence that the gNB
+released a stale context. They do not restart UE/gNB or recreate the PDU.
+Each command removes its own packet filter in `finally`. The live full-scale
+gate runs both checks after satellite traffic and EVPN withdrawal tests.
 
 The independent Rel-17 NTN software channel gate is:
 

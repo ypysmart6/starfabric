@@ -2770,3 +2770,10 @@ footer { flex-wrap: wrap; gap: 14px; }
 .matrix-cell.configured { background: #e0eaff; color: #2852b0; }
 .matrix-cell.verified { background: #cdeee3; color: #116d54; }
 .matrix-self { color: #c4cbd4; }
+
+.launch-card fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.launch-carriers { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+.launch-carriers label { display: flex; align-items: center; gap: 8px; }
+.launch-carriers input { width: auto; }
+.launch-card fieldset:disabled { opacity: .7; }
+.launch-card select { width: 100%; }

@@ -52,6 +52,7 @@ func run() error {
 		stateDir         = flag.String("state-dir", "data", "durable state directory")
 		planTTL          = flag.Duration("plan-ttl", 30*time.Second, "maximum lifetime of a computed forwarding plan")
 		operationTimeout = flag.Duration("operation-timeout", 2*time.Second, "timeout of each device operation")
+		batchSize        = flag.Int("device-batch-size", 4, "parallel devices per verified canary batch (1..32)")
 		httpWriteTimeout = flag.Duration("http-write-timeout", 30*time.Second, "HTTP response deadline including reconciliation")
 		logFile          = flag.String("log-file", "", "optional JSON log file for collector tailing")
 		otlpEndpoint     = flag.String("otlp-endpoint", "", "OTLP/HTTP collector host:port; empty disables traces")
@@ -93,6 +94,9 @@ func run() error {
 		leaseRetry       = flag.Duration("leader-retry-period", 2*time.Second, "Kubernetes Lease retry period")
 	)
 	flag.Parse()
+	if *batchSize < 1 || *batchSize > 32 {
+		return fmt.Errorf("device-batch-size must be within 1..32")
+	}
 	if *showVersion {
 		fmt.Println(version)
 		return nil
@@ -129,7 +133,7 @@ func run() error {
 		TopologyStatePath: filepath.Join(*stateDir, "topology.json"), ReconcileStatePath: filepath.Join(*stateDir, "reconciler.json"),
 		IntentsStatePath: filepath.Join(*stateDir, "intents.json"), PredictiveStatePath: filepath.Join(*stateDir, "predictive.json"),
 		PlanTTL: *planTTL, MaxTelemetryAge: *maxTelemetryAge, NodeDisjoint: false,
-		OperationTimeout: *operationTimeout, RetryCount: 2, RetryBackoff: 50 * time.Millisecond, BatchSize: 4,
+		OperationTimeout: *operationTimeout, RetryCount: 2, RetryBackoff: 50 * time.Millisecond, BatchSize: *batchSize,
 	}
 	var elector *leadership.Elector
 	if *leaderElection {

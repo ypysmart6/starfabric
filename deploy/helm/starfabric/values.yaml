@@ -86,6 +86,7 @@ scenario:
   timeline: []
 
 controllerTuning:
+  deviceBatchSize: 4
   planTTL: 30s
   operationTimeout: 2s
   httpWriteTimeout: 30s
