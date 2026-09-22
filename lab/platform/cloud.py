@@ -32,6 +32,9 @@ class Cloud:
         # A kind node hosts many control-plane processes. Give it a larger
         # relative CPU share than one FRR namespace during fleet convergence.
         r.host_budget.limit_containers(nodes, cpu_shares=8192 if getattr(r,'live_mode',False) else None)
+        if getattr(r, 'live_mode', False):
+            for info in json.loads(execute(['docker','inspect',*nodes]).stdout):
+                r.performance_pids[info['Name'].lstrip('/')] = info['State']['Pid']
         c.prepare_application()
         bridge = json.loads(execute(["docker", "network", "inspect", "kind"]).stdout)[0]
         self.gateway = next(v["Gateway"] for v in bridge["IPAM"]["Config"] if ":" not in v["Gateway"])
@@ -83,6 +86,7 @@ class Cloud:
         with c.operation('controller-ready', '检查控制器服务接口', 'GET /readyz', 60):
             wait_for("cloud service FRR readiness", lambda: r.request("/readyz"), 60)
         c.save("platform-controller-deployment", c.get("deployment", "ha-starfabric"))
+        c.save("platform-controller-pods", c.get("pods", ns="starfabric"))
         c.save("platform-lease", c.get("lease", "starfabric-controller"))
         r.checks.update({"helm_deploys_real_frr_adapter": True,
                          "lease_single_ready_writer": True, "cilium_cni_ready": True, "hubble_relay_ready": True})
@@ -90,11 +94,16 @@ class Cloud:
     def start_proxy(self, host, port):
         node = self.cluster.name + "-control-plane"
         request_timeout = self.runtime.request_timeout
+        artifact = self.runtime.art
+        proxy_log_lock = threading.Lock()
         class Handler(BaseHTTPRequestHandler):
             def log_message(self, *_):
                 pass
 
             def relay(self):
+                started = time.monotonic()
+                record = {"request_id":self.headers.get("X-Request-ID"), "frame_id":self.headers.get("X-Starfabric-Frame-ID"),
+                          "run_id":self.headers.get("X-Starfabric-Run-ID"), "path":self.path, "started_at":time.time(), "status":None}
                 try:
                     body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
                     # The SIL ingress enters through the owned node's network
@@ -102,7 +111,7 @@ class Cloud:
                     # normal host identity across HA endpoint changes.
                     args = ["docker", "exec", "-i", node, "curl", "-sS", "--connect-timeout", "1", "--max-time", str(request_timeout),
                             "-X", self.command, "-w", "\n%{http_code}"]
-                    for key in ("Content-Type", "X-Request-ID", "traceparent", "Authorization"):
+                    for key in ("Content-Type", "X-Request-ID", "X-Starfabric-Run-ID", "X-Starfabric-Frame-ID", "traceparent", "Authorization"):
                         if key in self.headers:
                             args += ["-H", key + ": " + self.headers[key]]
                     if body:
@@ -110,6 +119,7 @@ class Cloud:
                     result = execute(args + [f"http://{host}:{port}{self.path}"], stdin=body.decode() if body else None, timeout=request_timeout + 5)
                     raw, code = result.stdout.rsplit("\n", 1)
                     data = raw.encode()
+                    record["status"] = int(code)
                     self.send_response(int(code))
                     self.send_header("Content-Type", "text/plain" if self.path == "/metrics" else "application/json")
                     self.send_header("Content-Length", str(len(data)))
@@ -122,6 +132,11 @@ class Cloud:
                         self.send_error(503, "cloud controller unavailable")
                     except (BrokenPipeError, ConnectionResetError):
                         pass
+
+                finally:
+                    record.update(duration_seconds=time.monotonic()-started, finished_at=time.time())
+                    with proxy_log_lock, (artifact/'controller-proxy.jsonl').open('a') as stream:
+                        stream.write(json.dumps(record)+'\n')
 
             do_GET = do_POST = do_PUT = do_DELETE = relay
 

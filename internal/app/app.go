@@ -187,6 +187,10 @@ func (a *App) SetIntents(intents []model.RouteIntent) error {
 }
 
 func (a *App) Preview() (model.RoutePlan, error) {
+	return a.PreviewContext(context.Background())
+}
+
+func (a *App) PreviewContext(ctx context.Context) (model.RoutePlan, error) {
 	a.mu.RLock()
 	intents := cloneIntents(a.intents)
 	a.mu.RUnlock()
@@ -197,6 +201,8 @@ func (a *App) Preview() (model.RoutePlan, error) {
 	if err != nil {
 		a.metrics.Inc("path_computation_failure_total")
 	}
+	a.logger.Event("info", "path computation", map[string]any{"correlation": observability.Fields(ctx),
+		"plan_id": plan.ID, "topology_version": plan.TopologyVersion, "duration_seconds": time.Since(started).Seconds(), "failed": err != nil})
 	return plan, err
 }
 
@@ -204,7 +210,7 @@ func (a *App) Reconcile(ctx context.Context) (model.RoutePlan, model.ReconcileSt
 	if !a.IsLeader() {
 		return model.RoutePlan{}, a.Status(), ErrNotLeader
 	}
-	plan, err := a.Preview()
+	plan, err := a.PreviewContext(ctx)
 	if err != nil {
 		return model.RoutePlan{}, model.ReconcileStatus{}, err
 	}

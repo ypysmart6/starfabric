@@ -19,6 +19,7 @@ import (
 	"github.com/starfabric/starfabric/internal/adapter"
 	"github.com/starfabric/starfabric/internal/durable"
 	"github.com/starfabric/starfabric/internal/model"
+	"github.com/starfabric/starfabric/internal/observability"
 )
 
 type Runner interface {
@@ -79,7 +80,11 @@ var _ adapter.DeviceAdapter = (*Device)(nil)
 
 func (d *Device) Name() string { return d.name }
 
-func (d *Device) Health(ctx context.Context) error {
+func (d *Device) Health(ctx context.Context) (resultErr error) {
+	started := time.Now()
+	defer func() {
+		observability.Record(ctx, observability.Fields(ctx)["phase"]+".health", d.name, false, started, resultErr)
+	}()
 	_, err := d.runner.Run(ctx, "-c", "show version")
 	return err
 }
@@ -116,7 +121,11 @@ func (d *Device) Prepare(_ context.Context, plan model.RoutePlan) error {
 	return nil
 }
 
-func (d *Device) Commit(ctx context.Context, planID string) error {
+func (d *Device) Commit(ctx context.Context, planID string) (resultErr error) {
+	started := time.Now()
+	defer func() {
+		observability.Record(ctx, observability.Fields(ctx)["phase"]+".commit", d.name, false, started, resultErr)
+	}()
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	if planID == d.appliedPlanID {
@@ -134,7 +143,7 @@ func (d *Device) Commit(ctx context.Context, planID string) error {
 	d.history[planID] = transaction{previous: append([]model.RouteOperation(nil), tx.previous...), previousPlanID: tx.previousPlanID}
 	d.routes = append([]model.RouteOperation(nil), tx.desired...)
 	d.appliedPlanID = planID
-	if err := d.persist(); err != nil {
+	if err := d.persist(ctx); err != nil {
 		delete(d.history, planID)
 		d.routes = oldRoutes
 		d.appliedPlanID = oldPlanID
@@ -145,7 +154,11 @@ func (d *Device) Commit(ctx context.Context, planID string) error {
 	return nil
 }
 
-func (d *Device) Rollback(ctx context.Context, planID string) error {
+func (d *Device) Rollback(ctx context.Context, planID string) (resultErr error) {
+	started := time.Now()
+	defer func() {
+		observability.Record(ctx, observability.Fields(ctx)["phase"]+".rollback", d.name, false, started, resultErr)
+	}()
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	if _, exists := d.prepared[planID]; exists {
@@ -164,7 +177,7 @@ func (d *Device) Rollback(ctx context.Context, planID string) error {
 	d.routes = append([]model.RouteOperation(nil), previous.previous...)
 	d.appliedPlanID = previous.previousPlanID
 	delete(d.history, planID)
-	if err := d.persist(); err != nil {
+	if err := d.persist(ctx); err != nil {
 		d.history[planID] = previous
 		d.routes = current
 		d.appliedPlanID = currentPlanID
@@ -174,7 +187,12 @@ func (d *Device) Rollback(ctx context.Context, planID string) error {
 	return nil
 }
 
-func (d *Device) State(ctx context.Context) (model.DeviceState, error) {
+func (d *Device) State(ctx context.Context) (state model.DeviceState, resultErr error) {
+	started := time.Now()
+	observability.Count(ctx, "state_calls", 1)
+	defer func() {
+		observability.Record(ctx, observability.Fields(ctx)["phase"]+".state", d.name, false, started, resultErr)
+	}()
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	expected := append([]model.RouteOperation(nil), d.routes...)
@@ -193,6 +211,7 @@ func (d *Device) State(ctx context.Context) (model.DeviceState, error) {
 		if ipv6 {
 			command = "show ipv6 route static json"
 		}
+		observability.Count(ctx, "state_family_queries", 1)
 		output, err := d.runner.Run(ctx, "-c", command)
 		if err != nil {
 			return model.DeviceState{}, err
@@ -214,7 +233,7 @@ func (d *Device) State(ctx context.Context) (model.DeviceState, error) {
 		// interface is down. Retain ownership so a later plan can remove it;
 		// otherwise it unexpectedly returns when that interface recovers.
 		d.appliedPlanID = ""
-		if err := d.persist(); err != nil {
+		if err := d.persist(ctx); err != nil {
 			return model.DeviceState{}, fmt.Errorf("persist observed FRR drift: %w", err)
 		}
 	}
@@ -234,18 +253,27 @@ type persistedState struct {
 	History       map[string]persistedTransaction `json:"history,omitempty"`
 }
 
-func (d *Device) persist() error {
+func (d *Device) persist(ctx context.Context) (resultErr error) {
 	if d.statePath == "" {
 		return nil
 	}
+	started := time.Now()
+	defer func() { observability.Record(ctx, "adapter_persist", d.name, false, started, resultErr) }()
+	observability.Maximum(ctx, "history_entries_per_device", int64(len(d.history)))
 	history := make(map[string]persistedTransaction, len(d.history))
 	for planID, tx := range d.history {
 		history[planID] = persistedTransaction{Previous: append([]model.RouteOperation(nil), tx.previous...), PreviousPlanID: tx.previousPlanID}
 	}
-	return durable.WriteJSON(d.statePath, persistedState{
+	data, err := json.MarshalIndent(persistedState{
 		Schema: 1, Device: d.name, Routes: append([]model.RouteOperation(nil), d.routes...),
 		AppliedPlanID: d.appliedPlanID, History: history,
-	}, 0o640)
+	}, "", "  ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+	observability.Count(ctx, "adapter_persist_bytes_attempted", int64(len(data)))
+	return durable.WriteFile(d.statePath, data, 0o640)
 }
 
 func (d *Device) load() error {
@@ -294,6 +322,8 @@ func (d *Device) apply(ctx context.Context, current, desired []model.RouteOperat
 	if len(commands) == 4 { // configure terminal + end only
 		return nil
 	}
+	observability.Count(ctx, "config_invocations", 1)
+	observability.Count(ctx, "route_commands", int64((len(commands)-4)/2))
 	_, err := d.runner.Run(ctx, commands...)
 	return err
 }

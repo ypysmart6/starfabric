@@ -3,6 +3,7 @@ package frr
 import (
 	"context"
 	"encoding/json"
+	"github.com/starfabric/starfabric/internal/observability"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,6 +14,9 @@ func TestAgentExecutionContract(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "Bearer secret" || r.URL.Path != "/v1/execute" {
 			t.Error("missing authenticated execution")
+		}
+		if r.Header.Get("X-Starfabric-Frame-ID") != "42" || r.Header.Get("X-Starfabric-Phase") != "final_verify" {
+			t.Error("lost performance correlation")
 		}
 		var v struct {
 			Node, Program string
@@ -31,7 +35,8 @@ func TestAgentExecutionContract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	raw, err := a.Runner("sat-1", "vtysh").Run(context.Background(), "-c", "show ip route json")
+	ctx := observability.WithFields(context.Background(), map[string]string{"frame_id": "42", "phase": "final_verify"})
+	raw, err := a.Runner("sat-1", "vtysh").Run(ctx, "-c", "show ip route json")
 	if err != nil || string(raw) != "actual-rib" {
 		t.Fatalf("%q %v", raw, err)
 	}

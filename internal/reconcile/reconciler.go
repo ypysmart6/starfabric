@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"sync"
 	"time"
 
@@ -107,8 +108,25 @@ func (r *Reconciler) Reload() error {
 	return r.load()
 }
 
-func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.ReconcileStatus, error) {
+func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (status model.ReconcileStatus, resultErr error) {
+	wallStarted := time.Now()
+	ctx = observability.WithFields(ctx, map[string]string{"plan_id": plan.ID})
+	ctx, profile := observability.NewPerformance(ctx)
+	cpuBefore := observability.CPUResources()
+	outcome := "success"
+	defer func() {
+		if resultErr != nil {
+			outcome = "failed"
+		}
+		r.logger.Event("info", "reconciliation profile", map[string]any{
+			"correlation": observability.Fields(ctx), "plan_id": plan.ID, "topology_version": plan.TopologyVersion,
+			"outcome": outcome, "duration_seconds": time.Since(wallStarted).Seconds(), "profile": profile,
+			"cpu_before": cpuBefore, "cpu_after": observability.CPUResources(),
+		})
+	}()
+	lockStarted := time.Now()
 	r.mu.Lock()
+	observability.Record(ctx, "lock_wait", "", true, lockStarted, nil)
 	defer r.mu.Unlock()
 	existingStatus := cloneStatus(r.status)
 	var previousCommitted *model.RoutePlan
@@ -122,7 +140,7 @@ func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.Rec
 	r.metrics.Inc("reconcile_total")
 	r.log("info", "reconciliation started", nil)
 	if err := validation.Plan(plan, r.topology(), started); err != nil {
-		return r.fail(err, nil)
+		return r.fail(ctx, err, nil)
 	}
 
 	additionalDevices := []string(nil)
@@ -142,7 +160,7 @@ func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.Rec
 	}
 	devicePlans, err := splitPlan(plan, additionalDevices)
 	if err != nil {
-		return r.fail(err, nil)
+		return r.fail(ctx, err, nil)
 	}
 	names := make([]string, 0, len(devicePlans))
 	for name := range devicePlans {
@@ -150,7 +168,8 @@ func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.Rec
 	}
 	sort.Strings(names)
 	if r.committedPlan != nil && r.committedPlan.ID == plan.ID {
-		if verifyErr := r.verify(ctx, plan.ID, names, devicePlans); verifyErr == nil {
+		if verifyErr := observability.Phase(ctx, "noop_verify", func(call context.Context) error { return r.verify(call, plan.ID, names, devicePlans) }); verifyErr == nil {
+			outcome = "noop"
 			r.status = existingStatus
 			r.metrics.Inc("reconcile_noop_total")
 			return cloneStatus(r.status), nil
@@ -164,25 +183,29 @@ func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.Rec
 	programmingStarted := time.Now()
 	// Independent device reads may overlap. All reads finish before preparing
 	// transactions; commits and their canary gates retain their original order.
-	health := r.readDevices(names, func(device adapter.DeviceAdapter) error {
-		if err := r.invoke(ctx, func(call context.Context) error { return device.Health(call) }); err != nil {
+	var health []error
+	_ = observability.Phase(ctx, "precheck", func(ctx context.Context) error {
+		health = r.readDevices(names, func(device adapter.DeviceAdapter) error {
+			if err := r.invoke(ctx, func(call context.Context) error { return device.Health(call) }); err != nil {
+				return err
+			}
+			// Refresh the adapter's observed FIB before calculating its delta. A new
+			// topology version may coincide with external route withdrawal or restart,
+			// so the same-plan drift check above alone is insufficient.
+			state, err := invokeValue(r, ctx, func(call context.Context) (model.DeviceState, error) { return device.State(call) })
+			if err == nil && !state.Healthy {
+				return adapter.ErrUnhealthy
+			}
 			return err
-		}
-		// Refresh the adapter's observed FIB before calculating its delta. A new
-		// topology version may coincide with external route withdrawal or restart,
-		// so the same-plan drift check above alone is insufficient.
-		state, err := invokeValue(r, ctx, func(call context.Context) (model.DeviceState, error) { return device.State(call) })
-		if err == nil && !state.Healthy {
-			return adapter.ErrUnhealthy
-		}
-		return err
+		})
+		return errors.Join(health...)
 	})
 	for index, name := range names {
 		device, exists := r.registry.Get(name)
 		if !exists {
 			err = fmt.Errorf("no device adapter registered for %q", name)
 			r.status.FailedDevices = append(r.status.FailedDevices, name)
-			return r.fail(err, prepared)
+			return r.fail(ctx, err, prepared)
 		}
 		if err = health[index]; err != nil && len(devicePlans[name].Routes) == 0 {
 			deferred = append(deferred, name)
@@ -191,11 +214,13 @@ func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.Rec
 			continue
 		} else if err == nil {
 			devicePlan := devicePlans[name]
-			err = r.invoke(ctx, func(call context.Context) error { return device.Prepare(call, devicePlan) })
+			err = observability.Phase(ctx, "prepare", func(call context.Context) error {
+				return r.invoke(call, func(call context.Context) error { return device.Prepare(call, devicePlan) })
+			})
 		}
 		if err != nil {
 			r.status.FailedDevices = append(r.status.FailedDevices, name)
-			return r.fail(fmt.Errorf("prepare %s: %w", name, err), prepared)
+			return r.fail(ctx, fmt.Errorf("prepare %s: %w", name, err), prepared)
 		}
 		prepared = append(prepared, name)
 		activeNames = append(activeNames, name)
@@ -205,14 +230,18 @@ func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.Rec
 	r.status.Phase = model.PhaseCommitting
 	for start := 0; start < len(activeNames); start += r.config.BatchSize {
 		if err = validation.Plan(plan, r.topology(), r.now().UTC()); err != nil {
-			return r.fail(fmt.Errorf("plan became invalid before commit batch: %w", err), prepared)
+			return r.fail(ctx, fmt.Errorf("plan became invalid before commit batch: %w", err), prepared)
 		}
 		end := min(start+r.config.BatchSize, len(activeNames))
 		// Devices in one canary batch are independent. Join every commit before
 		// verification or rollback, including successes alongside a failed peer.
 		batch := activeNames[start:end]
-		results := r.readDevices(batch, func(device adapter.DeviceAdapter) error {
-			return r.invoke(ctx, func(call context.Context) error { return device.Commit(call, plan.ID) })
+		var results []error
+		_ = observability.Phase(ctx, "commit", func(ctx context.Context) error {
+			results = r.readDevices(batch, func(device adapter.DeviceAdapter) error {
+				return r.invoke(ctx, func(call context.Context) error { return device.Commit(call, plan.ID) })
+			})
+			return errors.Join(results...)
 		})
 		var commitErrors []error
 		for index, name := range batch {
@@ -224,25 +253,25 @@ func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.Rec
 			}
 		}
 		if len(commitErrors) > 0 {
-			return r.fail(errors.Join(commitErrors...), prepared)
+			return r.fail(ctx, errors.Join(commitErrors...), prepared)
 		}
 		// Verification after every batch is the canary safety gate.
-		if err = r.verify(ctx, plan.ID, activeNames[start:end], devicePlans); err != nil {
-			return r.fail(err, prepared)
+		if err = observability.Phase(ctx, "batch_verify", func(call context.Context) error { return r.verify(call, plan.ID, activeNames[start:end], devicePlans) }); err != nil {
+			return r.fail(ctx, err, prepared)
 		}
 	}
 
 	r.status.Phase = model.PhaseVerifying
 	if err = validation.Plan(plan, r.topology(), r.now().UTC()); err != nil {
-		return r.fail(fmt.Errorf("plan became invalid before final verification: %w", err), prepared)
+		return r.fail(ctx, fmt.Errorf("plan became invalid before final verification: %w", err), prepared)
 	}
-	if err = r.verify(ctx, plan.ID, activeNames, devicePlans); err != nil {
-		return r.fail(err, prepared)
+	if err = observability.Phase(ctx, "final_verify", func(call context.Context) error { return r.verify(call, plan.ID, activeNames, devicePlans) }); err != nil {
+		return r.fail(ctx, err, prepared)
 	}
 	if r.verifier != nil {
 		if err = r.invoke(ctx, func(call context.Context) error { return r.verifier.Verify(call, plan) }); err != nil {
 			r.metrics.Inc("data_plane_verification_failure_total")
-			return r.fail(fmt.Errorf("data-plane verification: %w", err), prepared)
+			return r.fail(ctx, fmt.Errorf("data-plane verification: %w", err), prepared)
 		}
 		r.metrics.Inc("data_plane_verification_success_total")
 	}
@@ -254,10 +283,10 @@ func (r *Reconciler) Apply(ctx context.Context, plan model.RoutePlan) (model.Rec
 	for _, name := range deferred {
 		r.pendingDevices[name] = true
 	}
-	if persistErr := r.persist(); persistErr != nil {
+	if persistErr := observability.Phase(ctx, "reconciler_persist", func(context.Context) error { return r.persist() }); persistErr != nil {
 		r.committedPlan = previousCommitted
 		r.pendingDevices = previousPending
-		return r.fail(fmt.Errorf("state persistence after device commit: %w", persistErr), prepared)
+		return r.fail(ctx, fmt.Errorf("state persistence after device commit: %w", persistErr), prepared)
 	}
 	r.metrics.Inc("reconcile_success_total")
 	r.metrics.Set("desired_actual_mismatch", 0)
@@ -320,7 +349,9 @@ func (r *Reconciler) readDevices(names []string, read func(adapter.DeviceAdapter
 	return results
 }
 
-func (r *Reconciler) fail(cause error, rollback []string) (model.ReconcileStatus, error) {
+func (r *Reconciler) fail(parent context.Context, cause error, rollback []string) (model.ReconcileStatus, error) {
+	ctx := observability.WithFields(context.WithoutCancel(parent), map[string]string{"phase": "rollback"})
+	rollbackStarted := time.Now()
 	r.status.Error = cause.Error()
 	r.status.RollbackReason = cause.Error()
 	rollbackErrs := make([]error, 0)
@@ -330,13 +361,14 @@ func (r *Reconciler) fail(cause error, rollback []string) (model.ReconcileStatus
 		if !exists {
 			continue
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), r.config.OperationTimeout)
+		ctx, cancel := context.WithTimeout(ctx, r.config.OperationTimeout)
 		err := device.Rollback(ctx, r.status.PlanID)
 		cancel()
 		if err != nil {
 			rollbackErrs = append(rollbackErrs, fmt.Errorf("rollback %s: %w", name, err))
 		}
 	}
+	observability.Record(ctx, "rollback", "", true, rollbackStarted, errors.Join(rollbackErrs...))
 	r.status.FinishedAt = r.now().UTC()
 	if len(rollbackErrs) > 0 {
 		r.status.Phase = model.PhaseFailed
@@ -349,7 +381,7 @@ func (r *Reconciler) fail(cause error, rollback []string) (model.ReconcileStatus
 	r.metrics.Inc("reconcile_failure_total")
 	r.metrics.ObserveDuration("reconcile_last", r.status.StartedAt)
 	r.log("error", "reconciliation failed", map[string]any{"error": cause.Error(), "phase": r.status.Phase})
-	_ = r.persist()
+	_ = observability.Phase(ctx, "reconciler_persist", func(context.Context) error { return r.persist() })
 	return cloneStatus(r.status), cause
 }
 
@@ -357,6 +389,8 @@ func (r *Reconciler) invoke(parent context.Context, operation func(context.Conte
 	var last error
 	for attempt := 0; attempt <= r.config.RetryCount; attempt++ {
 		ctx, cancel := context.WithTimeout(parent, r.config.OperationTimeout)
+		ctx = observability.WithFields(ctx, map[string]string{"attempt": strconv.Itoa(attempt + 1)})
+		observability.Count(ctx, "operation_attempts", 1)
 		last = operation(ctx)
 		cancel()
 		if last == nil {
@@ -364,6 +398,7 @@ func (r *Reconciler) invoke(parent context.Context, operation func(context.Conte
 		}
 		if attempt < r.config.RetryCount {
 			r.metrics.Inc("adapter_retry_total")
+			observability.Count(parent, "retries", 1)
 			timer := time.NewTimer(r.config.RetryBackoff * time.Duration(1<<attempt))
 			select {
 			case <-parent.Done():

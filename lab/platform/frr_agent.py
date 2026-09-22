@@ -8,6 +8,8 @@ from __future__ import annotations
 import hmac
 import ipaddress
 import json
+import logging
+from logging.handlers import RotatingFileHandler
 import re
 import subprocess
 import threading
@@ -64,6 +66,8 @@ class Agent:
                 if not hmac.compare_digest(self.headers.get("Authorization", ""), "Bearer " + owner.token):
                     self.send_error(401)
                     return
+                started = time.monotonic()
+                record = None
                 try:
                     length = int(self.headers.get("Content-Length", "0"))
                     if length <= 0 or length > 512 * 1024:
@@ -73,6 +77,11 @@ class Agent:
                     if node not in owner.nodes:
                         raise ValueError("node is not owned by this run")
                     validate(program, args)
+                    record = {"run_id":runtime.identifier, "node":node, "program":program, "args":args,
+                              "started_at":time.time(), "exit_code":None,
+                              "correlation":{key:self.headers.get(header, '')[:128] for key,header in {
+                                  "request_id":"X-Request-ID", "frame_id":"X-Starfabric-Frame-ID", "plan_id":"X-Starfabric-Plan-ID",
+                                  "phase":"X-Starfabric-Phase", "attempt":"X-Starfabric-Attempt"}.items()}}
                     timeout = getattr(runtime, "frr_operation_timeout", 1.5)
                     if owner.executor_socket:
                         from frr_executor import request
@@ -82,10 +91,7 @@ class Agent:
                                                  text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
                         result = {"output": process.stdout, "exit_code": process.returncode}
                     data = json.dumps(result).encode()
-                    with owner.lock:
-                        with (runtime.art / "frr-agent.jsonl").open("a") as stream:
-                            stream.write(json.dumps({"run_id": runtime.identifier, "node": node, "program": program,
-                                                     "args": args, "exit_code": result['exit_code']}) + "\n")
+                    record.update(exit_code=result['exit_code'], response_bytes=len(data), executor_timing=result.get('timing'))
                     self.send_response(200)
                     self.send_header("Content-Type", "application/json")
                     self.send_header("Content-Length", str(len(data)))
@@ -95,8 +101,19 @@ class Agent:
                     self.send_error(400, "invalid execution request")
                 except (OSError, subprocess.TimeoutExpired):
                     self.send_error(504, "router operation timed out")
+                finally:
+                    if record is not None:
+                        record.update(finished_at=time.time(), duration_seconds=time.monotonic()-started)
+                        owner.log.info(json.dumps(record, separators=(',', ':')))
 
-        self.lock = threading.Lock()
+        # Rotate at the only writer, under the logging handler's lock. The
+        # driver's old truncate-in-place could race with active requests and
+        # discard early frames of a 600-second measurement.
+        self.log = logging.Logger(str(runtime.art/'frr-agent.jsonl'))
+        self.log_handler = RotatingFileHandler(runtime.art/'frr-agent.jsonl',
+                                               maxBytes=8*1024*1024, backupCount=8)
+        self.log_handler.setFormatter(logging.Formatter('%(message)s'))
+        self.log.addHandler(self.log_handler)
         class Server(ThreadingHTTPServer):
             # The controller's device batches open connections together.
             # The default backlog of 5 causes TCP SYN retries (1..3 seconds)
@@ -136,6 +153,7 @@ class Agent:
         self.server.shutdown()
         self.server.server_close()
         self.thread.join(timeout=5)
+        self.log_handler.close()
         if self.executor:
             from run import command
             command('docker','rm','-f',self.executor,check=False)

@@ -17,6 +17,7 @@ import socket
 import struct
 import threading
 import time
+import uuid
 
 HEADER = struct.Struct('!4s16sIQQ')
 MAGIC = b'SFW1'
@@ -59,13 +60,22 @@ class Counters:
         self.jitter = 0.0
         self.previous = (time.monotonic(), 0, 0)
         self.last_error = None
+        self.counter_id = uuid.uuid4().hex
+        self.first_sent = None
+        self.last_ack_mono = None
+        self.last_ack_sequence = None
+        self.ack_gap_sequence = 0
+        self.ack_gaps = deque(maxlen=256)
+        self.ack_max_gap = 0.0
 
     def sent(self, sequence, size):
         with self.lock:
             if len(self.pending) >= 10000:
                 self.pending.pop(next(iter(self.pending)))
                 self.values['expired_packets'] += 1
-            self.pending[sequence] = (time.monotonic(), size)
+            sent_at = time.monotonic()
+            if self.first_sent is None: self.first_sent = sent_at
+            self.pending[sequence] = (sent_at, size)
             self.values['tx_packets'] += 1
             self.values['tx_bytes'] += size
 
@@ -80,7 +90,18 @@ class Counters:
             if value is None:
                 return
             sent, size = value
-            rtt = (time.monotonic() - sent) * 1000
+            received_at = time.monotonic()
+            previous = self.last_ack_mono if self.last_ack_mono is not None else self.first_sent
+            gap = received_at-previous
+            self.ack_max_gap = max(self.ack_max_gap, gap)
+            # Keep event timestamps for intervals >=100ms. Even at maximum
+            # event frequency this covers 25.6s, beyond telemetry freshness.
+            if gap >= .1:
+                self.ack_gap_sequence += 1
+                self.ack_gaps.append({'id':self.ack_gap_sequence, 'start_mono':previous,
+                    'end_mono':received_at, 'seconds':gap, 'sequence':sequence})
+            self.last_ack_mono, self.last_ack_sequence = received_at, sequence
+            rtt = (received_at - sent) * 1000
             self.values['acked_packets'] += 1
             self.values['acked_bytes'] += size
             self.samples.append(rtt)
@@ -104,7 +125,14 @@ class Counters:
             elapsed = max(0.001, now - at)
             ordered = sorted(self.samples)
             finished = self.values['acked_packets'] + self.values['expired_packets']
-            result = {**self.values, 'pending_packets': len(self.pending),
+            wall = time.time()
+            result = {**self.values, 'counter_id':self.counter_id,
+                      'ack_snapshot_at':wall, 'ack_snapshot_mono':now,
+                      'last_ack_mono':self.last_ack_mono, 'last_ack_sequence':self.last_ack_sequence,
+                      'first_sent_mono':self.first_sent, 'ack_gap_sequence':self.ack_gap_sequence,
+                      'ack_gap_events':list(self.ack_gaps), 'ack_gap_resolution_seconds':.1,
+                      'maximum_ack_gap_since_worker_start_seconds':self.ack_max_gap,
+                      'pending_packets': len(self.pending),
                       'tx_bps': (self.values['tx_bytes'] - tx) * 8 / elapsed,
                       'goodput_bps': (self.values['acked_bytes'] - rx) * 8 / elapsed,
                       'loss_percent': self.values['expired_packets'] * 100 / finished if finished else None,

@@ -30,6 +30,7 @@ from run import command, save, now, TOOLS, GNB, UPF, wait_for
 from physics_runtime import PhysicalReplay
 from lab.live.model import OrbitClock, LiveFabric
 from lab.live.storage import atomic, rotating, PingCounters
+from lab.live.performance import append_record, cpu_snapshot, next_slot, source_manifest, workloads_ready
 from lab.live.progress import Progress
 from lab.live.workloads import Workloads
 from tools.physical_constellation import load_config
@@ -106,6 +107,8 @@ class LiveRuntime(entry.Platform):
         self.status_lock = threading.Lock()
         self.live_snapshot = {}
         self.skipped_intervals = 0
+        self.schedule_state = {}
+        self.performance_pids = {"driver":os.getpid()}
         self.container_extra_args = ['--log-opt', 'max-size=5m', '--log-opt', 'max-file=2']
         self.publish_status()
 
@@ -117,7 +120,7 @@ class LiveRuntime(entry.Platform):
         self.event_log.info(json.dumps(value, ensure_ascii=False))
         print(json.dumps(value, ensure_ascii=False), flush=True)
 
-    def publish_status(self):
+    def publish_status(self, include_snapshot=True):
         with self.status_lock:
             status = {'mode': 'live', 'run_id': self.identifier, 'pid': os.getpid(),
                 'launch_config': self.launch_config,
@@ -126,9 +129,10 @@ class LiveRuntime(entry.Platform):
                 'step_seconds': self.step, 'artifacts': str(self.art.relative_to(ROOT)),
                 'sequence': self.sequence, 'route_changes': self.route_changes,
                 'applied_at': self.applied_at, 'skipped_intervals': self.skipped_intervals,
+                'schedule':getattr(self, 'schedule_state', {}),
                 'timeline': self.timeline[-30:]}
             atomic(LIVE/'status.json', status)
-            if self.live_snapshot:
+            if self.live_snapshot and include_snapshot:
                 atomic(LIVE/'snapshot.json', {**self.live_snapshot, 'runtime': status})
 
     def stage(self, label, fn):
@@ -411,6 +415,8 @@ class LiveRuntime(entry.Platform):
             except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
                 self.workload_error = str(error)[-1500:]
                 self.event('live_workloads_degraded', error=self.workload_error)
+        forwarding_seconds = time.monotonic()-started
+        forwarding_finished_at = now()
         phase('retire')
         self.retire(tick)
         phase('complete')
@@ -420,13 +426,18 @@ class LiveRuntime(entry.Platform):
         self.last_error = controller_error
         record = {'index': self.sequence, 'model_at': frame['at'], 'application_started_at': self.applied_at,
             'apply_seconds': time.monotonic()-started, 'offset_seconds': frame['offset_seconds'],
+            'forwarding_seconds':forwarding_seconds, 'forwarding_finished_at':forwarding_finished_at,
+            'forwarding_verified':not controller_error and not self.workload_error and workloads_ready(self.workloads),
             'topology_version': topology_version,
             'routes_reprogrammed': reprogrammed, 'active_pairs': frame['active_pairs'], **timing, **channel_timing}
+        snapshot_started = time.monotonic()
         self.publish_snapshot(frame, record)
+        record['snapshot_seconds'] = time.monotonic()-snapshot_started
+        return record
 
     def trim_logs(self):
         # Preserve the controller log's hard link/inode used by the cloud/NOC.
-        for name in ('controller.log', 'frr-agent.jsonl'):
+        for name in ('controller.log',):
             path = self.art/name
             if path.exists() and path.stat().st_size > 8*1024*1024:
                 with path.open('r+b') as stream:
@@ -435,6 +446,7 @@ class LiveRuntime(entry.Platform):
                     stream.seek(0); stream.write(tail); stream.truncate()
 
     def run_forever(self, duration=0):
+        save(self.art/'source-manifest-start.json', source_manifest(ROOT))
         self.stage('preparing_host', self.host_budget.prepare)
         self.initial_pdu = self.pdu_identity()
         save(self.art/'pdu-identity-before-fleet.json', self.initial_pdu)
@@ -476,20 +488,44 @@ class LiveRuntime(entry.Platform):
         mono_base = time.monotonic()
         utc_base = datetime.now(timezone.utc)
         deadline = mono_base
+        slot = 0
+        self.schedule_state = {'base_epoch':utc_base.timestamp(), 'step_seconds':self.step,
+                               'completed_slots':0, 'skipped_slots':0, 'next_slot':0}
+        save(self.art/'schedule.json', self.schedule_state)
+        append_record(self.art/'cpu-samples.jsonl', cpu_snapshot(self.performance_pids))
         while not self.stop_event.is_set():
             if duration and time.monotonic()-mono_base >= duration:
                 break
             if self.stop_event.wait(max(0, deadline-time.monotonic())):
                 break
-            tick = time.monotonic()-mono_base
+            iteration_started = time.monotonic()
+            tick = iteration_started-mono_base
             frame = self.orbit_clock.sample(utc_base+timedelta(seconds=tick))
-            self.tick(frame, tick)
-            elapsed = time.monotonic()-mono_base
-            next_slot = math.floor(elapsed/self.step)+1
-            scheduled_slot = math.floor((deadline-mono_base)/self.step)+1
-            self.skipped_intervals += max(0,next_slot-scheduled_slot)
-            deadline = mono_base+next_slot*self.step
+            apply_started = time.monotonic()
+            sample_seconds = apply_started-iteration_started
+            record = self.tick(frame, tick)
             self.trim_logs()
+            append_record(self.art/'cpu-samples.jsonl', cpu_snapshot(self.performance_pids))
+            completed = time.monotonic()
+            following, skipped = next_slot(slot, completed-mono_base, self.step)
+            self.skipped_intervals += skipped
+            record.update(slot=slot, scheduled_at=(utc_base+timedelta(seconds=slot*self.step)).isoformat(),
+                sample_seconds=sample_seconds, iteration_seconds=completed-iteration_started,
+                scheduled_to_forwarding_seconds=apply_started-deadline+record['forwarding_seconds'],
+                scheduled_to_completion_seconds=completed-deadline,
+                model_to_forwarding_seconds=sample_seconds+record['forwarding_seconds'],
+                skipped_after_frame=skipped, skipped_intervals=self.skipped_intervals)
+            self.schedule_state.update(completed_slots=self.schedule_state['completed_slots']+1,
+                skipped_slots=self.skipped_intervals, next_slot=following, last_completed_slot=slot,
+                observed_at=time.time())
+            # Append-only per-frame evidence survives snapshot rotation. Small
+            # bookkeeping writes are outside iteration_seconds; any delay they
+            # cause is included in the next slot's scheduling latency.
+            append_record(self.art/'performance-frames.jsonl', record)
+            save(self.art/'schedule.json', self.schedule_state)
+            self.publish_status(include_snapshot=False)
+            slot = following
+            deadline = mono_base+slot*self.step
 
     def stop_probe(self):
         if self.continuous and self.continuous.poll() is None:
@@ -551,6 +587,7 @@ def main():
             failed = True
         runtime.phase = 'failed' if failed else 'stopped'
         runtime.publish_status()
+        save(runtime.art/'source-manifest-end.json', source_manifest(ROOT))
         save(runtime.art/'live-session.json', {'run_id': runtime.identifier, 'mode':'live',
             'stopped_at':now(), 'error':runtime.last_error, 'cleanup_errors':errors,
             'frames_applied':runtime.sequence-100000, 'route_changes':runtime.route_changes})

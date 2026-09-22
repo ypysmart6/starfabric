@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/starfabric/starfabric/internal/model"
+	"github.com/starfabric/starfabric/internal/observability"
 )
 
 // PingProbe verifies real packet delivery from source router containers. Node
@@ -32,6 +33,10 @@ func NewPingProbe(nodes []model.Node) *PingProbe {
 }
 
 func (p *PingProbe) Verify(ctx context.Context, plan model.RoutePlan) error {
+	return observability.Phase(ctx, "packet_probe", func(ctx context.Context) error { return p.verify(ctx, plan) })
+}
+
+func (p *PingProbe) verify(ctx context.Context, plan model.RoutePlan) error {
 	type probe struct {
 		intentID, node, container, target string
 		ipv6                              bool

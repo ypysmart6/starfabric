@@ -113,16 +113,30 @@ class Runtime:
 
     def request(self, path: str, body: Any = None) -> Any:
         trace_id = uuid.uuid4().hex if getattr(self, 'live_mode', False) else self.noc.trace_id
-        req = urllib.request.Request(self.endpoint + path, data=None if body is None else json.dumps(body).encode(),
-                                     headers={"Content-Type": "application/json", "X-Request-ID": self.identifier,
-                                              "traceparent": f"00-{trace_id}-0123456789abcdef-01"})
+        request_id = uuid.uuid4().hex
+        headers = {"Content-Type": "application/json", "X-Request-ID": request_id,
+                   "X-Starfabric-Run-ID": self.identifier,
+                   "traceparent": f"00-{trace_id}-0123456789abcdef-01"}
+        frame_id = str(getattr(self, 'sequence', ''))
+        headers['X-Starfabric-Frame-ID'] = frame_id
+        started = time.monotonic()
+        record = {'run_id':self.identifier, 'frame_id':frame_id, 'request_id':request_id,
+                  'path':path, 'method':'GET' if body is None else 'POST', 'started_at':now(), 'status':None}
         try:
+            req = urllib.request.Request(self.endpoint + path, data=None if body is None else json.dumps(body).encode(), headers=headers)
             with urllib.request.urlopen(req, timeout=getattr(self, "request_timeout", 15)) as response:
+                record['status'] = response.status
                 return json.load(response)
         except urllib.error.HTTPError as error:
+            record['status'] = error.code
             body=error.read().decode(errors='replace')
             save(self.art/'last-http-error.json',{'path':path,'status':error.code,'body':body,'at':now()})
             raise RuntimeError(f'controller {path}: HTTP {error.code}: {body}') from error
+        finally:
+            if getattr(self, 'live_mode', False):
+                record.update(duration_seconds=time.monotonic()-started, finished_at=now())
+                with (self.art/'controller-client.jsonl').open('a') as stream:
+                    stream.write(json.dumps(record)+'\n')
 
     def onboard_request(self, node: str, path: str, body: Any = None) -> Any:
         args = ["curl", "--silent", "--show-error", "--fail", "--max-time", "2",

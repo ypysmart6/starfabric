@@ -8,9 +8,7 @@ has been verified. The monitor never restarts daemons or changes rates.
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 from datetime import datetime
-import hashlib
 import json
 import math
 from pathlib import Path
@@ -22,6 +20,62 @@ sys.path.insert(0, str(ROOT))
 from lab.live.service import Service
 from lab.live.storage import atomic
 from lab.live.workload_snapshot import observe
+from lab.live.performance import realtime_assessment, source_manifest
+
+
+class AckGaps:
+    """Receive-event gaps, never poll intervals. Sub-100ms gaps are censored."""
+    def __init__(self, baseline, started):
+        self.counter_id = baseline.get('counter_id')
+        self.event_id = baseline.get('ack_gap_sequence', 0)
+        self.started = started
+        self.maximum = 0.0
+
+    def update(self, metrics, now):
+        if not self.counter_id or metrics.get('counter_id') != self.counter_id:
+            raise ValueError('ACK counter identity missing or restarted')
+        stamp, mono = metrics.get('ack_snapshot_at'), metrics.get('ack_snapshot_mono')
+        if stamp is None or mono is None or not 0 <= now-stamp <= 20:
+            raise ValueError('ACK telemetry missing or stale')
+        events = [e for e in metrics.get('ack_gap_events', []) if e['id'] > self.event_id]
+        if events and events[0]['id'] != self.event_id+1:
+            raise ValueError('ACK gap event history overflowed')
+        start_mono = mono-(stamp-self.started)
+        for event in events:
+            if event['id'] != self.event_id+1:
+                raise ValueError('ACK gap events missing or out of order')
+            self.maximum = max(self.maximum, max(0, event['end_mono']-max(event['start_mono'],start_mono)))
+            self.event_id = event['id']
+        if metrics.get('ack_gap_sequence') != self.event_id:
+            raise ValueError('ACK gap events missing')
+        previous = metrics.get('last_ack_mono')
+        if previous is None: previous = metrics.get('first_sent_mono')
+        if previous is not None:
+            self.maximum = max(self.maximum, max(0, mono-max(previous,start_mono)))
+        return self.maximum
+
+
+def completed_records(path, offset):
+    """Tail complete JSONL records, retrying any partially written final line."""
+    records = []
+    try:
+        with path.open('rb') as stream:
+            stream.seek(offset)
+            while raw := stream.readline():
+                if not raw.endswith(b'\n'): break
+                records.append(json.loads(raw))
+                offset = stream.tell()
+    except FileNotFoundError:
+        pass
+    return records, offset
+
+
+def acceptance(functional_failures, realtime):
+    functional = not functional_failures
+    timely = bool(realtime.get('passed'))
+    return {'functional_passed':functional, 'realtime_passed':timely,
+            'overall_passed':functional and timely,
+            'result':'passed' if functional and timely else 'failed'}
 
 
 def read(path):
@@ -54,7 +108,9 @@ def monitor(run_id, streams, window, warmup, outage, output, stop_after=False):
     phase_names, failures = [], []
     last_print, last_phase = 0, None
     dynamic_started = measured_started = None
-    baseline, last_counts, last_ack, max_gap = {}, {}, {}, {}
+    baseline, gap_trackers, max_gap = {}, {}, {}
+    frame_offset = 0
+    manifest = source_manifest(ROOT)
     current = {}
     memory = [l for l in Path('/proc/meminfo').read_text().splitlines() if l.startswith('MemTotal:')][0]
     report = {'run_id':run_id, 'streams':streams, 'started_at':started,
@@ -65,8 +121,14 @@ def monitor(run_id, streams, window, warmup, outage, output, stop_after=False):
             'required_dynamic_frames':3, 'all_flows_dynamic_packet_evidence':True,
             'realtime_target_seconds':10, 'realtime_passing_fraction':.95},
         'host':{'memory':memory, 'load_at_start':Path('/proc/loadavg').read_text().strip()},
-        'source_sha256':{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in [*ROOT.joinpath('lab/live').glob('*.py'), *ROOT.joinpath('lab/platform').glob('*.py')]},
+        'source_sha256':manifest['source_sha256'], 'source_manifest':manifest,
+        'runtime_source_manifest':read(artifact/'source-manifest-start.json'),
+        'deployed_controller':read(artifact/'cloud/platform-controller-deployment.json'),
+        'controller_image':read(artifact/'cloud/controller-image.json'),
+        'cpu_budget':read(artifact/'radio-cpu-budget.json'),
+        'ack_gap_semantics':'receive-event gaps including normal application pacing; not one-way network outage',
+        'ack_gap_resolution_seconds':.1,
+        'dynamic_evidence_scope':'cumulative per-flow capture evidence; not per-slot packet verification',
         'result':'measuring'}
     atomic(output/'result.json', report)
     with (output/'observations.jsonl').open('a') as log:
@@ -90,13 +152,20 @@ def monitor(run_id, streams, window, warmup, outage, output, stop_after=False):
             if snapshot.get('run_id') == run_id:
                 for record in snapshot.get('records', []):
                     if record['index'] > 100000:
-                        observed_frames[record['index']] = record
+                        observed_frames[record['index']] = {**observed_frames.get(record['index'], {}), **record}
+            records, frame_offset = completed_records(artifact/'performance-frames.jsonl', frame_offset)
+            for record in records:
+                observed_frames[record['index']] = record
             base = read(folder/'snapshot.json')
             if base.get('run_id') == run_id:
                 current = observe(base, folder)
+            # A worker can publish fresh counters while the files above are
+            # being read. Compare them against the end of collection, not the
+            # earlier loop timestamp, which can make valid samples look future.
+            now = time.time()
             flows = current.get('flows', [])
             newest = max(observed_frames.values(), key=lambda r:r['index'], default={})
-            since = seconds(newest['application_started_at']) if newest else math.inf
+            since = seconds(newest.get('forwarding_finished_at', newest['application_started_at'])) if newest else math.inf
             good = [f for f in flows if verified(f)]
             dynamic_good = [f for f in flows if verified(f, since)] if newest else []
             for flow in good:
@@ -116,21 +185,20 @@ def monitor(run_id, streams, window, warmup, outage, output, stop_after=False):
             if measured_started is None and len(dynamic_good) == streams and phase == 'running':
                 measured_started = now
                 baseline = {f['id']:dict(f['metrics']) for f in flows}
-                last_counts = {f['id']:f['metrics'].get('acked_packets',0) for f in flows}
-                last_ack = {f['id']:now for f in flows}
+                gap_trackers = {f['id']:AckGaps(f['metrics'], now) for f in flows}
                 max_gap = {f['id']:0 for f in flows}
                 atomic(output/'measurement-start.json', {'at':now,'snapshot':snapshot,'workloads':current})
             if measured_started is not None:
                 for flow in flows:
                     key, metrics = flow['id'], flow.get('metrics', {})
-                    count = metrics.get('acked_packets',0)
-                    if flow.get('fresh') and count > last_counts[key]:
-                        last_ack[key] = now
-                    last_counts[key] = count
-                    gap = now-last_ack[key]
-                    max_gap[key] = max(max_gap[key],gap)
+                    try:
+                        gap = gap_trackers[key].update(metrics, now)
+                    except ValueError as error:
+                        failures.append(f'{key}: {error}')
+                        continue
+                    max_gap[key] = gap
                     if gap > outage:
-                        failures.append(f'{key}: no fresh acknowledged traffic for {gap:.1f}s')
+                        failures.append(f'{key}: ACK receive-event gap exceeded {outage}s ({gap:.1f}s)')
                 if phase == 'degraded':
                     failures.append('controller degraded in measurement: '+str(state.get('error'))[-400:])
             elapsed = now-measured_started if measured_started else 0
@@ -139,7 +207,8 @@ def monitor(run_id, streams, window, warmup, outage, output, stop_after=False):
                 'verified_now':len(good),'dynamic_verified_now':len(dynamic_good),
                 'load':Path('/proc/loadavg').read_text().strip(),
                 'flows':{f['id']:{'fresh':f.get('fresh'),'rate_scale':f.get('rate_scale'),
-                    'metrics':f.get('metrics'), 'evidence_at':f.get('evidence_at'),
+                    'metrics':{k:v for k,v in f.get('metrics',{}).items() if k != 'ack_gap_events'},
+                    'maximum_ack_receive_gap_seconds':max_gap.get(f['id']), 'evidence_at':f.get('evidence_at'),
                     'evidence_fresh':f.get('evidence_fresh'),
                     'forward':f.get('evidence',{}).get('forward',0),
                     'reverse':f.get('evidence',{}).get('reverse',0),
@@ -155,7 +224,7 @@ def monitor(run_id, streams, window, warmup, outage, output, stop_after=False):
                 measurement_started_at=measured_started, measured_seconds=elapsed,
                 initial_or_later_verified=len(initial_proofs), dynamic_verified=len(dynamic_proofs),
                 currently_verified=len(good), frames=list(observed_frames.values()), failures=failures,
-                maximum_flow_outages=max_gap, phases=phase_names)
+                maximum_ack_receive_gaps=max_gap, schedule=read(artifact/'schedule.json'), phases=phase_names)
             atomic(output/'result.json',report)
             if failures or elapsed >= window:
                 break
@@ -178,7 +247,7 @@ def monitor(run_id, streams, window, warmup, outage, output, stop_after=False):
             results[key]={'tx_packets':tx, 'acked_packets':ack, 'ack_fraction':ack/max(1,tx),
                 'average_goodput_bps':ack_bytes*8/max(1,measured_seconds),
                 'target_bps':target,'target_fraction':ack_bytes*8/max(1,measured_seconds)/target,
-                'maximum_outage_seconds':max_gap[key]}
+                'maximum_ack_receive_gap_seconds':max_gap[key]}
             if results[key]['ack_fraction'] < .95 or results[key]['target_fraction'] < .8:
                 failures.append(key+': delivery/throughput threshold not met')
     measured_frames = [r for r in observed_frames.values()
@@ -189,11 +258,21 @@ def monitor(run_id, streams, window, warmup, outage, output, stop_after=False):
         failures.append('fewer than three dynamic frames during measurement')
     if len(dynamic_proofs) != streams:
         failures.append('not every flow has post-transition bidirectional packet evidence')
-    realtime = sum(r['apply_seconds']<=10 for r in measured_frames)/max(1,len(measured_frames))
-    report.update(finished_at=finished, result='failed' if failures else 'passed', failures=failures,
+    final_manifest = source_manifest(ROOT)
+    runtime_hashes = report['runtime_source_manifest'].get('source_sha256')
+    source_unchanged = runtime_hashes == final_manifest['source_sha256'] if runtime_hashes else None
+    if source_unchanged is False:
+        failures.append('source changed since runtime startup; performance baseline is not reproducible')
+    schedule = read(artifact/'schedule.json')
+    realtime = realtime_assessment(observed_frames.values(), schedule, measured_started, report.get('observed_at', finished))
+    legacy_fraction = sum(r['apply_seconds']<=10 for r in measured_frames)/max(1,len(measured_frames))
+    report.update(finished_at=finished, failures=failures, **acceptance(failures, realtime),
         measured_seconds=measured_seconds, flow_results=results, dynamic_proofs=dynamic_proofs,
-        frames=list(observed_frames.values()), realtime_passing_fraction=realtime,
-        realtime_passed=bool(not failures and realtime>=.95), phases=phase_names)
+        frames=list(observed_frames.values()), realtime_passing_fraction=realtime.get('passing_fraction', 0),
+        completed_apply_passing_fraction=legacy_fraction, realtime_assessment=realtime, schedule=schedule,
+        source_unchanged=source_unchanged, source_manifest_end=final_manifest,
+        realtime_failures=[] if realtime['passed'] else ['due-slot completion/forwarding criterion failed or evidence missing'],
+        phases=phase_names)
     atomic(output/'result.json',report)
     atomic(output/'last-workloads.json',current)
     if stop_after and service.status().get('run_id') == run_id:
@@ -212,11 +291,12 @@ def main(argv=None):
     parser.add_argument('--outage',type=int,default=60)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--stop-after',action='store_true')
+    parser.add_argument('--functional-only',action='store_true',help='exit by functional result; still report realtime and overall failure')
     args = parser.parse_args(argv)
     if args.streams < 1 or args.window < 60 or args.warmup < 60 or args.outage < 5:
         parser.error('invalid trial bounds')
     result = monitor(args.run_id,args.streams,args.window,args.warmup,args.outage,args.output,args.stop_after)
-    return 0 if result['result'] == 'passed' else 1
+    return 0 if result.get('functional_passed' if args.functional_only else 'overall_passed', False) else 1
 
 
 if __name__ == '__main__':

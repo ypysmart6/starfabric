@@ -42,7 +42,7 @@ def run(run_id,output,session_id=None):
             l3=pool.submit(capacity,run_id,24,600,600,60,output/'full-scale')
             l2=pool.submit(services,run_id,output/'services')
             traffic,systems=l3.result(),l2.result()
-        result['stability_passed']=traffic['result']=='passed' and systems['result']=='passed'
+        result['stability_passed']=traffic.get('functional_passed', traffic['result']=='passed') and systems['result']=='passed'
         result['realtime_passed']=traffic.get('realtime_passed',False)
         if not result['stability_passed']:
             raise RuntimeError('stability acceptance failed; see full-scale and services reports')

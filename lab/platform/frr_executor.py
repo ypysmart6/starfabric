@@ -12,6 +12,7 @@ import socketserver
 import subprocess
 import sys
 import threading
+import time
 
 from frr_agent import validate
 
@@ -44,14 +45,27 @@ def serve(config_path):
     class Handler(socketserver.StreamRequestHandler):
         def handle(self):
             self.request.settimeout(config['timeout']+5)
+            started = time.monotonic()
+            acquired = None
+            executing = None
+            timing = {}
             try:
                 raw = self.rfile.readline(512*1024+1)
                 if len(raw) > 512*1024 or not raw.endswith(b'\n'):
                     raise ValueError('invalid request size')
+                waiting = time.monotonic()
                 with slots:
-                    result = execute(nodes, json.loads(raw), config['timeout'])
+                    acquired = time.monotonic()
+                    timing['slot_wait_seconds'] = acquired-waiting
+                    executing = time.monotonic()
+                    try:
+                        result = execute(nodes, json.loads(raw), config['timeout'])
+                    finally:
+                        timing['execution_seconds'] = time.monotonic()-executing
             except (OSError, ValueError, KeyError, TypeError, subprocess.TimeoutExpired) as error:
                 result = {'output': str(error), 'exit_code': 125}
+            timing["executor_seconds"] = time.monotonic()-started
+            result["timing"] = timing
             self.wfile.write(json.dumps(result).encode()+b'\n')
     class Server(socketserver.ThreadingUnixStreamServer):
         daemon_threads = True

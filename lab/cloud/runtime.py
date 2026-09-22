@@ -230,6 +230,8 @@ class Cluster:
             (self.artifacts / "controller-build.log").write_text(result.stdout + result.stderr)
             if result.returncode:
                 raise RuntimeError(f"controller build failed; see {self.artifacts / 'controller-build.log'}")
+        image_info = json.loads(execute(['docker','image','inspect',self.image]).stdout)[0]
+        self.save('controller-image', {key:image_info.get(key) for key in ('Id','RepoTags','RepoDigests','Created')})
         self.image_built = True
 
     def prepare_application(self) -> None:

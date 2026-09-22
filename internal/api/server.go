@@ -200,8 +200,8 @@ func (s *Server) putIntents(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"intents": s.app.Intents()})
 }
 
-func (s *Server) preview(w http.ResponseWriter, _ *http.Request) {
-	plan, err := s.app.Preview()
+func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
+	plan, err := s.app.PreviewContext(r.Context())
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, "planning_failed", err)
 		return
@@ -344,6 +344,14 @@ func (s *Server) requestContext(next http.Handler) http.Handler {
 		}
 		w.Header().Set("X-Request-ID", id)
 		ctx := context.WithValue(r.Context(), requestIDKey{}, id)
+		fields := map[string]string{"request_id": id}
+		for _, key := range []string{"run_id", "frame_id"} {
+			value := r.Header.Get(observability.CorrelationHeaders[key])
+			if len(value) <= 128 {
+				fields[key] = value
+			}
+		}
+		ctx = observability.WithFields(ctx, fields)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -364,7 +372,7 @@ func (s *Server) accessLog(next http.Handler) http.Handler {
 		recorder := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
 		next.ServeHTTP(recorder, r)
 		s.logger.Event("info", "http request", map[string]any{
-			"request_id": requestID(r.Context()), "method": r.Method, "path": r.URL.Path,
+			"correlation": observability.Fields(r.Context()), "request_id": requestID(r.Context()), "method": r.Method, "path": r.URL.Path,
 			"status": recorder.status, "duration_us": time.Since(started).Microseconds(),
 		})
 	})

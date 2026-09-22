@@ -10,6 +10,7 @@ import (
 
 	"github.com/starfabric/starfabric/internal/adapter"
 	"github.com/starfabric/starfabric/internal/model"
+	"github.com/starfabric/starfabric/internal/observability"
 )
 
 // RouteProbe emulates packet forwarding from actual adapter state. Unlike plan
@@ -24,6 +25,10 @@ func NewRouteProbe(registry *adapter.Registry, topology func() model.TopologySna
 }
 
 func (p *RouteProbe) Verify(ctx context.Context, plan model.RoutePlan) error {
+	return observability.Phase(ctx, "route_probe", func(ctx context.Context) error { return p.verify(ctx, plan) })
+}
+
+func (p *RouteProbe) verify(ctx context.Context, plan model.RoutePlan) error {
 	snapshot := p.topology()
 	verifiedAt := time.Now().UTC()
 	edges := make(map[string]bool, len(snapshot.Links))

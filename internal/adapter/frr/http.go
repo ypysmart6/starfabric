@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/starfabric/starfabric/internal/observability"
 	"io"
 	"net/http"
 	"net/url"
@@ -45,7 +46,9 @@ type agentRunner struct {
 
 func (a *Agent) Runner(node, program string) Runner { return &agentRunner{a, node, program} }
 
-func (r *agentRunner) Run(ctx context.Context, args ...string) ([]byte, error) {
+func (r *agentRunner) Run(ctx context.Context, args ...string) (output []byte, resultErr error) {
+	started := time.Now()
+	defer func() { observability.Record(ctx, "agent_http", r.node, false, started, resultErr) }()
 	body, err := json.Marshal(struct {
 		Node    string   `json:"node"`
 		Program string   `json:"program"`
@@ -60,6 +63,11 @@ func (r *agentRunner) Run(ctx context.Context, args ...string) ([]byte, error) {
 	}
 	req.Header.Set("Authorization", "Bearer "+r.agent.token)
 	req.Header.Set("Content-Type", "application/json")
+	for key, value := range observability.Fields(ctx) {
+		if header, ok := observability.CorrelationHeaders[key]; ok {
+			req.Header.Set(header, value)
+		}
+	}
 	response, err := r.agent.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("FRR agent transport: %w", err)
@@ -69,6 +77,7 @@ func (r *agentRunner) Run(ctx context.Context, args ...string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	observability.Count(ctx, "agent_response_bytes", int64(len(raw)))
 	if len(raw) > 4*1024*1024 {
 		return nil, errors.New("FRR agent response too large")
 	}
