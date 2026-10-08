@@ -231,8 +231,8 @@ github.com/openconfig/goyang v1.6.3 h1:9nWXBwd6b4+nZr8ni7O4zUXVhrVMXCLFz8os5YWFu
 github.com/openconfig/goyang v1.6.3/go.mod h1:5WolITjek1NF8yrNERyVZ7jqjOClJTpO8p/+OwmETM4=
 github.com/openconfig/gribi v1.9.1 h1:lN5KMEKu+X5L24XVHnwMJe52De5CSNZb1rR0F/ym13M=
 github.com/openconfig/gribi v1.9.1/go.mod h1:P1ZjH4Nj5u+D+jgZ89YpAR8RFyGixQ3U5tR+LHUNTbc=
-github.com/openconfig/gribigo v0.1.3 h1:1ahvq4oZ6djCigKVVjqAB/tdCSvh94kl4lqyzDE2s/8=
-github.com/openconfig/gribigo v0.1.3/go.mod h1:2wZG3jObpWFR0+SY+SY2+qcjkkNW/l6GIM2RfAH0zZQ=
+github.com/openconfig/gribigo v0.2.0 h1:5iepgSMQeYEsAjqZbZFXLR3fuXmL4qTI/mwND9TGwaI=
+github.com/openconfig/gribigo v0.2.0/go.mod h1:MI4bdpuxclBIphPkpPPW1gF0yFx4l0A5wpx8HN4PNJ4=
 github.com/openconfig/grpctunnel v0.1.0 h1:EN99qtlExZczgQgp5ANnHRC/Rs62cAG+Tz2BQ5m/maM=
 github.com/openconfig/grpctunnel v0.1.0/go.mod h1:G04Pdu0pml98tdvXrvLaU+EBo3PxYfI9MYqpvdaEHLo=
 github.com/openconfig/kne v0.1.18 h1:8D9SexWhj6knxfvEficyVj0F13GIvF1pQz7TKwVDSUI=
@@ -241,8 +241,8 @@ github.com/openconfig/lemming/operator v0.2.0 h1:dovZnR6lQkOHXcODli1NDOr/GVYrBY0
 github.com/openconfig/lemming/operator v0.2.0/go.mod h1:LKgEXSR5VK2CAeh2uKijKAXFj42uQuwakrCHVPF0iII=
 github.com/openconfig/ondatra v0.14.6 h1:Ci4W4MA4CqmK6khTPms2ZX5rkvDKUqRQX9BUE6WjH0g=
 github.com/openconfig/ondatra v0.14.6/go.mod h1:qsX19FqgyioshI2vlGjbZx5o+yK86UztMWuAKp1KhPY=
-github.com/openconfig/testt v0.0.0-20220311054427-efbb1a32ec07 h1:X631iD/B0ximGFb5P9LY5wHju4SiedxUhc5UZEo7VSw=
-github.com/openconfig/testt v0.0.0-20220311054427-efbb1a32ec07/go.mod h1:bmpU0kIsCiXuncozViVuQx1HqolC3C94H7lD9KKmoTo=
+github.com/openconfig/testt v0.0.0-20251119232631-fbbd49c39452 h1:KI67JEIYGMXx9aZjGOwfO2aUsCGih9199v+zhJNHB9Y=
+github.com/openconfig/testt v0.0.0-20251119232631-fbbd49c39452/go.mod h1:wOB0bus1N8a90H58cmlxE15dKN4bTvdqqlh7bEQkQFc=
 github.com/openconfig/ygnmi v0.15.0 h1:Cio+fv7+c8G/w3KpO9CK7BLLEMdBy9bO1q3RRsd5xqs=
 github.com/openconfig/ygnmi v0.15.0/go.mod h1:COooftumNKJimjY1AY8Zoem+pLtTj9lpDBz6s21GXCo=
 github.com/openconfig/ygot v0.34.0 h1:9OkVjy3SGi4mbvAZc4HTQBU9u4MT6k4j5DdX+hgRiC4=
@@ -353,8 +353,8 @@ go.opentelemetry.io/otel/trace v1.44.0/go.mod h1:oLl1jrMQAVo6v3GAggN+1VH9VIz9iUS
 go.opentelemetry.io/proto/otlp v0.7.0/go.mod h1:PqfVotwruBrMGOCsRd/89rSnXhoiJIqeYNgFYFoEGnI=
 go.opentelemetry.io/proto/otlp v1.10.0 h1:IQRWgT5srOCYfiWnpqUYz9CVmbO8bFmKcwYxpuCSL2g=
 go.opentelemetry.io/proto/otlp v1.10.0/go.mod h1:/CV4QoCR/S9yaPj8utp3lvQPoqMtxXdzn7ozvvozVqk=
-go.uber.org/atomic v1.10.0 h1:9qC72Qh0+3MqyJbAn8YU5xVq1frD8bn3JtD2oXtafVQ=
-go.uber.org/atomic v1.10.0/go.mod h1:LUxbIzbOniOlMKjJjyPfpl4v+PKK2cNJn91OQbhoJI0=
+go.uber.org/atomic v1.11.0 h1:ZvwS0R+56ePWxUNi+Atn9dWONBPp/AUETXlHW0DxSjE=
+go.uber.org/atomic v1.11.0/go.mod h1:LUxbIzbOniOlMKjJjyPfpl4v+PKK2cNJn91OQbhoJI0=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
 go.uber.org/multierr v1.11.0 h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0=
@@ -486,8 +486,8 @@ google.golang.org/grpc v1.33.1/go.mod h1:fr5YgcSWrqhRRxogOsw7RzIpsmvOZ6IcH4kBYTp
 google.golang.org/grpc v1.33.2/go.mod h1:JMHMWHQWaTccqQQlmk3MJZS+GWXOdAesneDmEnv2fbc=
 google.golang.org/grpc v1.36.0/go.mod h1:qjiiYl8FncCW8feJPdyg3v6XW24KsRHe+dy9BAGRRjU=
 google.golang.org/grpc v1.40.0/go.mod h1:ogyxbiOoUXAkP+4+xa6PZSE9DZgIHtSpzjDTB9KAK34=
-google.golang.org/grpc v1.82.0 h1:vguDnZUPjE26w09A63VoxZPnvPjB5Riyc0mkXPFmAIU=
-google.golang.org/grpc v1.82.0/go.mod h1:yzTZ1TB1Z3SG+LIYaI+WiE8D5+PZ3ArnrSp8zF3+/ZA=
+google.golang.org/grpc v1.82.1 h1:NnAxzGRA0677vCa4BUkOAnO5+FfQqVl9iUXeD0IqcGE=
+google.golang.org/grpc v1.82.1/go.mod h1:yzTZ1TB1Z3SG+LIYaI+WiE8D5+PZ3ArnrSp8zF3+/ZA=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=
 google.golang.org/protobuf v0.0.0-20200221191635-4d8936d0db64/go.mod h1:kwYJMbMJ01Woi6D6+Kah6886xMZcty6N08ah7+eCXa0=
 google.golang.org/protobuf v0.0.0-20200228230310-ab0ca4ff8a60/go.mod h1:cfTl7dwQJ+fmap5saPgwCLgHXTUD7jkjRqWcaiX5VyM=
